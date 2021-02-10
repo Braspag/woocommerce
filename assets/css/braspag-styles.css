@@ -1,0 +1,201 @@
+.wc-braspag-elements-field {
+    border: 1px solid #ddd;
+    margin: 5px 0;
+    padding: 5px;
+    background-color: #fff;
+    outline: 0
+}
+
+.woocommerce form .form-row .input-text.wc-credit-card-form-braspag-card-number {
+    font-size: 1.5em;
+    padding: 8px;
+    background-repeat: no-repeat;
+    background-position: right .618em center;
+    background-size: 32px 20px;
+}
+
+.woocommerce form .form-row input.visa {
+    background-image: url(../images/visa.svg);
+}
+
+.woocommerce form .form-row input.naranja-nevada {
+    background-image: url(../images/credit-card.svg);
+}
+
+.woocommerce form .form-row input.elo {
+    background-image: url(../images/credit-card.svg);
+}
+
+.woocommerce form .form-row input.carnet {
+    background-image: url(../images/credit-card.svg);
+}
+
+.woocommerce form .form-row input.cabal {
+    background-image: url(../images/credit-card.svg);
+}
+
+.woocommerce form .form-row input.mastercard {
+    background-image: url(../images/mastercard.svg);
+}
+
+.woocommerce form .form-row input.maestro {
+    background-image: url(../images/maestro.svg);
+}
+
+.woocommerce form .form-row input.amex {
+    background-image: url(../images/amex.svg);
+}
+
+.woocommerce form .form-row input.dinersclub {
+    background-image: url(../images/diners.svg);
+}
+
+.woocommerce form .form-row input.discover {
+    background-image: url(../images/discover.svg);
+}
+
+.woocommerce form .form-row input.jcb {
+    background-image: url(../images/jcb.svg);
+}
+
+.woocommerce form .form-row input.hiper {
+    background-image: url(../images/credit-card.svg);
+}
+
+.woocommerce form .form-row input.hipercard {
+    background-image: url(../images/credit-card.svg);
+}
+
+.woocommerce form .form-row input.aura {
+    background-image: url(../images/credit-card.svg);
+}
+
+#payment .methods li.woocommerce-SavedPaymentMethods-token label {
+    display: inline
+}
+
+#payment .methods li.woocommerce-SavedPaymentMethods-new label {
+    display: inline
+}
+
+#add_payment_method #payment ul.payment_methods li img.braspag-icon,
+.woocommerce-checkout #payment ul.payment_methods li img.braspag-icon {
+    max-width: 40px;
+    padding-left: 3px;
+    margin: 0
+}
+
+#add_payment_method #payment ul.payment_methods li img.braspag-boleto-icon,
+.woocommerce-checkout #payment ul.payment_methods li img.braspag-boleto-icon {
+    max-width: 50px
+}
+
+#add_payment_method #payment ul.payment_methods li .braspag-credit-card-brand,
+.woocommerce-checkout #payment ul.payment_methods li .braspag-credit-card-brand {
+    position: absolute;
+    top: 50%;
+    margin-top: -10px;
+    right: 10px;
+    background: no-repeat url(../images/credit-card.svg);
+    display: block;
+    width: 30px;
+    height: 24px
+}
+
+#add_payment_method #payment ul.payment_methods li .braspag-visa-brand,
+.woocommerce-checkout #payment ul.payment_methods li .braspag-visa-brand {
+    position: absolute;
+    top: 50%;
+    margin-top: -10px;
+    right: 10px;
+    background: no-repeat url(../images/visa.svg);
+    display: block;
+    width: 30px;
+    height: 24px
+}
+
+#add_payment_method #payment ul.payment_methods li .braspag-amex-brand,
+.woocommerce-checkout #payment ul.payment_methods li .braspag-amex-brand {
+    position: absolute;
+    top: 50%;
+    margin-top: -10px;
+    right: 10px;
+    background: no-repeat url(../images/amex.svg);
+    display: block;
+    width: 30px;
+    height: 24px
+}
+
+#add_payment_method #payment ul.payment_methods li .braspag-diners-brand,
+.woocommerce-checkout #payment ul.payment_methods li .braspag-diners-brand {
+    position: absolute;
+    top: 50%;
+    margin-top: -10px;
+    right: 10px;
+    background: no-repeat url(../images/diners.svg);
+    display: block;
+    width: 30px;
+    height: 24px
+}
+
+#add_payment_method #payment ul.payment_methods li .braspag-discover-brand,
+.woocommerce-checkout #payment ul.payment_methods li .braspag-discover-brand {
+    position: absolute;
+    top: 50%;
+    margin-top: -10px;
+    right: 10px;
+    background: no-repeat url(../images/discover.svg);
+    display: block;
+    width: 30px;
+    height: 24px
+}
+
+#add_payment_method #payment ul.payment_methods li .braspag-jcb-brand,
+.woocommerce-checkout #payment ul.payment_methods li .braspag-jcb-brand {
+    position: absolute;
+    top: 50%;
+    margin-top: -10px;
+    right: 10px;
+    background: no-repeat url(../images/jcb.svg);
+    display: block;
+    width: 30px;
+    height: 24px
+}
+
+#add_payment_method #payment ul.payment_methods li .braspag-maestro-brand,
+.woocommerce-checkout #payment ul.payment_methods li .braspag-maestro-brand {
+    position: absolute;
+    top: 50%;
+    margin-top: -10px;
+    right: 10px;
+    background: no-repeat url(../images/maestro.svg);
+    display: block;
+    width: 30px;
+    height: 24px
+}
+
+#add_payment_method #payment ul.payment_methods li .braspag-mastercard-brand,
+.woocommerce-checkout #payment ul.payment_methods li .braspag-mastercard-brand {
+    position: absolute;
+    top: 50%;
+    margin-top: -10px;
+    right: 10px;
+    background: no-repeat url(../images/mastercard.svg);
+    display: block;
+    width: 30px;
+    height: 24px
+}
+
+#add_payment_method #payment div.payment_box .wc-credit-card-form-card-holder,
+.woocommerce-cart #payment div.payment_box .wc-credit-card-form-card-holder,
+.woocommerce-checkout #payment div.payment_box .wc-credit-card-form-card-holder {
+    font-size: 1.5em;
+    padding: 8px;
+    background-repeat: no-repeat;
+    background-position: right .618em center;
+    background-size: 32px 20px
+}
+
+#add_payment_method #payment ul.payment_methods li, .woocommerce-cart #payment ul.payment_methods li, .woocommerce-checkout #payment ul.payment_methods li > label {
+    display: contents !important;
+}
