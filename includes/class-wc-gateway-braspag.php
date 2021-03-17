@@ -489,7 +489,7 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
     /**
      * @param $response
      * @param $order
-     * @param $options
+     * @param array $options
      * @throws WC_Braspag_Exception
      */
     public function process_pagador_response( $response, $order, $options = array())
