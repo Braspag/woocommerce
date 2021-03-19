@@ -90,8 +90,9 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway {
     /**
      * @param $response
      * @param $order
+     * @param array $options
      */
-	public function process_pagador_response( $response, $order ) {}
+	public function process_pagador_response( $response, $order, $options = array()) {}
 
     /**
      * @param $response
@@ -211,7 +212,6 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway {
         $request_data['body'] = $request;
         $request_data = array_merge($request_data, $default_request_params);
 
-		// Create an intent that awaits an action.
 		$response = WC_Braspag_Pagador_API::request( $request_data, $api);
 
 		if ( ! empty( $response->errors ) ) {
@@ -235,7 +235,6 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway {
         $request_data['body'] = $request;
         $request_data = array_merge($request_data, $default_request_params);
 
-        // Create an intent that awaits an action.
         $response = WC_Braspag_Pagador_API::request_action( $request_data, $api);
 
         if ( ! empty( $response->errors ) ) {
@@ -258,7 +257,6 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway {
     {
         $token = $default_request_params['token'];
 
-        // Create an intent that awaits an action.
         $response = WC_Braspag_Risk_API::request( $request, $api, $token);
 
         if ( ! empty( $response->errors ) ) {
@@ -278,7 +276,6 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway {
      */
     public function braspag_oauth_request( $request, $api )
     {
-        // Create an intent that awaits an action.
         $response = WC_Braspag_OAuth_API::request( $request, $api);
 
         if ( ! empty( $response->errors ) ) {
@@ -320,7 +317,6 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway {
      */
     public function braspag_mpi_request( $request, $api )
     {
-        // Create an intent that awaits an action.
         $response = WC_Braspag_Mpi_API::request( $request, $api);
 
         if ( ! empty( $response->errors ) ) {
@@ -364,7 +360,6 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway {
 		$order_id       = WC_Braspag_Helper::is_wc_lt( '3.0' ) ? $order->id : $order->get_id();
 		$transient_name = 'wc_braspag_processing_order_' . $order_id;
 
-		// Save the new intent as a transient, eventually overwriting another one.
 		set_transient( $transient_name, empty( $order ) ? '-1' : $order_id, 60);
 
 		return false;

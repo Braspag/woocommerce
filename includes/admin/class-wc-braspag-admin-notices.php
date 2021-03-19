@@ -35,10 +35,8 @@ class WC_Braspag_Admin_Notices {
 			return;
 		}
 
-		// Main Braspag payment method.
 		$this->braspag_check_environment();
 
-		// All other payment methods.
 		$this->payment_methods_check_environment();
 
 		foreach ( (array) $this->notices as $notice_key => $notice ) {
@@ -117,7 +115,7 @@ class WC_Braspag_Admin_Notices {
 			}
 
 			if ( empty( $show_ssl_notice ) ) {
-				// Show message if enabled and FORCE SSL is disabled and WordpressHTTPS plugin is not detected.
+
 				if ( ! wc_checkout_is_https() ) {
 					/* translators: 1) link */
 					$this->add_admin_notice( 'ssl', 'notice notice-warning', sprintf( __( 'Braspag is enabled, but a SSL certificate is not detected. Your checkout may not be secure! Please ensure your server has a valid <a href="%1$s" target="_blank">SSL certificate</a>', 'woocommerce-braspag' ), 'https://en.wikipedia.org/wiki/Transport_Layer_Security' ), true );

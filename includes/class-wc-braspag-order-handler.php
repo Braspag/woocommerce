@@ -22,7 +22,6 @@ class WC_Braspag_Order_Handler extends WC_Braspag_Payment_Gateway {
 		self::$_this = $this;
 
         add_action( 'woocommerce_order_status_processing', array( $this, 'wc_gateway_braspag_pagador_status_update_capture' ) );
-//        add_action( 'woocommerce_order_status_completed', array( $this, 'wc_gateway_braspag_pagador_status_update_capture' ) );
         add_action( 'woocommerce_order_status_cancelled', array( $this, 'wc_gateway_braspag_pagador_status_update_void' ) );
         add_action( 'woocommerce_order_status_refunded', array( $this, 'wc_gateway_braspag_pagador_status_update_refund' ) );
 	}

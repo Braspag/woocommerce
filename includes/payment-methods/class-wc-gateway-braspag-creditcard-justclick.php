@@ -33,13 +33,9 @@ class WC_Gateway_Braspag_CreditCard_JustClick extends WC_Gateway_Braspag_CreditC
             'tokenization'
         );
 
-        // Load the form fields.
         $this->init_form_fields();
 
-        // Load the settings.
         $this->init_settings();
-
-        // Get setting values.
 
         $braspag_main_settings = get_option( 'woocommerce_braspag_settings' );
 
@@ -57,7 +53,6 @@ class WC_Gateway_Braspag_CreditCard_JustClick extends WC_Gateway_Braspag_CreditC
         $this->saved_cards          = WC_Payment_Tokens::get_customer_tokens($this->get_logged_in_customer_id(),'braspag');
         $this->available_types = WC_Braspag_Payment_Tokens::get_customer_tokens_types($this->get_logged_in_customer_id(),'braspag');
 
-        // Hooks.
         add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
         add_action( 'woocommerce_customer_save_address', array( $this, 'show_update_card_notice' ), 10, 2 );
 
