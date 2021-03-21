@@ -103,27 +103,6 @@ return apply_filters(
             /* translators: post_notification URL */
             'description' => $this->display_admin_settings_webhook_description(),
         ),
-//        'send_email_for_customer'               => array(
-//            'title'       => __( 'Send E-mail for Customer', 'woocommerce-braspag' ),
-//            'type'        => 'checkbox',
-//            'description' => __( 'Send mail for Customer after post notification.', 'woocommerce-braspag' ),
-//            'default'     => 'no',
-//            'desc_tip'    => true,
-//        ),
-//        'order_status_update'                       => array(
-//            'title'       => "<hr>".__( 'Order Status Update', 'woocommerce-braspag' ),
-//            'type'        => 'title',
-//            'description' => '',
-//        ),
-//        'order_status_paid'               => array(
-//            'title'       => __( 'Status Paid', 'woocommerce-braspag' ),
-//            'type'        => 'select',
-//            'class'       => 'wc-enhanced-select',
-//            'description' => __( 'Choose the new order status after Status Update set order as Paid.', 'woocommerce' ),
-//            'default'     => 'sale',
-//            'desc_tip'    => true,
-//            'options'     => wc_get_is_paid_statuses()
-//        ),
         'antifraud'                       => array(
             'title'       => "<hr>".__( 'Anti Fraud', 'woocommerce-braspag' ),
             'type'        => 'title',

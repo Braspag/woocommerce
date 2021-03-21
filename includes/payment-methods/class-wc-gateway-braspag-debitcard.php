@@ -46,13 +46,9 @@ class WC_Gateway_Braspag_DebitCard extends WC_Gateway_Braspag {
             'add_payment_method'
         );
 
-        // Load the form fields.
         $this->init_form_fields();
 
-        // Load the settings.
         $this->init_settings();
-
-        // Get setting values.
 
         $braspag_main_settings = get_option( 'woocommerce_braspag_settings' );
 
@@ -75,7 +71,6 @@ class WC_Gateway_Braspag_DebitCard extends WC_Gateway_Braspag {
         $this->auth3ds20_mpi_authorize_on_unenrolled = $this->get_option( 'auth3ds20_mpi_authorize_on_unenrolled', 'no');
         $this->auth3ds20_mpi_authorize_on_unsupported_brand = $this->get_option( 'auth3ds20_mpi_authorize_on_unsupported_brand', 'no');
 
-        // Hooks.
         add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
         add_action( 'woocommerce_customer_save_address', array( $this, 'show_update_card_notice' ), 10, 2 );
 
@@ -237,14 +232,12 @@ class WC_Gateway_Braspag_DebitCard extends WC_Gateway_Braspag {
 
             $response = $this->braspag_pagador_request( $request_builder, 'v2/sales/', $default_request_params );
 
-            // Confirm the intent after locking the order to make sure webhooks will not interfere.
             if ( empty( $response->errors ) ) {
                 $this->lock_order_payment( $order, $response );
             }
 
             if ( ! empty( $response->errors ) ) {
 
-                // We want to retry.
                 if ( $this->is_retryable_error( $response ) ) {
                     return $this->retry_after_error( $response, $order, $retry, $previous_error, $use_order_source );
                 }
@@ -253,19 +246,16 @@ class WC_Gateway_Braspag_DebitCard extends WC_Gateway_Braspag {
                 $this->throw_localized_message( $response, $order );
             }
 
-            // Process valid response.
             $this->process_pagador_response( $response, $order,
                 [
                     'antifraud_review_order_status' => $this->get_option( 'antifraud_review_order_status' ),
                     'antifraud_reject_order_status' => $this->get_option( 'antifraud_reject_order_status' )
                 ]);
 
-            // Remove cart.
             if ( isset( WC()->cart ) ) {
                 WC()->cart->empty_cart();
             }
 
-            // Unlock the order.
             $this->unlock_order_payment( $order );
 
             do_action( 'wc_gateway_braspag_pagador_debitcard_process_payment_after', $order_id, $order, $response);
@@ -277,7 +267,6 @@ class WC_Gateway_Braspag_DebitCard extends WC_Gateway_Braspag {
                 $redirect_url = $order->get_meta('_braspag_debitcard_authentication_url');
             }
 
-            // Return thank you page redirect.
             return array(
                 'result'   => 'success',
                 'redirect' => $redirect_url,
@@ -369,18 +358,16 @@ class WC_Gateway_Braspag_DebitCard extends WC_Gateway_Braspag {
     /**
      * @param $response
      * @param $order
-     * @return mixed
+     * @param array $options
      * @throws WC_Braspag_Exception
      */
-    public function process_pagador_response( $response, $order ) {
+    public function process_pagador_response( $response, $order, $options = array()) {
 
         WC_Braspag_Logger::log( 'Processing response: ' . print_r( $response, true ) );
 
         do_action( 'wc_gateway_braspag_pagador_process_response_before', $response, $order );
 
         $order_id = WC_Braspag_Helper::is_wc_lt( '3.0' ) ? $order->id : $order->get_id();
-
-        // Store charge data.
 
         if ( in_array($response->body->Payment->Status, ['2'] )) {
 

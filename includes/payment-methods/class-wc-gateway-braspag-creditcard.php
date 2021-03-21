@@ -71,13 +71,10 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag {
             'tokenization'
         );
 
-        // Load the form fields.
         $this->init_form_fields();
 
-        // Load the settings.
         $this->init_settings();
 
-        // Get setting values.
         $braspag_main_settings = get_option( 'woocommerce_braspag_settings' );
 
         $braspag_enabled = isset($braspag_main_settings['enabled']) ? $braspag_main_settings['enabled'] : 'no';
@@ -120,7 +117,6 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag {
 
         $this->antifraud_finger_print_session_id = $this->antifraud_finger_print_merchant_id.$this->antifraud_finger_print_id;
 
-        // Hooks.
         add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
         add_action( 'woocommerce_customer_save_address', array( $this, 'show_update_card_notice' ), 10, 2 );
 
@@ -374,14 +370,12 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag {
 
                 $response = $this->braspag_pagador_request( $request_builder, 'v2/sales/', $default_request_params );
 
-                // Confirm the intent after locking the order to make sure webhooks will not interfere.
                 if ( empty( $response->errors ) ) {
                     $this->lock_order_payment( $order, $response );
                 }
 
                 if ( ! empty( $response->errors ) ) {
 
-                    // We want to retry.
                     if ( $this->is_retryable_error( $response ) ) {
                         return $this->retry_after_error( $response, $order, $retry, $previous_error, $use_order_source );
                     }
@@ -390,7 +384,6 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag {
                     $this->throw_localized_message( $response, $order );
                 }
 
-                // Process valid response.
                 $this->process_pagador_response( $response, $order ,
                     [
                         'antifraud_review_order_status' => $this->get_option( 'antifraud_review_order_status' ),
@@ -411,17 +404,14 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag {
                 }
             }
 
-            // Remove cart.
             if ( isset( WC()->cart ) ) {
                 WC()->cart->empty_cart();
             }
 
-            // Unlock the order.
             $this->unlock_order_payment( $order );
 
             do_action( 'wc_gateway_braspag_pagador_creditcard_process_payment_after', $order_id, $order, $response);
 
-            // Return thank you page redirect.
             return array(
                 'result'   => 'success',
                 'redirect' => $this->get_return_url( $order ),
@@ -649,7 +639,6 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag {
                 ['token' => $this->get_oauth_token()]
             );
 
-            // Process valid response.
             $this->process_antifraud_response( $antifraud_response, $order );
 
         } catch ( WC_Braspag_Exception $e ) {
@@ -682,7 +671,6 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag {
 
             $fraudAnalysCartItems[] = [
                 "ProductName" => $cart_content['data']->get_name(),
-//                "Category" => $cart_content['data']->get_category(),
                 "UnitPrice" => intval($cart_content['data']->get_price() * 100),
                 "MerchantItemId" => $cart_content['data']->get_id(),
                 "Sku" => $cart_content['data']->get_sku(),
@@ -693,7 +681,6 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag {
         $return_data = [
             "MerchantOrderId" => $braspag_pagador_request['MerchantOrderId'],
             "TotalOrderAmount" => intval($order->get_total() * 100),
-//            "TransactionAmount" => intval($order->get_total() * 100),
             "Currency" => $braspag_pagador_request['Payment']['Currency'],
             "Provider" => "Cybersource",
             "BraspagTransactionId" => $braspag_pagador_response->body->Payment->PaymentId,
@@ -740,7 +727,6 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag {
                 "BrowserHostName" => gethostname(),
                 "BrowserCookiesAccepted" => false,
                 "BrowserEmail" => $order->get_billing_email(),
-//                "BrowserType" => "Chrome 58 on Windows 10",
                 "BrowserFingerprint" => $this->antifraud_finger_print_id
             ],
             "CartItems" => $fraudAnalysCartItems,

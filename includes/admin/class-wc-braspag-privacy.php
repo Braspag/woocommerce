@@ -64,7 +64,7 @@ class WC_Braspag_Privacy extends WC_Abstract_Privacy {
      * @return stdClass|WC_Order[]
      */
 	protected function get_braspag_orders( $email_address, $page ) {
-		$user = get_user_by( 'email', $email_address ); // Check if user has an ID in the DB to load stored personal data.
+		$user = get_user_by( 'email', $email_address );
 
 		$order_query = array(
 			'payment_method' => array( 'braspag', 'braspag_creditcard', 'braspag_creditcard_justiclick', 'braspag_debitcard', 'braspag_boleto'),
@@ -199,7 +199,7 @@ class WC_Braspag_Privacy extends WC_Abstract_Privacy {
      * @return array
      */
 	public function customer_data_exporter( $email_address, $page ) {
-		$user           = get_user_by( 'email', $email_address ); // Check if user has an ID in the DB to load stored personal data.
+		$user           = get_user_by( 'email', $email_address );
 		$data_to_export = array();
 
 		if ( $user instanceof WP_User ) {
@@ -235,7 +235,7 @@ class WC_Braspag_Privacy extends WC_Abstract_Privacy {
      */
 	public function customer_data_eraser( $email_address, $page ) {
 		$page               = (int) $page;
-		$user               = get_user_by( 'email', $email_address ); // Check if user has an ID in the DB to load stored personal data.
+		$user               = get_user_by( 'email', $email_address );
 		$braspag_customer_id = '';
 		$braspag_source_id   = '';
 
@@ -288,7 +288,6 @@ class WC_Braspag_Privacy extends WC_Abstract_Privacy {
 			$messages                          = array_merge( $messages, $msgs );
 		}
 
-		// Tell core if we have more orders to work on still
 		$done = count( $orders ) < 10;
 
 		return array(

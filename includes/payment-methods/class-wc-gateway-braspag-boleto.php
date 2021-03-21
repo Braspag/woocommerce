@@ -31,10 +31,8 @@ class WC_Gateway_Braspag_Boleto extends WC_Gateway_Braspag {
             'add_payment_method'
         );
 
-        // Load the form fields.
         $this->init_form_fields();
 
-        // Load the settings.
         $this->init_settings();
 
         $braspag_main_settings = get_option( 'woocommerce_braspag_settings' );
@@ -42,7 +40,6 @@ class WC_Gateway_Braspag_Boleto extends WC_Gateway_Braspag {
         $braspag_enabled = isset($braspag_main_settings['enabled']) ? $braspag_main_settings['enabled'] : 'no';
         $test_mode = isset($braspag_main_settings['test_mode']) ? $braspag_main_settings['test_mode'] : 'no';
 
-        // Get setting values.
         $this->title                = $this->get_option( 'title' );
         $this->description          = $this->get_option( 'description' );
         $this->enabled  = $braspag_enabled == 'yes' ? $this->get_option( 'enabled' ) : 'no';
@@ -55,7 +52,6 @@ class WC_Gateway_Braspag_Boleto extends WC_Gateway_Braspag {
         $this->available_type          = $this->get_option( 'available_type' );
         $this->label_print_button          = $this->get_option( 'label_print_button' );
 
-        // Hooks.
         add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
         add_action( 'woocommerce_customer_save_address', array( $this, 'show_update_card_notice' ), 10, 2 );
         add_action( 'woocommerce_order_details_after_order_table', array( $this, 'display_order_boleto_data' ) );
@@ -134,14 +130,12 @@ class WC_Gateway_Braspag_Boleto extends WC_Gateway_Braspag {
 
             $response = $this->braspag_pagador_request( $request_builder, 'v2/sales/', $default_request_params );
 
-            // Confirm the intent after locking the order to make sure webhooks will not interfere.
             if ( empty( $response->errors ) ) {
                 $this->lock_order_payment( $order, $response );
             }
 
             if ( ! empty( $response->errors ) ) {
 
-                // We want to retry.
                 if ( $this->is_retryable_error( $response ) ) {
                     return $this->retry_after_error( $response, $order, $retry, $previous_error, $use_order_source );
                 }
@@ -150,20 +144,16 @@ class WC_Gateway_Braspag_Boleto extends WC_Gateway_Braspag {
                 $this->throw_localized_message( $response, $order );
             }
 
-            // Process valid response.
             $this->process_pagador_response( $response, $order );
 
-            // Remove cart.
             if ( isset( WC()->cart ) ) {
                 WC()->cart->empty_cart();
             }
 
-            // Unlock the order.
             $this->unlock_order_payment( $order );
 
             do_action( 'wc_gateway_braspag_pagador_boleto_process_payment_after', $order_id, $order, $response);
 
-            // Return thank you page redirect.
             return array(
                 'result'   => 'success',
                 'redirect' => $this->get_return_url( $order ),
