@@ -58,6 +58,8 @@ class WC_Gateway_Braspag_Boleto extends WC_Gateway_Braspag {
 
         add_action( 'wc_gateway_braspag_pagador_boleto_process_payment_after', array( $this, 'save_payment_response_data' ), 10, 3);
         add_filter( "wc_gateway_braspag_pagador_{$this->id}_request_payment_builder", array( $this, 'braspag_pagador_boleto_payment_request_builder' ), 10, 4);
+
+        add_filter( "wc_gateway_braspag_pagador_request_builder", array( $this, 'braspag_pagador_request_builder_boleto' ), 10, 3);
     }
 
     /**
@@ -292,5 +294,272 @@ class WC_Gateway_Braspag_Boleto extends WC_Gateway_Braspag {
         <?php
 
         do_action( 'wc_gateway_braspag_pagador_boleto_display_order_data_after', $order );
+    }
+
+    /**
+     * @param $request
+     * @param $order
+     * @param $default_request_params
+     * @return mixed
+     */
+    public function braspag_pagador_request_builder_boleto($request, $order, $default_request_params) {
+
+        if (!isset ($request['Payment']) || $request['Payment']['Type'] != 'Boleto') {
+            return $request;
+        }
+
+        $fields = [];
+
+        switch ($request['Payment']['Provider']) {
+
+            case 'Bradesco2':
+
+                $fields = [
+                    [
+                        'field' => 'Id do Pedido',
+                        'size_limit' => 27,
+                        'size' => strlen($request['MerchantOrderId'])
+                    ],[
+                        'field' => 'Número do Boleto',
+                        'size_limit' => 11,
+                        'size' => strlen($request['Payment']['BoletoNumber'])
+                    ],[
+                        'field' => 'Nome do Cliente',
+                        'size_limit' => 34,
+                        'size' => strlen($request['Customer']['Name'])
+                    ],[
+                        'field' => 'Endereço do cliente - Campo Endereço',
+                        'size_limit' => 70,
+                        'size' => strlen($request['Customer']['Address']['Street'])
+                    ],[
+                        'field' => 'Endereço do cliente - Campo Número',
+                        'size_limit' => 10,
+                        'size' => strlen($request['Customer']['Address']['Number'])
+                    ],[
+                        'field' => 'Endereço do cliente - Campo Complemento',
+                        'size_limit' => 20,
+                        'size' => strlen($request['Customer']['Address']['Complement'])
+                    ],[
+                        'field' => 'Endereço do cliente - Campo Bairro',
+                        'size_limit' => 50,
+                        'size' => strlen($request['Customer']['Address']['District'])
+                    ],[
+                        'field' => 'Endereço do cliente - Campo Cidade',
+                        'size_limit' => 50,
+                        'size' => strlen($request['Customer']['Address']['City'])
+                    ],[
+                        'field' => 'Instruções do Boleto',
+                        'size_limit' => 450,
+                        'size' => strlen($request['Payment']['Instructions'])
+                    ],[
+                        'field' => 'Texto de Demonstrativo',
+                        'size_limit' => 255,
+                        'size' => strlen($request['Payment']['Demonstrative'])
+                    ],
+                ];
+
+                break;
+
+            case 'BancoDoBrasil2':
+
+                $fields = [
+                    [
+                        'field' => 'Id do Pedido',
+                        'size_limit' => 50,
+                        'size' => strlen($request['MerchantOrderId'])
+                    ],[
+                        'field' => 'Número do Boleto',
+                        'size_limit' => 9,
+                        'size' => strlen($request['Payment']['BoletoNumber'])
+                    ],[
+                        'field' => 'Nome do Cliente',
+                        'size_limit' => 60,
+                        'size' => strlen($request['Customer']['Name'])
+                    ],[
+                        'field' => 'Endereço do cliente - Campos Endereço, Número, Complemento e Bairro',
+                        'size_limit' => 60,
+                        'size' => strlen($request['Customer']['Address']['Street']. " ".$request['Customer']['Address']['Number']. " ".$request['Customer']['Address']['Complement']. " ".$request['Customer']['Address']['District'])
+                    ],[
+                        'field' => 'Endereço do cliente - Campo Cidade',
+                        'size_limit' => 18,
+                        'size' => strlen($request['Customer']['Address']['City'])
+                    ],[
+                        'field' => 'Instruções do Boleto',
+                        'size_limit' => 450,
+                        'size' => strlen($request['Payment']['Instructions'])
+                    ],[
+                        'field' => 'Texto de Demonstrativo',
+                        'size_limit' => 999999999999999,
+                        'size' => strlen($request['Payment']['Demonstrative'])
+                    ],
+                ];
+
+                break;
+
+            case 'ItauShopline':
+
+                $fields = [
+                    [
+                        'field' => 'Id do Pedido',
+                        'size_limit' => 8,
+                        'size' => strlen($request['MerchantOrderId'])
+                    ],[
+                        'field' => 'Número do Boleto',
+                        'size_limit' => 8,
+                        'size' => strlen($request['Payment']['BoletoNumber'])
+                    ],[
+                        'field' => 'Nome do Cliente',
+                        'size_limit' => 30,
+                        'size' => strlen($request['Customer']['Name'])
+                    ],[
+                        'field' => 'Endereço do cliente - Campos Endereço, Número e Complemento',
+                        'size_limit' => 40,
+                        'size' => strlen($request['Customer']['Address']['Street']. " ".$request['Customer']['Address']['Number']. " ".$request['Customer']['Address']['Complement'])
+                    ],[
+                        'field' => 'Endereço do cliente - Campo Bairro',
+                        'size_limit' => 15,
+                        'size' => strlen($request['Customer']['Address']['District'])
+                    ],[
+                        'field' => 'Endereço do cliente - Campo Cidade',
+                        'size_limit' => 15,
+                        'size' => strlen($request['Customer']['Address']['City'])
+                    ],[
+                        'field' => 'Instruções do Boleto',
+                        'size_limit' => 999999999999999,
+                        'size' => strlen($request['Payment']['Instructions'])
+                    ],[
+                        'field' => 'Texto de Demonstrativo',
+                        'size_limit' => 999999999999999,
+                        'size' => strlen($request['Payment']['Demonstrative'])
+                    ],
+                ];
+
+                break;
+
+            case 'Santander2':
+
+                $fields = [
+                    [
+                        'field' => 'Id do Pedido',
+                        'size_limit' => 50,
+                        'size' => strlen($request['MerchantOrderId'])
+                    ],[
+                        'field' => 'Número do Boleto',
+                        'size_limit' => 13,
+                        'size' => strlen($request['Payment']['BoletoNumber'])
+                    ],[
+                        'field' => 'Nome do Cliente',
+                        'size_limit' => 40,
+                        'size' => strlen($request['Customer']['Name'])
+                    ],[
+                        'field' => 'Endereço do cliente - Campos Endereço, Número e Complemento',
+                        'size_limit' => 40,
+                        'size' => strlen($request['Customer']['Address']['Street']. " ".$request['Customer']['Address']['Number']. " ".$request['Customer']['Address']['Complement'])
+                    ],[
+                        'field' => 'Endereço do cliente - Campo Bairro',
+                        'size_limit' => 15,
+                        'size' => strlen($request['Customer']['Address']['District'])
+                    ],[
+                        'field' => 'Endereço do cliente - Campo Cidade',
+                        'size_limit' => 30,
+                        'size' => strlen($request['Customer']['Address']['City'])
+                    ],[
+                        'field' => 'Instruções do Boleto',
+                        'size_limit' => 450,
+                        'size' => strlen($request['Payment']['Instructions'])
+                    ],[
+                        'field' => 'Texto de Demonstrativo',
+                        'size_limit' => 255,
+                        'size' => strlen($request['Payment']['Demonstrative'])
+                    ],
+                ];
+                break;
+
+            case 'Caixa2':
+
+                $fields = [
+                    [
+                        'field' => 'Id do Pedido',
+                        'size_limit' => 11,
+                        'size' => strlen($request['MerchantOrderId'])
+                    ],[
+                        'field' => 'Número do Boleto',
+                        'size_limit' => 12,
+                        'size' => strlen($request['Payment']['BoletoNumber'])
+                    ],[
+                        'field' => 'Nome do Cliente',
+                        'size_limit' => 40,
+                        'size' => strlen($request['Customer']['Name'])
+                    ],[
+                        'field' => 'Endereço do cliente - Campos Endereço, Número e Complemento',
+                        'size_limit' => 40,
+                        'size' => strlen($request['Customer']['Address']['Street']. " ".$request['Customer']['Address']['Number']. " ".$request['Customer']['Address']['Complement'])
+                    ],[
+                        'field' => 'Endereço do cliente - Campo Bairro',
+                        'size_limit' => 15,
+                        'size' => strlen($request['Customer']['Address']['District'])
+                    ],[
+                        'field' => 'Endereço do cliente - Campo Cidade',
+                        'size_limit' => 15,
+                        'size' => strlen($request['Customer']['Address']['City'])
+                    ],[
+                        'field' => 'Instruções do Boleto',
+                        'size_limit' => 450,
+                        'size' => strlen($request['Payment']['Instructions'])
+                    ],[
+                        'field' => 'Texto de Demonstrativo',
+                        'size_limit' => 255,
+                        'size' => strlen($request['Payment']['Demonstrative'])
+                    ],
+                ];
+                break;
+
+            case 'Citibank2':
+
+                $fields = [
+                    [
+                        'field' => 'Id do Pedido',
+                        'size_limit' => 10,
+                        'size' => strlen($request['MerchantOrderId'])
+                    ],[
+                        'field' => 'Número do Boleto',
+                        'size_limit' => 11,
+                        'size' => strlen($request['Payment']['BoletoNumber'])
+                    ],[
+                        'field' => 'Nome do Cliente',
+                        'size_limit' => 50,
+                        'size' => strlen($request['Customer']['Name'])
+                    ],[
+                        'field' => 'Endereço do cliente - Campos Endereço, Número e Complemento',
+                        'size_limit' => 40,
+                        'size' => strlen($request['Customer']['Address']['Street']. " ".$request['Customer']['Address']['Number']. " ".$request['Customer']['Address']['Complement'])
+                    ],[
+                        'field' => 'Endereço do cliente - Campo Bairro',
+                        'size_limit' => 50,
+                        'size' => strlen($request['Customer']['Address']['District'])
+                    ],[
+                        'field' => 'Endereço do cliente - Campo Cidade',
+                        'size_limit' => 50,
+                        'size' => strlen($request['Customer']['Address']['City'])
+                    ],[
+                        'field' => 'Instruções do Boleto',
+                        'size_limit' => 450,
+                        'size' => strlen($request['Payment']['Instructions'])
+                    ],[
+                        'field' => 'Texto de Demonstrativo',
+                        'size_limit' => 255,
+                        'size' => strlen($request['Payment']['Demonstrative'])
+                    ],
+                ];
+                break;
+        }
+
+        foreach ($fields as $field) {
+            if ($field['size'] > $field['size_limit']) {
+                throw new \Exception("O número máximo de caracteres permitidos, de {$field['size_limit']} caractere(s), para o item '{$field['field']}' foi ultrapassado.");
+            }
+        }
+
+        return $request;
     }
 }
