@@ -532,14 +532,25 @@ class WC_Gateway_Braspag_DebitCard extends WC_Gateway_Braspag {
         return [
             'Cielo-Visa' => 'Cielo Visa',
             'Cielo-Master' => 'Cielo Master',
+
             'Cielo30-Visa' => 'Cielo 3.0 Visa',
             'Cielo30-Master' => 'Cielo 3.0 Master',
+
             'Getnet-Visa' => 'Getnet Visa',
             'Getnet-Master' => 'Getnet Master',
+
+            'Rede2-Visa' => 'Rede 2 Visa',
+            'Rede2-Master' => 'Rede 2 Master',
+
+            'Safra2-Visa' => 'Safra 2 Visa',
+            'Safra2-Master' => 'Safra 2 Master',
+
             'FirstData-Visa' => 'FirstData Visa',
             'FirstData-Master' => 'FirstData Master',
+
             'GlobalPayments-Visa' => 'GlobalPayments Visa',
             'GlobalPayments-Master' => 'GlobalPayments Master',
+
             'Simulado-Simulado' => 'Simulado',
         ];
     }
