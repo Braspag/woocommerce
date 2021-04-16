@@ -373,14 +373,31 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
      */
     public function get_customer_identity_data($order) {
 
-        if ( '' === $order->get_meta( '_billing_persontype' ) ) {
+        if ( '' === $order->get_meta( '_billing_persontype' )
+            && '' === $order->get_meta( '_billing_cpf' )
+            && '' === $order->get_meta( '_billing_cnpj' )) {
             return '';
         }
 
-        $customer_identity_type = $order->get_meta('_billing_persontype') == '1' ? 'CPF' : 'CNPJ';
+        $customer_identity_type = '';
+        $identityValue = '';
+
+        if ( '' !== $order->get_meta( '_billing_persontype' )) {
+            $customer_identity_type = $order->get_meta('_billing_persontype') == '1' ? 'CPF' : 'CNPJ';
+            $identityValue = preg_replace('/\D+/', '', $customer_identity_type == 'CPF' ? $order->get_meta('_billing_cpf') : $order->get_meta('_billing_cnpj'));
+
+        } elseif ('' !== $order->get_meta( '_billing_cpf' )) {
+            $customer_identity_type = 'CPF';
+            $identityValue = preg_replace('/\D+/', '', $order->get_meta('_billing_cpf'));
+
+        } elseif ('' !== $order->get_meta( '_billing_cnpj' )) {
+            $customer_identity_type = 'CNPJ';
+            $identityValue = preg_replace('/\D+/', '', $order->get_meta('_billing_cnpj'));
+        }
+
         return [
             'type' => $customer_identity_type,
-            'value' => preg_replace('/\D+/', '', $customer_identity_type == 'CPF' ? $order->get_meta('_billing_cpf') : $order->get_meta('_billing_cnpj'))
+            'value' => $identityValue
         ];
     }
 
@@ -410,7 +427,7 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
         return [
             "Name" => $order->get_formatted_billing_full_name(),
             "Email" => $order->get_billing_email(),
-            "Phone" => preg_replace('/\D+/', '', $order->get_billing_phone()),
+            "Phone" => $this->get_customer_phone_data($order),
             "Identity" => preg_replace('/\D+/', '', $customer_identity_data['value']),
             "IdentityType" => $customer_identity_data['type'],
             "Address" => [
@@ -420,7 +437,7 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
                 "ZipCode" => $billing_address['postcode'],
                 "City" => $billing_address['city'],
                 "State" => $billing_address['state'],
-                "Country" => $billing_address['country'] == 'BR' ? 'BRA' : '',
+                "Country" => $billing_address['country'] == 'BR' ? 'BRA' : $billing_address['country'],
                 "District" => $billing_address['neighborhood']
             ],
             "DeliveryAddress" => [
@@ -430,10 +447,25 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
                 "ZipCode" => $shipping_address['postcode'],
                 "City" => $shipping_address['city'],
                 "State" => $shipping_address['state'],
-                "Country" => $shipping_address['country'] == 'BR' ? 'BRA' : '',
+                "Country" => $shipping_address['country'] == 'BR' ? 'BRA' : $shipping_address['country'],
                 "District" => $shipping_address['neighborhood']
             ]
         ];
+    }
+
+    public function get_customer_phone_data($order) {
+
+        $phone_prefix = '';
+
+        $billing_address = $order->get_address('billing');
+        switch ($billing_address['country']) {
+            case 'BR':
+            case 'BRA':
+                $phone_prefix = '55';
+            break;
+        }
+
+        return $phone_prefix.preg_replace('/\D+/', '', $order->get_billing_phone());
     }
 
     /**

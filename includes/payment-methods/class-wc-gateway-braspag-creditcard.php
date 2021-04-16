@@ -593,12 +593,15 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag {
         $provider = $this
             ->get_braspag_payment_provider($checkout->get_value('braspag_creditcard-card-type'), $this->test_mode);
 
+        $billing_address = $order->get_address('billing');
+        $country = isset($billing_address['country']) ? $billing_address['country'] == 'BR' ? 'BRA' : $billing_address['country'] : '';
+
         $payment_data = array_merge($payment_data, [
             "Provider" => $provider,
             "Type" => "CreditCard",
             "Amount" => intval($order->get_total() * 100),
-            "Currency" => "BRL",
-            "Country" => "BRA",
+            "Currency" => $order->currency,
+            "Country" => $country,
             "Installments" => $checkout->get_value('braspag_creditcard-card-installments'),
             "Interest" => "ByMerchant",
             "Capture" => $this->capture,
@@ -674,7 +677,7 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag {
                 "UnitPrice" => intval($cart_content['data']->get_price() * 100),
                 "MerchantItemId" => $cart_content['data']->get_id(),
                 "Sku" => $cart_content['data']->get_sku(),
-                "Quantity" => $cart_content->quantity
+                "Quantity" => $cart_content['quantity']
             ];
         }
 
@@ -699,7 +702,7 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag {
                 "Neighborhood" => $billing_address['neighborhood'],
                 "City" => $billing_address['city'],
                 "State" => $billing_address['state'],
-                "Country" => $billing_address['country'],
+                "Country" => $billing_address['country'] == 'BR' ? 'BRA' : $billing_address['country'],
                 "ZipCode" => $billing_address['postcode']
             ],
             "Shipping" => [
@@ -709,12 +712,12 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag {
                 "Neighborhood" => $shipping_address['neighborhood'],
                 "City" => $shipping_address['city'],
                 "State" => $shipping_address['state'],
-                "Country" => $shipping_address['country'],
+                "Country" => $shipping_address['country'] == 'BR' ? 'BRA' : $shipping_address['country'],
                 "ZipCode" => $shipping_address['postcode'],
                 "FirstName" => $order->get_shipping_first_name(),
                 "LastName" => $order->get_shipping_last_name(),
                 "ShippingMethod" => $order->get_payment_method(),
-                "Phone" => preg_replace('/\D+/', '', $order->get_billing_phone())
+                "Phone" => $this->get_customer_phone_data($order)
             ],
             "Customer" => [
                 "MerchantCustomerId" => $this->get_logged_in_customer_id(),
@@ -797,7 +800,7 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag {
                 "ObscenitiesHedge" => "Off",
                 "PhoneHedge" => "Off",
                 "Name" => $cart_content['data']->get_name(),
-                "Quantity" => $cart_content->quantity,
+                "Quantity" => $cart_content['quantity'],
                 "Sku" => $cart_content['data']->get_sku(),
                 "UnitPrice" => intval($cart_content['data']->get_price() * 100),
             ];
@@ -861,7 +864,7 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag {
             "Shipping" => [
                 "Addressee" => $order->get_formatted_billing_full_name(),
                 "Method" => "LowCost",
-                "Phone" => preg_replace('/\D+/', '', $order->get_billing_phone())
+                "Phone" => $this->get_customer_phone_data($order)
             ]
         ];
 
@@ -917,14 +920,6 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag {
     public function get_creditcard_payment_types_options() {
 
         return [
-            'Cielo-Visa' => 'Cielo Visa',
-            'Cielo-Master' => 'Cielo Master',
-            'Cielo-Amex' => 'Cielo Amex',
-            'Cielo-Elo' => 'Cielo Elo',
-            'Cielo-Aura' => 'Cielo Aura',
-            'Cielo-Jcb' => 'Cielo Jcb',
-            'Cielo-Diners' => 'Cielo Diners',
-            'Cielo-Discover' => 'Cielo Discover',
             'Cielo30-Visa' => 'Cielo 3.0 Visa',
             'Cielo30-Master' => 'Cielo 3.0 Master',
             'Cielo30-Amex' => 'Cielo 3.0 Amex',
@@ -935,31 +930,49 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag {
             'Cielo30-Discover' => 'Cielo 3.0 Discover',
             'Cielo30-Hipercard' => 'Cielo 3.0 Hipercard',
             'Cielo30-Hiper' => 'Cielo 3.0 Hiper',
-            'Redecard-Visa' => 'Redecard Visa',
-            'Redecard-Master' => 'Redecard Master',
-            'Redecard-Hipercard' => 'Redecard Hipercard',
-            'Redecard-Hiper' => 'Redecard Hiper',
-            'Redecard-Diners' => 'Redecard Diners',
-            'Rede2-Visa' => 'Rede2-Visa',
-            'Rede2-Master' => 'Rede2-Master',
-            'Rede2-Hipercard' => 'Rede2-Hipercard',
-            'Rede2-Hiper' => 'Rede2-Hiper',
-            'Rede2-Diners' => 'Rede2-Diners',
-            'Rede2-Elo' => 'Rede2-Elo',
-            'Rede2-Amex' => 'Rede2-Amex',
+            'Cielo30-Sorocred' => 'Cielo 3.0 Sorocred',
+
             'Getnet-Visa' => 'Getnet-Visa',
             'Getnet-Master' => 'Getnet-Master',
             'Getnet-Elo' => 'Getnet-Elo',
             'Getnet-Amex' => 'Getnet-Amex',
+            'Getnet-Hipercard' => 'Getnet-Hipercard',
+
+            'Rede2-Visa' => 'Rede 2 Visa',
+            'Rede2-Master' => 'Rede 2 Master',
+            'Rede2-Hipercard' => 'Rede 2 Hipercard',
+            'Rede2-Hiper' => 'Rede 2 Hiper',
+            'Rede2-Diners' => 'Rede 2 Diners',
+            'Rede2-Elo' => 'Rede 2 Elo',
+            'Rede2-Amex' => 'Rede 2 Amex',
+            'Rede2-Sorocred' => 'Rede 2 Sorocred',
+
             'GlobalPayments-Visa' => 'GlobalPayments Visa',
             'GlobalPayments-Master' => 'GlobalPayments Master',
+            'GlobalPayments-Elo' => 'GlobalPayments Elo',
+            'GlobalPayments-Hiper' => 'GlobalPayments Hiper',
+            'GlobalPayments-Hipercard' => 'GlobalPayments Hipercard',
+            'GlobalPayments-Cabal' => 'GlobalPayments Cabal',
+            'GlobalPayments-Amex' => 'GlobalPayments Amex',
+
             'Stone-Visa' => 'Stone Visa',
             'Stone-Master' => 'Stone Master',
             'Stone-Hipercard' => 'Stone Hipercard',
             'Stone-Elo' => 'Stone Elo',
+
+            'Safra2-Visa' => 'Safra 2 Visa',
+            'Safra2-Master' => 'Safra 2 Master',
+            'Safra2-Hipercard' => 'Safra 2 Hipercard',
+            'Safra2-Elo' => 'Safra 2 Elo',
+            'Safra2-Amex' => 'Safra 2 Amex',
+
             'FirstData-Visa' => 'FirstData Visa',
             'FirstData-Master' => 'FirstData Master',
+            'FirstData-Elo' => 'FirstData Elo',
+            'FirstData-Hipercard' => 'FirstData Hipercard',
             'FirstData-Cabal' => 'FirstData Cabal',
+            'FirstData-Amex' => 'FirstData Amex',
+
             'Sub1-Visa' => 'Sub1 Visa',
             'Sub1-Master' => 'Sub1 Master',
             'Sub1-Diners' => 'Sub1 Diners',
@@ -967,32 +980,30 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag {
             'Sub1-Discover' => 'Sub1 Discover',
             'Sub1-Cabal' => 'Sub1 Cabal',
             'Sub1-Naranja e Nevada' => 'Sub1 Naranja e Nevada',
+
             'Banorte-Visa' => 'Banorte Visa',
             'Banorte-Master' => 'Banorte Master',
             'Banorte-Carnet' => 'Banorte Carnet',
+
             'Credibanco-Visa' => 'Credibanco Visa',
             'Credibanco-Master' => 'Credibanco Master',
             'Credibanco-Diners' => 'Credibanco Diners',
             'Credibanco-Amex' => 'Credibanco Amex',
             'Credibanco-Credential' => 'Credibanco Credential',
-            'Transbank-Visa' => 'Transbank Visa',
-            'Transbank-Master' => 'Transbank Master',
-            'Transbank-Diners' => 'Transbank Diners',
-            'Transbank-Amex' => 'Transbank Amex',
-            'RedeSitef-Visa' => 'Rede Sitef Visa',
-            'RedeSitef-Master' => 'Rede Sitef Master',
-            'RedeSitef-Hipercard' => 'Rede Sitef Hipercard',
-            'RedeSitef-Diners' => 'Rede Sitef Diners',
-            'CieloSitef-Visa' => 'Cielo Sitef Visa',
-            'CieloSitef-Master' => 'Cielo Sitef Master',
-            'CieloSitef-Amex' => 'Cielo Sitef Amex',
-            'CieloSitef-Elo' => 'Cielo Sitef Elo',
-            'CieloSitef-Aura' => 'Cielo Sitef Aura',
-            'CieloSitef-Jcb' => 'Cielo Sitef Jcb',
-            'CieloSitef-Diners' => 'Cielo Sitef Diners',
-            'CieloSitef-Discover' => 'Cielo Sitef Discover',
-            'SantanderSitef-Visa' => 'Santander Sitef Visa',
-            'SantanderSitef-Master' => 'Santander Sitef Master',
+
+            'Transbank2-Visa' => 'Transbank 2 Visa',
+            'Transbank2-Master' => 'Transbank 2 Master',
+            'Transbank2-Diners' => 'Transbank 2 Diners',
+            'Transbank2-Amex' => 'Transbank 2 Amex',
+
+            'Banese-Banese' => 'Banese',
+
+            'BrasilCard-BrasilCard' => 'BrasilCard',
+
+            'Credz-Credz' => 'Credz',
+
+            'DMCard-' => 'DMCard',
+
             'Simulado-Simulado' => 'Simulado',
         ];
     }

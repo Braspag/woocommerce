@@ -97,6 +97,7 @@ class WC_Braspag_Order_Handler extends WC_Braspag_Payment_Gateway {
         $order = wc_get_order( $order_id );
 
         if (!preg_match("#braspag#is", $order->get_payment_method())
+            || $order->get_meta( '_braspag_charge_cancelled') === 'yes'
             || $order->get_meta( '_braspag_charge_refunded') === 'yes')
         {
             return $this;
@@ -137,7 +138,9 @@ class WC_Braspag_Order_Handler extends WC_Braspag_Payment_Gateway {
 
         $order = wc_get_order( $order_id );
 
-        if (!preg_match("#braspag#is", $order->get_payment_method())) {
+        if (!preg_match("#braspag#is", $order->get_payment_method())
+            || $order->get_meta( '_braspag_charge_cancelled') === 'yes'
+            || $order->get_meta( '_braspag_charge_refunded') === 'yes') {
             return $this;
         }
 

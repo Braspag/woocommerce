@@ -5,7 +5,7 @@
  * Description: Take payments on your store using Braspag.
  * Author: Braspag
  * Author URI: https://braspag.com.br/
- * Version: 2.2.26
+ * Version: 2.2.29
  * Requires at least: 5.3.2
  * Tested up to: 5.4
  * WC requires at least: 4.0.0
@@ -45,7 +45,7 @@ function woocommerce_gateway_braspag_init() {
 		/**
 		 * Required minimums and constants
 		 */
-		define( 'WC_BRASPAG_VERSION', '2.2.26' );
+		define( 'WC_BRASPAG_VERSION', '2.2.29' );
 		define( 'WC_BRASPAG_MIN_PHP_VER', '5.6.0' );
 		define( 'WC_BRASPAG_MIN_WC_VER', '2.6.0' );
 		define( 'WC_BRASPAG_MAIN_FILE', __FILE__ );

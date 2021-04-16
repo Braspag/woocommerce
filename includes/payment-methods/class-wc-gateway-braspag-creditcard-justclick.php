@@ -264,7 +264,7 @@ class WC_Gateway_Braspag_CreditCard_JustClick extends WC_Gateway_Braspag_CreditC
             "Provider" => $provider,
             "Type" => "CreditCard",
             "Amount" => intval($order->get_total() * 100),
-            "Currency" => "BRL",
+            "Currency" => $order->currency,
             "Country" => "BRA",
             "Installments" => $checkout->get_value('braspag_creditcard-card-installments'),
             "Interest" => "ByMerchant",
