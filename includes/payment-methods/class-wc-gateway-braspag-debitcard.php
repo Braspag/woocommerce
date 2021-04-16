@@ -462,7 +462,7 @@ class WC_Gateway_Braspag_DebitCard extends WC_Gateway_Braspag {
             "Provider" => $provider,
             "Type" => "DebitCard",
             "Amount" => intval($order->get_total() * 100),
-            "Currency" => "BRL",
+            "Currency" => $order->currency,
             "Country" => "BRA",
             "Installments" => '1',
             "Interest" => "ByMerchant",

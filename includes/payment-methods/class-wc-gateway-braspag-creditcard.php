@@ -593,12 +593,15 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag {
         $provider = $this
             ->get_braspag_payment_provider($checkout->get_value('braspag_creditcard-card-type'), $this->test_mode);
 
+        $billing_address = $order->get_address('billing');
+        $country = isset($billing_address['country']) ? $billing_address['country'] == 'BR' ? 'BRA' : $billing_address['country'] : '';
+
         $payment_data = array_merge($payment_data, [
             "Provider" => $provider,
             "Type" => "CreditCard",
             "Amount" => intval($order->get_total() * 100),
-            "Currency" => "BRL",
-            "Country" => "BRA",
+            "Currency" => $order->currency,
+            "Country" => $country,
             "Installments" => $checkout->get_value('braspag_creditcard-card-installments'),
             "Interest" => "ByMerchant",
             "Capture" => $this->capture,
@@ -674,7 +677,7 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag {
                 "UnitPrice" => intval($cart_content['data']->get_price() * 100),
                 "MerchantItemId" => $cart_content['data']->get_id(),
                 "Sku" => $cart_content['data']->get_sku(),
-                "Quantity" => $cart_content->quantity
+                "Quantity" => $cart_content['quantity']
             ];
         }
 
@@ -699,7 +702,7 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag {
                 "Neighborhood" => $billing_address['neighborhood'],
                 "City" => $billing_address['city'],
                 "State" => $billing_address['state'],
-                "Country" => $billing_address['country'],
+                "Country" => $billing_address['country'] == 'BR' ? 'BRA' : $billing_address['country'],
                 "ZipCode" => $billing_address['postcode']
             ],
             "Shipping" => [
@@ -709,12 +712,12 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag {
                 "Neighborhood" => $shipping_address['neighborhood'],
                 "City" => $shipping_address['city'],
                 "State" => $shipping_address['state'],
-                "Country" => $shipping_address['country'],
+                "Country" => $shipping_address['country'] == 'BR' ? 'BRA' : $shipping_address['country'],
                 "ZipCode" => $shipping_address['postcode'],
                 "FirstName" => $order->get_shipping_first_name(),
                 "LastName" => $order->get_shipping_last_name(),
                 "ShippingMethod" => $order->get_payment_method(),
-                "Phone" => preg_replace('/\D+/', '', $order->get_billing_phone())
+                "Phone" => $this->get_customer_phone_data($order)
             ],
             "Customer" => [
                 "MerchantCustomerId" => $this->get_logged_in_customer_id(),
@@ -797,7 +800,7 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag {
                 "ObscenitiesHedge" => "Off",
                 "PhoneHedge" => "Off",
                 "Name" => $cart_content['data']->get_name(),
-                "Quantity" => $cart_content->quantity,
+                "Quantity" => $cart_content['quantity'],
                 "Sku" => $cart_content['data']->get_sku(),
                 "UnitPrice" => intval($cart_content['data']->get_price() * 100),
             ];
@@ -861,7 +864,7 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag {
             "Shipping" => [
                 "Addressee" => $order->get_formatted_billing_full_name(),
                 "Method" => "LowCost",
-                "Phone" => preg_replace('/\D+/', '', $order->get_billing_phone())
+                "Phone" => $this->get_customer_phone_data($order)
             ]
         ];
 
