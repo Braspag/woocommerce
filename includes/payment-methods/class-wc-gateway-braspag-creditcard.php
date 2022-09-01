@@ -25,6 +25,8 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
 
     protected $merchant_category;
 
+    protected $soft_descriptor;
+
     protected $antifraud_enabled;
 
     protected $antifraud_send_with_pagador_transaction;
@@ -84,6 +86,7 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
 
         $this->title = $this->get_option('title');
         $this->description = $this->get_option('description');
+        $this->soft_descriptor = $this->get_option('SoftDescriptor');
         $this->enabled = $braspag_enabled == 'yes' ? $this->get_option('enabled') : 'no';
         $this->test_mode = $test_mode == 'yes';
         $this->available_types = $this->get_option('available_types', array());
@@ -625,21 +628,39 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
         $provider = $this
             ->get_braspag_payment_provider($checkout->get_value('braspag_creditcard-card-type'), $this->test_mode);
 
-        $payment_data = array_merge($payment_data, [
-            "Provider" => $provider,
-            "Type" => "CreditCard",
-            "Amount" => intval($order->get_total() * 100),
-            "Currency" => "BRL",
-            "Country" => "BRA",
-            "Installments" => $checkout->get_value('braspag_creditcard-card-installments'),
-            "Interest" => "ByMerchant",
-            "Capture" => $this->capture,
-            "Authenticate" => false,
-            "Recurrent" => false,
-            "SoftDescriptor" => "",
-            "DoSplit" => false,
-            "CreditCard" => $card_data
-        ]);
+        if (isset($this->soft_descriptor) && !empty($this->soft_descriptor)) {
+            $payment_data = array_merge($payment_data, [
+                "Provider" => $provider,
+                "Type" => "CreditCard",
+                "Amount" => intval($order->get_total() * 100),
+                "Currency" => "BRL",
+                "Country" => "BRA",
+                "Installments" => $checkout->get_value('braspag_creditcard-card-installments'),
+                "Interest" => "ByMerchant",
+                "Capture" => $this->capture,
+                "Authenticate" => false,
+                "Recurrent" => false,
+                "SoftDescriptor" => $this->soft_descriptor,
+                "DoSplit" => false,
+                "CreditCard" => $card_data
+            ]);
+        } else {
+            $payment_data = array_merge($payment_data, [
+                "Provider" => $provider,
+                "Type" => "CreditCard",
+                "Amount" => intval($order->get_total() * 100),
+                "Currency" => "BRL",
+                "Country" => "BRA",
+                "Installments" => $checkout->get_value('braspag_creditcard-card-installments'),
+                "Interest" => "ByMerchant",
+                "Capture" => $this->capture,
+                "Authenticate" => false,
+                "Recurrent" => false,
+                "DoSplit" => false,
+                "CreditCard" => $card_data
+            ]);
+        }
+
 
         return apply_filters(
             'wc_gateway_braspag_pagador_request_creditcard_payment_builder',
@@ -1032,12 +1053,12 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
             'CieloSitef-Discover' => 'Cielo Sitef Discover',
             'SantanderSitef-Visa' => 'Santander Sitef Visa',
             'SantanderSitef-Master' => 'Santander Sitef Master',
-            'Simulado-Simulado' => 'Simulado',
             'Safra2-Visa' => 'Safra2 Visa',
             'Safra2-Master' => 'Safra2 Master',
             'Safra2-Hipercard' => 'Safra2 Hipercard',
             'Safra2-Elo' => 'Safra2 Elo',
             'Safra2-Amex' => 'Safra2 Amex',
+            'Simulado-Simulado' => 'Simulado',
         ];
     }
 
