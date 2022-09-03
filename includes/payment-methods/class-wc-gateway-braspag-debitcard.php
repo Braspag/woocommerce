@@ -60,7 +60,7 @@ class WC_Gateway_Braspag_DebitCard extends WC_Gateway_Braspag
 
         $this->title = $this->get_option('title');
         $this->description = $this->get_option('description');
-        $this->soft_descriptor = $this->get_option('SoftDescriptor');
+        $this->soft_descriptor = substr($this->get_option('SoftDescriptor'), 0, 13);
         $this->enabled = $braspag_enabled == 'yes' ? $this->get_option('enabled') : 'no';
         $this->test_mode = $test_mode == 'yes';
         $this->bank_automatic_redirect = $this->get_option('bank_automatic_redirect', 'no') == 'yes';
