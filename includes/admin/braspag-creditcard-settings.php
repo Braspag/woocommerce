@@ -26,6 +26,12 @@ return apply_filters(
             'description' => __( 'This controls the description which the user sees during checkout.', 'woocommerce-braspag' ),
             'desc_tip'    => true,
         ),
+        'SoftDescriptor' => array(
+            'title'       => __( 'Soft Descriptor', 'woocommerce-braspag' ),
+            'type'        => 'text',
+            'description' => __( 'Value that will be concatenated with the value of registration at the acquirer for identification on the invoice.', 'woocommerce-braspag' ),
+            'desc_tip'    => true,
+        ),
         'payment_action' => array(
             'title'       => __( 'Payment Action', 'woocommerce-braspag' ),
             'type'        => 'select',
