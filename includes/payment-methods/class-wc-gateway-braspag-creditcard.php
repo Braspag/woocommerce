@@ -907,7 +907,7 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
             "Browser" => [
                 "CookiesAccepted" => false,
                 "Email" => $order->get_billing_email(),
-                "HostName" => gethostname(),
+                "HostName" => substr(gethostname(), 0, 60),
                 "IpAddress" => $order->get_customer_ip_address()
             ],
             "Cart" => [
