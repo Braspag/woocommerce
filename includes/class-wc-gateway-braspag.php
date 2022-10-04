@@ -9,7 +9,6 @@ if (!defined('ABSPATH')) {
 class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
 {
     public $enabled;
-
     protected $test_mode;
     protected $antifraud_enabled;
     protected $antifraud_status;
@@ -18,6 +17,7 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
     protected $antifraud_finger_print_merchant_id;
     protected $antifraud_finger_print_id;
     protected $extra_data_collection;
+    protected $soft_descriptor;
 
     public function __construct()
     {
@@ -36,11 +36,11 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
         // Load the settings.
         $this->init_settings();
 
-        // Get setting values.
-        $this->title = 'Braspag';
-
         // Load the settings extra data collection.
         $this->settings_extra_data();
+
+        // Get setting values.
+        $this->title = 'Braspag';
 
         $this->enabled = $this->get_option('enabled');
         $this->test_mode = 'yes' === $this->get_option('test_mode');

@@ -25,8 +25,6 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
 
     protected $merchant_category;
 
-    protected $soft_descriptor;
-
     protected $antifraud_enabled;
 
     protected $antifraud_send_with_pagador_transaction;

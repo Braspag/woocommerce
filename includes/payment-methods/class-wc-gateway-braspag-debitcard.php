@@ -21,8 +21,6 @@ class WC_Gateway_Braspag_DebitCard extends WC_Gateway_Braspag
 
     protected $bank_return_url;
 
-    protected $soft_descriptor;
-
     protected $available_types;
 
     protected $auth3ds20_mpi_is_active;
