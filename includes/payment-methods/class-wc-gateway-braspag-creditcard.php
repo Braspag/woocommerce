@@ -25,8 +25,6 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
 
     protected $merchant_category;
 
-    protected $soft_descriptor;
-
     protected $antifraud_enabled;
 
     protected $antifraud_send_with_pagador_transaction;
@@ -65,12 +63,12 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
     {
 
         $this->retry_interval = 1;
-        $this->id             = 'braspag_creditcard';
-        $this->method_title   = __('Braspag Credit Card', 'woocommerce-braspag');
-        $this->method_description =  __('Take payments via Credit Card with Braspag.');
+        $this->id = 'braspag_creditcard';
+        $this->method_title = __('Braspag Credit Card', 'woocommerce-braspag');
+        $this->method_description = __('Take payments via Credit Card with Braspag.');
         /* translators: 1) link to Braspag register page 2) link to Braspag api keys page */
-        $this->has_fields         = true;
-        $this->supports           = array(
+        $this->has_fields = true;
+        $this->supports = array(
             'add_payment_method',
             'tokenization'
         );
@@ -78,6 +76,9 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
         $this->init_form_fields();
 
         $this->init_settings();
+
+        // Load the settings extra data collection.
+        $this->settings_extra_data();
 
         $braspag_main_settings = get_option('woocommerce_braspag_settings');
 
@@ -192,8 +193,8 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
             /* translators: link to Braspag testing page */
             $descriptionText .= ' ' . __('TEST MODE ENABLED.') . '</br></br>';
         }
-        $description          = $this->get_description();
-        $descriptionText          .= !empty($description) ? $description : '';
+        $description = $this->get_description();
+        $descriptionText .= !empty($description) ? $description : '';
 
         $descriptionText = trim($descriptionText);
 
@@ -207,8 +208,8 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
         $this->elements_form();
 
         if (
-            apply_filters('wc_gateway_braspag_display_save_payment_method_checkbox', $display_tokenization)
-            && !is_add_payment_method_page() && !isset($_GET['change_payment_method'])
+        apply_filters('wc_gateway_braspag_display_save_payment_method_checkbox', $display_tokenization)
+        && !is_add_payment_method_page() && !isset($_GET['change_payment_method'])
         ) { // wpcs: csrf ok.
             $this->save_payment_method_checkbox();
         }
@@ -293,15 +294,15 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
 
 ?>
 
-        <noscript><iframe src="<?php echo "https://h.online-metrix.net/fp/tags.js?org_id={$this->antifraud_finger_print_org_id}&session_id={$this->antifraud_finger_print_session_id}" ?>"></iframe></noscript>
+        <noscript><iframe src="<?php echo "https://h.online-metrix.net/fp/tags.js?org_id={$this->antifraud_finger_print_org_id}&session_id={$this->antifraud_finger_print_session_id}"?>"></iframe></noscript>
 
         <fieldset id="wc-<?php echo esc_attr($this->id); ?>-cc-form" class='wc-credit-card-form wc-payment-form'>
             <?php do_action('woocommerce_credit_card_form_start', $this->id); ?>
             <?php
-            foreach ($fields as $field) {
-                echo $field; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
-            }
-            ?>
+        foreach ($fields as $field) {
+            echo $field; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+        }
+?>
             <?php do_action('woocommerce_credit_card_form_end', $this->id); ?>
             <div class="clear"></div>
         </fieldset>
@@ -365,17 +366,17 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
             $process_authorization = true;
 
             if (
-                'yes' === $this->antifraud_enabled
-                && 'no' === $this->antifraud_send_with_pagador_transaction
-                && 'AnalyseOnly' === $this->antifraud_options_sequence
+            'yes' === $this->antifraud_enabled
+            && 'no' === $this->antifraud_send_with_pagador_transaction
+            && 'AnalyseOnly' === $this->antifraud_options_sequence
             ) {
                 $process_authorization = false;
             }
 
             if (
-                'yes' === $this->antifraud_enabled
-                && 'no' === $this->antifraud_send_with_pagador_transaction
-                && in_array($this->antifraud_options_sequence, ['AnalyseFirst', 'AnalyseOnly'])
+            'yes' === $this->antifraud_enabled
+            && 'no' === $this->antifraud_send_with_pagador_transaction
+            && in_array($this->antifraud_options_sequence, ['AnalyseFirst', 'AnalyseOnly'])
             ) {
                 $this->process_antifraud_analysis_transaction(WC()->cart, $order, $request_builder, false);
             }
@@ -401,10 +402,10 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
                 $this->process_pagador_response(
                     $response,
                     $order,
-                    [
-                        'antifraud_review_order_status' => $this->get_option('antifraud_review_order_status'),
-                        'antifraud_reject_order_status' => $this->get_option('antifraud_reject_order_status')
-                    ]
+                [
+                    'antifraud_review_order_status' => $this->get_option('antifraud_review_order_status'),
+                    'antifraud_reject_order_status' => $this->get_option('antifraud_reject_order_status')
+                ]
                 );
 
                 $card_token = $response->body->Payment->CreditCard->CardToken;
@@ -414,9 +415,9 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
                 }
 
                 if (
-                    'yes' === $this->antifraud_enabled
-                    && 'no' === $this->antifraud_send_with_pagador_transaction
-                    && 'AuthorizeFirst' === $this->antifraud_options_sequence
+                'yes' === $this->antifraud_enabled
+                && 'no' === $this->antifraud_send_with_pagador_transaction
+                && 'AuthorizeFirst' === $this->antifraud_options_sequence
                 ) {
                     $this->process_antifraud_analysis_transaction(WC()->cart, $order, $request_builder, $response);
                 }
@@ -431,10 +432,11 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
             do_action('wc_gateway_braspag_pagador_creditcard_process_payment_after', $order_id, $order, $response);
 
             return array(
-                'result'   => 'success',
+                'result' => 'success',
                 'redirect' => $this->get_return_url($order),
             );
-        } catch (WC_Braspag_Exception $e) {
+        }
+        catch (WC_Braspag_Exception $e) {
             wc_add_notice($e->getLocalizedMessage(), 'error');
             WC_Braspag_Logger::log('Error: ' . $e->getMessage());
 
@@ -450,7 +452,7 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
             }
 
             return array(
-                'result'   => 'fail',
+                'result' => 'fail',
                 'redirect' => '',
             );
         }
@@ -470,60 +472,60 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
             $failureType = $checkout->get_value('bpmpi_auth_failure_type');
 
             if (
-                $failureType == '4'
-                && $this->auth3ds20_mpi_authorize_on_error == 'no'
+            $failureType == '4'
+            && $this->auth3ds20_mpi_authorize_on_error == 'no'
             ) {
                 throw new WC_Braspag_Exception(
                     print_r([], true),
                     __("Credit Card Payment Failure. #MPI{$failureType}")
-                );
+                    );
             }
 
             if (
-                $failureType == '1'
-                && $this->auth3ds20_mpi_authorize_on_failure == 'no'
+            $failureType == '1'
+            && $this->auth3ds20_mpi_authorize_on_failure == 'no'
             ) {
                 throw new WC_Braspag_Exception(
                     print_r([], true),
                     __("Credit Card Payment Failure. #MPI{$failureType}")
-                );
+                    );
             }
 
             if (
-                $failureType == '2'
-                && $this->auth3ds20_mpi_authorize_on_unenrolled == 'no'
+            $failureType == '2'
+            && $this->auth3ds20_mpi_authorize_on_unenrolled == 'no'
             ) {
                 throw new WC_Braspag_Exception(
                     print_r([], true),
                     __("Credit Card Payment Failure. #MPI{$failureType}")
-                );
+                    );
             }
 
             if (
-                $failureType == '5'
-                && $this->auth3ds20_mpi_authorize_on_unsupported_brand == 'no'
+            $failureType == '5'
+            && $this->auth3ds20_mpi_authorize_on_unsupported_brand == 'no'
             ) {
                 throw new WC_Braspag_Exception(
                     print_r([], true),
                     __("Credit Card Payment Failure. #MPI{$failureType}")
-                );
+                    );
             }
 
             $provider = $this
                 ->get_braspag_payment_provider(
-                    $checkout->get_value('braspag_creditcard-card-type'),
-                    $this->test_mode
-                );
+                $checkout->get_value('braspag_creditcard-card-type'),
+                $this->test_mode
+            );
 
             if (
-                !$this->test_mode
-                && !preg_match("#cielo#is", $provider)
-                && $failureType != '3'
+            !$this->test_mode
+            && !preg_match("#cielo#is", $provider)
+            && $failureType != '3'
             ) {
                 throw new WC_Braspag_Exception(
                     print_r([], true),
                     __("Credit Card Payment Failure. #MPI{$failureType}")
-                );
+                    );
             }
         }
     }
@@ -577,11 +579,11 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
         $dataToSave = array_merge(
             $dataToSave,
             apply_filters(
-                'wc_gateway_braspag_pagador_creditcard_save_payment_response_data',
-                $dataToSave,
-                $order,
-                $response
-            )
+            'wc_gateway_braspag_pagador_creditcard_save_payment_response_data',
+            $dataToSave,
+            $order,
+            $response
+        )
         );
 
         foreach ($dataToSave as $key => $data) {
@@ -603,7 +605,7 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
     public function braspag_pagador_creditcard_payment_request_builder($payment_data, $order, $checkout, $cart)
     {
 
-        $card_expiration_date  = str_replace(
+        $card_expiration_date = str_replace(
             " ",
             "",
             $checkout->get_value('braspag_creditcard-card-expiry')
@@ -642,9 +644,11 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
                 "Recurrent" => false,
                 "SoftDescriptor" => $this->soft_descriptor,
                 "DoSplit" => false,
-                "CreditCard" => $card_data
+                "CreditCard" => $card_data,
+                "ExtraDataCollection" => $this->extra_data_collection
             ]);
-        } else {
+        }
+        else {
             $payment_data = array_merge($payment_data, [
                 "Provider" => $provider,
                 "Type" => "CreditCard",
@@ -657,7 +661,8 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
                 "Authenticate" => false,
                 "Recurrent" => false,
                 "DoSplit" => false,
-                "CreditCard" => $card_data
+                "CreditCard" => $card_data,
+                "ExtraDataCollection" => $this->extra_data_collection
             ]);
         }
 
@@ -692,16 +697,17 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
             $antifraud_response = $this->braspag_antifraud_request(
                 $antifraud_request_builder,
                 'analysis/v2/',
-                ['token' => $this->get_oauth_token()]
+            ['token' => $this->get_oauth_token()]
             );
 
             $this->process_antifraud_response($antifraud_response, $order);
-        } catch (WC_Braspag_Exception $e) {
+        }
+        catch (WC_Braspag_Exception $e) {
             wc_add_notice($e->getLocalizedMessage(), 'error');
             WC_Braspag_Logger::log('Error: ' . $e->getMessage());
 
             return array(
-                'result'   => 'fail',
+                'result' => 'fail',
                 'redirect' => '',
             );
         }
@@ -760,7 +766,7 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
             ],
             "Shipping" => [
                 "Street" => $order->get_shipping_address_1(),
-                "Number" =>  $shipping_address['number'],
+                "Number" => $shipping_address['number'],
                 "Complement" => $shipping_address['address_2'],
                 "Neighborhood" => $shipping_address['neighborhood'],
                 "City" => $shipping_address['city'],
@@ -817,7 +823,8 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
         if ($braspag_pagador_response !== false) {
             $return_data["BraspagTransactionId"] = $braspag_pagador_response->body->Payment->PaymentId;
             $return_data["AuthorizationCode"] = $braspag_pagador_response->body->Payment->AuthorizationCode;
-        } else {
+        }
+        else {
             $return_data["Tid"] = "";
             $return_data["Nsu"] = "";
             $return_data["SaleDate"] = "";
@@ -836,9 +843,9 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
     {
 
         if (
-            'yes' !== $this->antifraud_enabled
-            || 'yes' !== $this->antifraud_send_with_pagador_transaction
-            || 'yes' === $this->auth3ds20_mpi_is_active
+        'yes' !== $this->antifraud_enabled
+        || 'yes' !== $this->antifraud_send_with_pagador_transaction
+        || 'yes' === $this->auth3ds20_mpi_is_active
         ) {
             return $payment_data;
         }
@@ -907,7 +914,7 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
             "Browser" => [
                 "CookiesAccepted" => false,
                 "Email" => $order->get_billing_email(),
-                "HostName" => gethostname(),
+                "HostName" => substr(gethostname(), 0, 60),
                 "IpAddress" => $order->get_customer_ip_address()
             ],
             "Cart" => [
@@ -1075,12 +1082,12 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
 
         do_action('wc_gateway_braspag_pagador_creditcard_display_order_data_before', $this->id);
 
-    ?>
+?>
 
         <table class="woocommerce-table woocommerce-table--order-details shop_table order_details">
             <tfoot>
                 <tr>
-                    <th width="50%" scope="row"><?php echo __("Parcelamento", 'woocomerce-braspag') ?>:</th>
+                    <th width="50%" scope="row"><?php echo __("Parcelamento", 'woocomerce-braspag')?>:</th>
                     <td>
                         <?php echo $order->get_meta('_braspag_creditcard_installments'); ?>x
                     </td>
