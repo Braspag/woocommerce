@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Integration Braspag Oficial
+ * Plugin Name: Braspag for WooCommerce Oficial
  * Plugin URI: https://wordpress.org/plugins/woocommerce-braspag/
  * Description: Take payments on your store using Braspag.
  * Author: Braspag

@@ -1,4 +1,4 @@
-# Braspag for WooCommerce
+# WooCommerce
 
 > Módulo para integração da plataforma WooCommerce com o Gateway da Braspag.
 
