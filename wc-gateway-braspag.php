@@ -5,11 +5,11 @@
  * Description: Take payments on your store using Braspag.
  * Author: Braspag
  * Author URI: https://braspag.com.br/
- * Version: 2.2.26
+ * Version: 2.2.30
  * Requires at least: 5.3.2
- * Tested up to: 5.4
+ * Tested up to: 6.2.2
  * WC requires at least: 4.0.0
- * WC tested up to: 4.0.1
+ * WC tested up to: 7.9.0
  * Text Domain: woocommerce-braspag
  * Domain Path: /languages
  *
@@ -116,20 +116,21 @@ function woocommerce_gateway_braspag_init() {
 				include_once dirname(__FILE__) . '/includes/class-wc-braspag-risk-api.php';
 				include_once dirname(__FILE__) . '/includes/class-wc-braspag-oauth-api.php';
 				include_once dirname(__FILE__) . '/includes/class-wc-braspag-mpi-api.php';
-				include_once dirname( __FILE__ ) . '/includes/class-wc-braspag-pagador-api-query.php';
-				require_once dirname( __FILE__ ) . '/includes/abstracts/abstract-wc-braspag-payment-gateway.php';
-				require_once dirname( __FILE__ ) . '/includes/class-wc-braspag-webhook-handler.php';
-				require_once dirname( __FILE__ ) . '/includes/class-wc-gateway-braspag.php';
-				require_once dirname( __FILE__ ) . '/includes/payment-methods/class-wc-gateway-braspag-creditcard.php';
-				require_once dirname( __FILE__ ) . '/includes/payment-methods/class-wc-gateway-braspag-creditcard-justclick.php';
-				require_once dirname( __FILE__ ) . '/includes/payment-methods/class-wc-gateway-braspag-debitcard.php';
-				require_once dirname( __FILE__ ) . '/includes/payment-methods/class-wc-gateway-braspag-boleto.php';
-//				require_once dirname( __FILE__ ) . '/includes/payment-methods/class-wc-braspag-payment-request.php';
-				require_once dirname( __FILE__ ) . '/includes/class-wc-braspag-order-handler.php';
-				require_once dirname( __FILE__ ) . '/includes/class-wc-braspag-customer.php';
+				include_once dirname(__FILE__) . '/includes/class-wc-braspag-pagador-api-query.php';
+				require_once dirname(__FILE__) . '/includes/abstracts/abstract-wc-braspag-payment-gateway.php';
+				require_once dirname(__FILE__) . '/includes/class-wc-braspag-webhook-handler.php';
+				require_once dirname(__FILE__) . '/includes/class-wc-gateway-braspag.php';
+				require_once dirname(__FILE__) . '/includes/payment-methods/class-wc-gateway-braspag-creditcard.php';
+				require_once dirname(__FILE__) . '/includes/payment-methods/class-wc-gateway-braspag-creditcard-justclick.php';
+				require_once dirname(__FILE__) . '/includes/payment-methods/class-wc-gateway-braspag-debitcard.php';
+				require_once dirname(__FILE__) . '/includes/payment-methods/class-wc-gateway-braspag-boleto.php';
+				require_once dirname(__FILE__) . '/includes/payment-methods/class-wc-gateway-braspag-pix.php';
+				//				require_once dirname( __FILE__ ) . '/includes/payment-methods/class-wc-braspag-payment-request.php';
+				require_once dirname(__FILE__) . '/includes/class-wc-braspag-order-handler.php';
+				require_once dirname(__FILE__) . '/includes/class-wc-braspag-customer.php';
 
-				if ( is_admin() ) {
-					require_once dirname( __FILE__ ) . '/includes/admin/class-wc-braspag-admin-notices.php';
+				if (is_admin()) {
+					require_once dirname(__FILE__) . '/includes/admin/class-wc-braspag-admin-notices.php';
 				}
 
 				add_filter( 'woocommerce_payment_gateways', array( $this, 'add_gateways' ) );
@@ -206,6 +207,7 @@ version 1.0.0
 				$methods[] = 'WC_Gateway_Braspag_CreditCard_JustClick';
 				$methods[] = 'WC_Gateway_Braspag_DebitCard';
 				$methods[] = 'WC_Gateway_Braspag_Boleto';
+				$methods[] = 'WC_Gateway_Braspag_Pix';
 
 				return $methods;
 			}
@@ -216,18 +218,21 @@ version 1.0.0
 			 * @since 1.0.0
 			 * @version 1.0.0
 			 */
-			public function filter_gateway_order_admin( $sections ) {
-				unset( $sections['braspag'] );
-				unset( $sections['braspag_creditcard'] );
-				unset( $sections['braspag_creditcard_justclick'] );
-				unset( $sections['braspag_debitcard'] );
-				unset( $sections['braspag_boleto'] );
+			public function filter_gateway_order_admin($sections)
+			{
+				unset($sections['braspag']);
+				unset($sections['braspag_creditcard']);
+				unset($sections['braspag_creditcard_justclick']);
+				unset($sections['braspag_debitcard']);
+				unset($sections['braspag_boleto']);
+				unset($sections['braspag_pix']);
 
-				$sections['braspag']            = 'Braspag';
-				$sections['braspag_creditcard'] = __( 'Braspag CreditCard', 'woocommerce-braspag' );
-				$sections['braspag_creditcard_justclick'] = __( 'Braspag CreditCard JustClick', 'woocommerce-braspag' );
-				$sections['braspag_debitcard']     = __( 'Braspag DebitCard', 'woocommerce-braspag' );
-				$sections['braspag_boleto']    = __( 'Braspag Boleto', 'woocommerce-braspag' );
+				$sections['braspag'] = 'Braspag';
+				$sections['braspag_creditcard'] = __('Braspag CreditCard', 'woocommerce-braspag');
+				$sections['braspag_creditcard_justclick'] = __('Braspag CreditCard JustClick', 'woocommerce-braspag');
+				$sections['braspag_debitcard'] = __('Braspag DebitCard', 'woocommerce-braspag');
+				$sections['braspag_boleto'] = __('Braspag Boleto', 'woocommerce-braspag');
+				$sections['braspag_pix'] = __('Braspag Pix', 'woocommerce-braspag');
 
 				return $sections;
 			}
