@@ -10,8 +10,9 @@ return apply_filters(
             'title' => __('Enable/Disable', 'woocommerce-braspag'),
             'label' => __('Enable Braspag Pix', 'woocommerce-braspag'),
             'type' => 'checkbox',
-            'description' => '',
+            'description' => 'This controls enable methods PIX during checkout.',
             'default' => 'no',
+            'desc_tip' => true,
         ),
         'title' => array(
             'title' => __('Title', 'woocommerce-braspag'),
