@@ -5,7 +5,7 @@
  * Description: Take payments on your store using Braspag.
  * Author: Braspag
  * Author URI: https://braspag.com.br/
- * Version: 2.2.30
+ * Version: 2.2.31
  * Requires at least: 5.3.2
  * Tested up to: 6.2.2
  * WC requires at least: 4.0.0
@@ -45,9 +45,11 @@ function woocommerce_gateway_braspag_init() {
 		/**
 		 * Required minimums and constants
 		 */
-		define( 'WC_BRASPAG_VERSION', '2.2.26' );
+		define( 'WC_BRASPAG_VERSION', '2.3.30' );
+		define( 'WC_BRASPAG_WP_VERSION', $wp_version );
 		define( 'WC_BRASPAG_MIN_PHP_VER', '5.6.0' );
-		define( 'WC_BRASPAG_MIN_WC_VER', '2.6.0' );
+		define( 'WC_BRASPAG_MIN_WC_VER', '4.0.0' );
+		define( 'WC_BRASPAG_MIN_WP_VER', '5.3.2' );
 		define( 'WC_BRASPAG_MAIN_FILE', __FILE__ );
 		define( 'WC_BRASPAG_PLUGIN_URL', untrailingslashit( plugins_url( basename( plugin_dir_path( __FILE__ ) ), basename( __FILE__ ) ) ) );
 		define( 'WC_BRASPAG_PLUGIN_PATH', untrailingslashit( plugin_dir_path( __FILE__ ) ) );
@@ -125,7 +127,7 @@ function woocommerce_gateway_braspag_init() {
 				require_once dirname(__FILE__) . '/includes/payment-methods/class-wc-gateway-braspag-debitcard.php';
 				require_once dirname(__FILE__) . '/includes/payment-methods/class-wc-gateway-braspag-boleto.php';
 				require_once dirname(__FILE__) . '/includes/payment-methods/class-wc-gateway-braspag-pix.php';
-				//				require_once dirname( __FILE__ ) . '/includes/payment-methods/class-wc-braspag-payment-request.php';
+				// require_once dirname( __FILE__ ) . '/includes/payment-methods/class-wc-braspag-payment-request.php';
 				require_once dirname(__FILE__) . '/includes/class-wc-braspag-order-handler.php';
 				require_once dirname(__FILE__) . '/includes/class-wc-braspag-customer.php';
 
@@ -137,7 +139,7 @@ function woocommerce_gateway_braspag_init() {
 				add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'plugin_action_links' ) );
 
 				// Modify emails.
-//				add_filter( 'woocommerce_email_classes', array( $this, 'add_emails' ), 20 );
+				// add_filter( 'woocommerce_email_classes', array( $this, 'add_emails' ), 20 );
 
 				if ( version_compare( WC_VERSION, '3.4', '<' ) ) {
 					add_filter( 'woocommerce_get_sections_checkout', array( $this, 'filter_gateway_order_admin' ) );
@@ -147,12 +149,8 @@ function woocommerce_gateway_braspag_init() {
 			/**
 			 * Updates the plugin version in db
 			 *
-			 * @since 1.0.0			}			}
-
-
-			 * @			}
-			}
-version 1.0.0
+			 * @since 1.0.0
+			 * @version 1.0.0
 			 */
 			public function update_plugin_version() {
 				delete_option( 'woocommerce_braspag_version' );

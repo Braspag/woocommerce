@@ -71,6 +71,7 @@ class WC_Braspag_Admin_Notices {
 		$show_ssl_notice     = get_option( 'woocommerce_braspag_show_ssl_notice' );
 		$show_phpver_notice  = get_option( 'wc_braspag_show_phpver_notice' );
 		$show_wcver_notice   = get_option( 'wc_braspag_show_wcver_notice' );
+		$show_wpver_notice   = get_option( 'wc_braspag_show_wpver_notice' );
 		$show_curl_notice    = get_option( 'wc_braspag_show_curl_notice' );
 		$options             = get_option( 'woocommerce_braspag_settings' );
 		$test_mode            = ( isset( $options['test_mode'] ) && 'yes' === $options['test_mode'] ) ? true : false;
@@ -103,6 +104,17 @@ class WC_Braspag_Admin_Notices {
 					$message = __( 'WooCommerce Braspag - The minimum WooCommerce version required for this plugin is %1$s. You are running %2$s.', 'woocommerce-braspag' );
 
 					$this->add_admin_notice( 'wcver', 'notice notice-warning', sprintf( $message, WC_BRASPAG_MIN_WC_VER, WC_VERSION ), true );
+
+					return;
+				}
+			}
+
+			if ( empty( $show_wpver_notice ) ) {
+				if ( version_compare( WC_BRASPAG_WP_VERSION, WC_BRASPAG_MIN_WP_VER, '<' ) ) {
+					/* translators: 1) int version 2) int version */
+					$message = __( 'Wordpress Braspag - The minimum Wordpress version required for this plugin is %1$s. You are running %2$s.', 'woocommerce-braspag' );
+
+					$this->add_admin_notice( 'wcver', 'notice notice-warning', sprintf( $message, WC_BRASPAG_MIN_WC_VER, WC_BRASPAG_WP_VERSION ), true );
 
 					return;
 				}
@@ -164,6 +176,9 @@ class WC_Braspag_Admin_Notices {
 					break;
 				case 'wcver':
 					update_option( 'wc_braspag_show_wcver_notice', 'no' );
+					break;
+				case 'wpver':
+					update_option( 'wc_braspag_show_wpver_notice', 'no' );
 					break;
 				case 'curl':
 					update_option( 'wc_braspag_show_curl_notice', 'no' );
