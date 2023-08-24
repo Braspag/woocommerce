@@ -1,10 +1,11 @@
 <?php
 /**
- * Plugin Name: Braspag for WooCommerce Oficial
+ * Plugin Name: Integration Braspag Oficial
  * Plugin URI: https://wordpress.org/plugins/woocommerce-braspag/
  * Description: Take payments on your store using Braspag.
  * Author: Braspag
  * Author URI: https://braspag.com.br/
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
  * Version: 2.3.0
@@ -20,6 +21,11 @@
  * WP requires at least: 5.3.2
  * WP tested up to: 6.2.2
 >>>>>>> c5d2738 (Add method pix)
+=======
+ * Version: 2.2.30
+ * Requires at least: 5.3.2
+ * Tested up to: 6.2.2
+>>>>>>> fa33e8b (Add method payment PIX)
  * WC requires at least: 4.0.0
  * WC tested up to: 7.9.0
  * Text Domain: woocommerce-braspag
@@ -154,6 +160,10 @@ function woocommerce_gateway_braspag_init()
 				require_once dirname(__FILE__) . '/includes/payment-methods/class-wc-gateway-braspag-debitcard.php';
 				require_once dirname(__FILE__) . '/includes/payment-methods/class-wc-gateway-braspag-boleto.php';
 				require_once dirname(__FILE__) . '/includes/payment-methods/class-wc-gateway-braspag-pix.php';
+<<<<<<< HEAD
+=======
+				//				require_once dirname( __FILE__ ) . '/includes/payment-methods/class-wc-braspag-payment-request.php';
+>>>>>>> ef80d3d (Add method payment PIX)
 				require_once dirname(__FILE__) . '/includes/class-wc-braspag-order-handler.php';
 				require_once dirname(__FILE__) . '/includes/class-wc-braspag-customer.php';
 
