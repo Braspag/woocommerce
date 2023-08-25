@@ -8,7 +8,6 @@ if (!defined('ABSPATH')) {
  */
 class WC_Gateway_Braspag_Boleto extends WC_Gateway_Braspag
 {
-
     public $enabled;
 
     public $payment_instructions_for_customer;
@@ -70,7 +69,6 @@ class WC_Gateway_Braspag_Boleto extends WC_Gateway_Braspag
      */
     public function is_available()
     {
-
         return $this->enabled == 'yes';
     }
 
@@ -168,8 +166,7 @@ class WC_Gateway_Braspag_Boleto extends WC_Gateway_Braspag
                 'redirect' => $this->get_return_url($order),
             );
 
-        }
-        catch (WC_Braspag_Exception $e) {
+        } catch (WC_Braspag_Exception $e) {
             wc_add_notice($e->getLocalizedMessage(), 'error');
             WC_Braspag_Logger::log('Error: ' . $e->getMessage());
 
@@ -224,7 +221,6 @@ class WC_Gateway_Braspag_Boleto extends WC_Gateway_Braspag
      */
     public function braspag_pagador_boleto_payment_request_builder($payment_data, $order, $checkout, $cart)
     {
-
         $days_to_expire = $this->days_to_expire > 0 ? $this->days_to_expire : 1;
 
         $created_date = $order->get_date_created();
@@ -259,7 +255,6 @@ class WC_Gateway_Braspag_Boleto extends WC_Gateway_Braspag
      */
     public function display_order_boleto_data($order)
     {
-
         if ($order->get_payment_method() != $this->id || in_array($order->get_status(), ['processing', 'completed'])) {
             return null;
         }
@@ -271,39 +266,38 @@ class WC_Gateway_Braspag_Boleto extends WC_Gateway_Braspag
         do_action('wc_gateway_braspag_pagador_boleto_display_order_data_before', $order);
 
 ?>
+                <table class="woocommerce-table woocommerce-table--order-details shop_table order_details">
 
-        <table class="woocommerce-table woocommerce-table--order-details shop_table order_details">
+                    <tbody>
+                        <tr class="woocommerce-table__line-item order_item">
+                            <td class="woocommerce-table__product-name product-name">
+                                <b>Boleto Bar Code</b>
+                            </td>
+                            <td class="woocommerce-table__product-total product-total">
+                                <?php echo $order->get_meta('_braspag_boleto_digitable_line'); ?>
+                            </td>
+                        </tr>
 
-            <tbody>
-                <tr class="woocommerce-table__line-item order_item">
-                    <td class="woocommerce-table__product-name product-name">
-                        <b>Boleto Bar Code</b>
-                    </td>
-                    <td class="woocommerce-table__product-total product-total">
-                        <?php echo $order->get_meta('_braspag_boleto_digitable_line'); ?>
-                    </td>
-                </tr>
+                        <tr class="woocommerce-table__line-item order_item">
+                            <td class="woocommerce-table__product-name product-name">
+                                <b>Boleto Expiration Date</b>
+                            </td>
+                            <td class="woocommerce-table__product-total product-total">
+                                <?php echo $expirationDate; ?>
+                            </td>
+                        </tr>
 
-                <tr class="woocommerce-table__line-item order_item">
-                    <td class="woocommerce-table__product-name product-name">
-                        <b>Boleto Expiration Date</b>
-                    </td>
-                    <td class="woocommerce-table__product-total product-total">
-                        <?php echo $expirationDate; ?>
-                    </td>
-                </tr>
+                        <tr class="woocommerce-table__line-item order_item">
+                            <td class="woocommerce-table__product-total product-total text-center" colspan="2">
+                                <a href="<?php echo $order->get_meta('_braspag_boleto_url'); ?>" target="_blank">
+                                    <b><?php echo $this->label_print_button ?></b>
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <?php
 
-                <tr class="woocommerce-table__line-item order_item">
-                    <td class="woocommerce-table__product-total product-total text-center" colspan="2">
-                        <a href="<?php echo $order->get_meta('_braspag_boleto_url'); ?>" target="_blank">
-                            <b><?php echo $this->label_print_button?></b>
-                        </a>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        <?php
-
-        do_action('wc_gateway_braspag_pagador_boleto_display_order_data_after', $order);
+                do_action('wc_gateway_braspag_pagador_boleto_display_order_data_after', $order);
     }
 }
