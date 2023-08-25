@@ -160,10 +160,6 @@ function woocommerce_gateway_braspag_init()
 				require_once dirname(__FILE__) . '/includes/payment-methods/class-wc-gateway-braspag-debitcard.php';
 				require_once dirname(__FILE__) . '/includes/payment-methods/class-wc-gateway-braspag-boleto.php';
 				require_once dirname(__FILE__) . '/includes/payment-methods/class-wc-gateway-braspag-pix.php';
-<<<<<<< HEAD
-=======
-				//				require_once dirname( __FILE__ ) . '/includes/payment-methods/class-wc-braspag-payment-request.php';
->>>>>>> ef80d3d (Add method payment PIX)
 				require_once dirname(__FILE__) . '/includes/class-wc-braspag-order-handler.php';
 				require_once dirname(__FILE__) . '/includes/class-wc-braspag-customer.php';
 
