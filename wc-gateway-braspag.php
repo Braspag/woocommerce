@@ -5,9 +5,9 @@
  * Description: Take payments on your store using Braspag.
  * Author: Braspag
  * Author URI: https://braspag.com.br/
- * Version: 2.2.31
- * Requires at least: 5.3.2
- * Tested up to: 6.2.2
+ * Version: 2.3.0
+ * WP requires at least: 5.3.2
+ * WP tested up to: 6.2.2
  * WC requires at least: 4.0.0
  * WC tested up to: 7.9.0
  * Text Domain: woocommerce-braspag
@@ -47,7 +47,7 @@ function woocommerce_gateway_braspag_init()
 		/**
 		 * Required minimums and constants
 		 */
-		define('WC_BRASPAG_VERSION', '2.3.30');
+		define('WC_BRASPAG_VERSION', '2.3.0');
 		define('WC_BRASPAG_WP_VERSION', $wp_version);
 		define('WC_BRASPAG_MIN_PHP_VER', '5.6.0');
 		define('WC_BRASPAG_MIN_WC_VER', '4.0.0');
@@ -108,10 +108,12 @@ function woocommerce_gateway_braspag_init()
 			}
 
 			/**
+			 * Inicializa o plugin
+			 * 
 			 * Init the plugin after plugins_loaded so environment variables are set.
 			 *
 			 * @since 1.0.0
-			 * @version 1.0.0
+			 * @version 0.0.3
 			 */
 			public function init()
 			{
@@ -137,7 +139,6 @@ function woocommerce_gateway_braspag_init()
 				require_once dirname(__FILE__) . '/includes/payment-methods/class-wc-gateway-braspag-debitcard.php';
 				require_once dirname(__FILE__) . '/includes/payment-methods/class-wc-gateway-braspag-boleto.php';
 				require_once dirname(__FILE__) . '/includes/payment-methods/class-wc-gateway-braspag-pix.php';
-				// require_once dirname( __FILE__ ) . '/includes/payment-methods/class-wc-braspag-payment-request.php';
 				require_once dirname(__FILE__) . '/includes/class-wc-braspag-order-handler.php';
 				require_once dirname(__FILE__) . '/includes/class-wc-braspag-customer.php';
 
@@ -147,9 +148,6 @@ function woocommerce_gateway_braspag_init()
 
 				add_filter('woocommerce_payment_gateways', array($this, 'add_gateways'));
 				add_filter('plugin_action_links_' . plugin_basename(__FILE__), array($this, 'plugin_action_links'));
-
-				// Modify emails.
-				// add_filter( 'woocommerce_email_classes', array( $this, 'add_emails' ), 20 );
 
 				if (version_compare(WC_VERSION, '3.4', '<')) {
 					add_filter('woocommerce_get_sections_checkout', array($this, 'filter_gateway_order_admin'));
@@ -228,7 +226,7 @@ function woocommerce_gateway_braspag_init()
 			 * Modifies the order of the gateways displayed in admin.
 			 *
 			 * @since 1.0.0
-			 * @version 1.0.0
+			 * @version 0.0.3
 			 */
 			public function filter_gateway_order_admin($sections)
 			{

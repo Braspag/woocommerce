@@ -35,12 +35,11 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
 		$this->init_settings();
 
 		// Get setting values.
-		$this->title                = 'Braspag';
+		$this->title = 'Braspag';
 
 		$this->enabled = $this->get_option( 'enabled' );
 		$this->test_mode = 'yes' === $this->get_option( 'test_mode' );
 
-        $this->test_mode = 'yes' === $this->get_option( 'test_mode' );
         $this->antifraud_enabled = 'yes' === $this->get_option( 'antifraud_enabled' );
         $this->antifraud_finger_print_org_id = $this->get_option( 'antifraud_finger_print_org_id' );
         $this->antifraud_finger_print_merchant_id = $this->get_option( 'antifraud_finger_print_merchant_id' );
