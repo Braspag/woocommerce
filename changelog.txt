@@ -2,3 +2,33 @@
 
 = 1.0 - 2020-04-06 =
 * First Release
+
+= 2.2.25 - 2021-02-10 =
+* Add methods payment credit card
+* Add methods payment debit card
+* Add methods payment boleto
+
+= 2.2.26 - 2021-03-19 =
+* Fix PHP notice and remove comments
+
+= 2.2.27 - 2022-09-12 =
+* Include Safra Provider
+* Add field Softdescriptor in credit card
+* Add field Softdescriptor in debit card
+* Send data softdescriptor in API request
+* Add character limit in field softdescriptor field
+
+= 2.2.28 - 2022-10-06 =
+* Add field ExtraDataCollection
+
+= 2.2.29 - 2022-10-06 =
+* Add limit field Browser Hostname in Antifraud
+
+= 2.2.30 - 2023-08-11 =
+* Update Readme
+* Update the plugin suitability for the official repository format in Wordpress
+
+= 2.3.0 - 2021-02-10 =
+* Add methods payment pix
+* Hotfix
+* Translate
