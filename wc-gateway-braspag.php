@@ -47,6 +47,7 @@ function woocommerce_gateway_braspag_init()
 		/**
 		 * Required minimums and constants
 		 */
+		global $wp_version;
 		define('WC_BRASPAG_VERSION', '2.3.0');
 		define('WC_BRASPAG_WP_VERSION', $wp_version);
 		define('WC_BRASPAG_MIN_PHP_VER', '5.6.0');
