@@ -22,7 +22,6 @@ class WC_Gateway_Braspag_CreditCard_JustClick extends WC_Gateway_Braspag_CreditC
 
     public function __construct()
     {
-
         $this->retry_interval = 1;
         $this->id = 'braspag_creditcard_justclick';
         $this->method_title = __('Braspag Credit Card JustClick', 'woocommerce-braspag');
@@ -37,9 +36,6 @@ class WC_Gateway_Braspag_CreditCard_JustClick extends WC_Gateway_Braspag_CreditC
         $this->init_form_fields();
 
         $this->init_settings();
-
-        // Load the settings extra data collection.
-        $this->settings_extra_data();
 
         $braspag_main_settings = get_option('woocommerce_braspag_settings');
 

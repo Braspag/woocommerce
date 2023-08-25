@@ -122,10 +122,6 @@ class WC_Gateway_Braspag_Pix extends WC_Gateway_Braspag
     public function process_payment($order_id, $retry = true, $previous_error = false, $use_order_source = false)
     {
         try {
-<<<<<<< HEAD
-=======
-
->>>>>>> aab9441 (Add method payment PIX)
             do_action('wc_gateway_braspag_pagador_pix_process_payment_before', $order_id, $retry, $previous_error, $use_order_source);
 
             $order = wc_get_order($order_id);
