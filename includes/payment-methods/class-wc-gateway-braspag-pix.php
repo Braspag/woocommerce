@@ -5,13 +5,10 @@ if (!defined('ABSPATH')) {
 
 /**
  * Class WC_Gateway_Braspag_Pix
-<<<<<<< HEAD
  * 
  * @since 2.3.0
  * @version 0.1.0
- * 
-=======
->>>>>>> aab9441 (Add method payment PIX)
+ *
  */
 class WC_Gateway_Braspag_Pix extends WC_Gateway_Braspag
 {
@@ -258,9 +255,12 @@ class WC_Gateway_Braspag_Pix extends WC_Gateway_Braspag
     public function display_order_pix_data($order)
     {
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
 >>>>>>> aab9441 (Add method payment PIX)
+=======
+>>>>>>> c5d2738 (Add method pix)
         if ($order->get_payment_method() != $this->id || in_array($order->get_status(), ['processing', 'completed'])) {
             return null;
         }
@@ -275,10 +275,14 @@ class WC_Gateway_Braspag_Pix extends WC_Gateway_Braspag
         do_action('wc_gateway_braspag_pagador_pix_display_order_data_before', $order);
         
 <<<<<<< HEAD
+<<<<<<< HEAD
         $swf_url = esc_url(plugins_url('assets/images/pix.webp', dirname(dirname(__FILE__))));
 =======
         $swf_url = esc_url(plugins_url('assets/images/logo_pix.webp', dirname(dirname(__FILE__))));
 >>>>>>> aab9441 (Add method payment PIX)
+=======
+        $swf_url = esc_url(plugins_url('assets/images/pix.webp', dirname(dirname(__FILE__))));
+>>>>>>> c5d2738 (Add method pix)
         $timer_url = esc_url(plugins_url( 'assets/images/timer.svg', dirname(dirname(__FILE__))));
         ?>
                         <div class="header">

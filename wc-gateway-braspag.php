@@ -6,6 +6,7 @@
  * Author: Braspag
  * Author URI: https://braspag.com.br/
 <<<<<<< HEAD
+<<<<<<< HEAD
  * Version: 2.3.0
  * WP requires at least: 5.3.2
  * WP tested up to: 6.2.2
@@ -14,6 +15,11 @@
  * Requires at least: 5.3.2
  * Tested up to: 6.2.2
 >>>>>>> aab9441 (Add method payment PIX)
+=======
+ * Version: 2.3.0
+ * WP requires at least: 5.3.2
+ * WP tested up to: 6.2.2
+>>>>>>> c5d2738 (Add method pix)
  * WC requires at least: 4.0.0
  * WC tested up to: 7.9.0
  * Text Domain: woocommerce-braspag
@@ -53,7 +59,9 @@ function woocommerce_gateway_braspag_init()
 		/**
 		 * Required minimums and constants
 		 */
+
 		global $wp_version;
+
 		define('WC_BRASPAG_VERSION', '2.3.0');
 		define('WC_BRASPAG_WP_VERSION', $wp_version);
 		define('WC_BRASPAG_MIN_PHP_VER', '5.6.0');
