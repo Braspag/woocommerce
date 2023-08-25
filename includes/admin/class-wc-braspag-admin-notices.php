@@ -47,8 +47,8 @@ class WC_Braspag_Admin_Notices
 
 			if ($notice['dismissible']) {
 				?>
-								<a href="<?php echo esc_url(wp_nonce_url(add_query_arg('wc-braspag-hide-notice', $notice_key), 'wc_braspag_hide_notices_nonce', '_wc_braspag_notice_nonce')); ?>" class="woocommerce-message-close notice-dismiss" style="position:relative;float:right;padding:9px 0px 9px 9px 9px;text-decoration:none;"></a>
-								<?php
+					<a href="<?php echo esc_url(wp_nonce_url(add_query_arg('wc-braspag-hide-notice', $notice_key), 'wc_braspag_hide_notices_nonce', '_wc_braspag_notice_nonce')); ?>" class="woocommerce-message-close notice-dismiss" style="position:relative;float:right;padding:9px 0px 9px 9px 9px;text-decoration:none;"></a>
+				<?php
 			}
 
 			echo '<p>';
@@ -58,6 +58,13 @@ class WC_Braspag_Admin_Notices
 	}
 
 	/**
+	 * Get payments Methods
+	 * 
+	 * Method get for return payments methods this plugin
+	 * 
+	 * @since 1.0.0
+	 * @version 0.3.0
+	 * 
 	 * @return array
 	 */
 	public function get_payment_methods()
@@ -71,6 +78,16 @@ class WC_Braspag_Admin_Notices
 		);
 	}
 
+	/**
+	 * Check versions the system
+	 * 
+	 * Method get for return payments methods this plugin
+	 * 
+	 * @since 1.0.0
+	 * @version 0.2.0
+	 * 
+	 * @return void
+	 */
 	public function braspag_check_environment()
 	{
 		$show_style_notice = get_option('wc_braspag_show_style_notice');
@@ -162,6 +179,16 @@ class WC_Braspag_Admin_Notices
 		}
 	}
 
+	/**
+	 * Get payments Methods
+	 * 
+	 * Method get for return payments methods this plugin
+	 * 
+	 * @since 1.0.0
+	 * @version 0.2.0
+	 * 
+	 * @return array
+	 */
 	public function hide_notices()
 	{
 		if (isset($_GET['wc-braspag-hide-notice']) && isset($_GET['_wc_braspag_notice_nonce'])) {
@@ -206,9 +233,9 @@ class WC_Braspag_Admin_Notices
 				case 'boleto':
 					update_option('woocommerce_braspag_show_boleto_notice', 'no');
 					break;
-					case 'pix':
-						update_option('woocommerce_braspag_show_pix_notice', 'no');
-						break;
+				case 'pix':
+					update_option('woocommerce_braspag_show_pix_notice', 'no');
+					break;
 			}
 		}
 	}
