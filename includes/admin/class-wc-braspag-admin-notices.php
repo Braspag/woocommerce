@@ -137,7 +137,7 @@ class WC_Braspag_Admin_Notices
 					/* translators: 1) int version 2) int version */
 					$message = __('Wordpress Braspag - The minimum Wordpress version required for this plugin is %1$s. You are running %2$s.', 'woocommerce-braspag');
 
-					$this->add_admin_notice('wcver', 'notice notice-warning', sprintf($message, WC_BRASPAG_MIN_WC_VER, WC_BRASPAG_WP_VERSION), true);
+					$this->add_admin_notice('wcver', 'notice notice-warning', sprintf($message, WC_BRASPAG_MIN_WP_VER, WC_BRASPAG_WP_VERSION), true);
 
 					return;
 				}
