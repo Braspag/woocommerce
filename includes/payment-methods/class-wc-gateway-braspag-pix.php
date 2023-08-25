@@ -258,7 +258,7 @@ class WC_Gateway_Braspag_Pix extends WC_Gateway_Braspag
         $expirationDate = date('H:i', $endTime);
 
         do_action('wc_gateway_braspag_pagador_pix_display_order_data_before', $order);
-        
+
         $swf_url = esc_url(plugins_url('assets/images/pix.webp', dirname(dirname(__FILE__))));
         $timer_url = esc_url(plugins_url( 'assets/images/timer.svg', dirname(dirname(__FILE__))));
         ?>

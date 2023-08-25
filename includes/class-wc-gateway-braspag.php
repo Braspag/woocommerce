@@ -43,9 +43,6 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
         // Load the settings.
         $this->init_settings();
 
-        // Load the settings extra data collection.
-        $this->settings_extra_data();
-      
         // Get setting values.
         $this->title = 'Braspag';
 
