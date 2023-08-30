@@ -36,9 +36,6 @@ class WC_Gateway_Braspag_Boleto extends WC_Gateway_Braspag
 
         $this->init_settings();
 
-        // Load the settings extra data collection.
-        $this->settings_extra_data();
-
         $braspag_main_settings = get_option('woocommerce_braspag_settings');
 
         $braspag_enabled = isset($braspag_main_settings['enabled']) ? $braspag_main_settings['enabled'] : 'no';
@@ -242,8 +239,7 @@ class WC_Gateway_Braspag_Boleto extends WC_Gateway_Braspag
             "FineAmount" => '',
             "DaysToInterest" => '',
             "InterestRate" => '',
-            "InterestAmount" => '',
-            "ExtraDataCollection" => $this->extra_data_collection
+            "InterestAmount" => ''
         ]);
 
         return apply_filters('wc_gateway_braspag_pagador_request_boleto_payment_builder', $payment_data, $order, $checkout, $cart);
