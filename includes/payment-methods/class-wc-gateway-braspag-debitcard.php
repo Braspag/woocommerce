@@ -11,27 +11,16 @@ if (!defined('ABSPATH')) {
 class WC_Gateway_Braspag_DebitCard extends WC_Gateway_Braspag
 {
     public $enabled;
-
     public $test_mode;
-
     protected $label_pay_button;
-
     protected $bank_automatic_redirect;
-
     protected $bank_return_url;
-
     protected $available_types;
-
     protected $auth3ds20_mpi_is_active;
-
     protected $auth3ds20_mpi_mastercard_notify_only;
-
     protected $auth3ds20_mpi_authorize_on_error;
-
     protected $auth3ds20_mpi_authorize_on_failure;
-
     protected $auth3ds20_mpi_authorize_on_unenrolled;
-
     protected $auth3ds20_mpi_authorize_on_unsupported_brand;
 
     public function __construct()
@@ -221,7 +210,6 @@ class WC_Gateway_Braspag_DebitCard extends WC_Gateway_Braspag
     public function process_payment($order_id, $retry = true, $previous_error = false, $use_order_source = false)
     {
         try {
-
             do_action('wc_gateway_braspag_pagador_debitcard_process_payment_before', $order_id, $retry, $previous_error, $use_order_source);
 
             $order = wc_get_order($order_id);
@@ -479,41 +467,29 @@ class WC_Gateway_Braspag_DebitCard extends WC_Gateway_Braspag
         $card_type = $checkout->get_value('braspag_debitcard-card-type');
         $provider = $this->get_braspag_payment_provider($card_type, $this->test_mode);
 
+        $authenticate = ($this->auth3ds20_mpi_is_active) ? true : false;
+
         if (isset($this->soft_descriptor) && !empty($this->soft_descriptor)) {
-            $payment_data = array_merge($payment_data, [
-                "Provider" => $provider,
-                "Type" => "DebitCard",
-                "Amount" => intval($order->get_total() * 100),
-                "Currency" => "BRL",
-                "Country" => "BRA",
-                "Installments" => '1',
-                "Interest" => "ByMerchant",
-                "Capture" => true,
-                "Authenticate" => true,
-                "Recurrent" => false,
-                "SoftDescriptor" => $this->soft_descriptor,
-                "DoSplit" => false,
-                "ReturnUrl" => sprintf($this->bank_return_url, $order->get_id()),
-                "DebitCard" => $card_data
-            ]);
+            $payment_data['SoftDescriptor'] = $this->soft_descriptor;
         }
-        else {
-            $payment_data = array_merge($payment_data, [
-                "Provider" => $provider,
-                "Type" => "DebitCard",
-                "Amount" => intval($order->get_total() * 100),
-                "Currency" => "BRL",
-                "Country" => "BRA",
-                "Installments" => '1',
-                "Interest" => "ByMerchant",
-                "Capture" => true,
-                "Authenticate" => true,
-                "Recurrent" => false,
-                "DoSplit" => false,
-                "ReturnUrl" => sprintf($this->bank_return_url, $order->get_id()),
-                "DebitCard" => $card_data
-            ]);
-        }
+
+        $payment_data = array_merge($payment_data, [
+            "Provider" => $provider,
+            "Type" => "DebitCard",
+            "Amount" => intval($order->get_total() * 100),
+            "Installments" => '1',
+            "ReturnUrl" => sprintf($this->bank_return_url, $order->get_id()),
+            "DebitCard" => $card_data,
+            "Authenticate" => $authenticate,
+            "Currency" => "BRL",
+            "Country" => "BRA",
+            "Interest" => "ByMerchant",
+            "Capture" => true,
+            "Recurrent" => false,
+            "DoSplit" => false,
+            "ExtraDataCollection" => $this->extra_data_collection
+        ]);
+       
         return apply_filters('wc_gateway_braspag_pagador_request_debitcard_payment_builder', $payment_data, $order, $checkout, $cart);
     }
 
