@@ -9,6 +9,13 @@ if (!defined('ABSPATH')) {
 class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
 {
     public $enabled;
+    protected $id;
+    protected $title;
+    protected $has_fields;
+    protected $method_title;
+    protected $supports;
+    protected $init_settings;
+    protected $method_description;
     protected $test_mode;
     protected $antifraud_enabled;
     protected $antifraud_status;
