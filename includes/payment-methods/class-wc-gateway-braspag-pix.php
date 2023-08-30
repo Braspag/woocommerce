@@ -41,9 +41,6 @@ class WC_Gateway_Braspag_Pix extends WC_Gateway_Braspag
 
         $this->init_settings();
 
-        // Load the settings extra data collection.
-        $this->settings_extra_data();
-
         $braspag_main_settings = get_option('woocommerce_braspag_settings');
 
         $braspag_enabled = isset($braspag_main_settings['enabled']) ? $braspag_main_settings['enabled'] : 'no';
@@ -125,7 +122,6 @@ class WC_Gateway_Braspag_Pix extends WC_Gateway_Braspag
     public function process_payment($order_id, $retry = true, $previous_error = false, $use_order_source = false)
     {
         try {
-
             do_action('wc_gateway_braspag_pagador_pix_process_payment_before', $order_id, $retry, $previous_error, $use_order_source);
 
             $order = wc_get_order($order_id);
@@ -195,7 +191,6 @@ class WC_Gateway_Braspag_Pix extends WC_Gateway_Braspag
      */
     public function save_payment_response_data($order_id, $order, $response)
     {
-
         $dataToSave = [
             "_braspag_pix_payment_id" => $response->body->Payment->PaymentId,
             "_braspag_pix_expiration_date" => $response->body->Payment->QrCodeExpiration,

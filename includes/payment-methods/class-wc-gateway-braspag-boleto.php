@@ -239,8 +239,7 @@ class WC_Gateway_Braspag_Boleto extends WC_Gateway_Braspag
             "FineAmount" => '',
             "DaysToInterest" => '',
             "InterestRate" => '',
-            "InterestAmount" => '',
-            "ExtraDataCollection" => $this->extra_data_collection
+            "InterestAmount" => ''
         ]);
 
         return apply_filters('wc_gateway_braspag_pagador_request_boleto_payment_builder', $payment_data, $order, $checkout, $cart);
