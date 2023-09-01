@@ -16,6 +16,7 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
     public $supports;
     protected $init_settings;
     public $method_description;
+
     protected $test_mode;
     protected $antifraud_enabled;
     protected $antifraud_status;
@@ -45,7 +46,7 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
 
         // Load the settings extra data collection.
         $this->settings_extra_data();
-      
+
         // Get setting values.
         $this->title = 'Braspag';
 

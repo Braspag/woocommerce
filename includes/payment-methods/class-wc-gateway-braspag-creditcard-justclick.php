@@ -22,7 +22,6 @@ class WC_Gateway_Braspag_CreditCard_JustClick extends WC_Gateway_Braspag_CreditC
 
     public function __construct()
     {
-
         $this->retry_interval = 1;
         $this->id = 'braspag_creditcard_justclick';
         $this->method_title = __('Braspag Credit Card JustClick', 'woocommerce-braspag');
@@ -37,9 +36,6 @@ class WC_Gateway_Braspag_CreditCard_JustClick extends WC_Gateway_Braspag_CreditC
         $this->init_form_fields();
 
         $this->init_settings();
-
-        // Load the settings extra data collection.
-        $this->settings_extra_data();
 
         $braspag_main_settings = get_option('woocommerce_braspag_settings');
 
@@ -268,37 +264,24 @@ class WC_Gateway_Braspag_CreditCard_JustClick extends WC_Gateway_Braspag_CreditC
         $provider = $this->get_braspag_payment_provider($card_type, $this->test_mode);
 
         if (isset($this->soft_descriptor) && !empty($this->soft_descriptor)) {
-            $payment_data = [
-                "Provider" => $provider,
-                "Type" => "CreditCard",
-                "Amount" => intval($order->get_total() * 100),
-                "Currency" => "BRL",
-                "Country" => "BRA",
-                "Installments" => $checkout->get_value('braspag_creditcard-card-installments'),
-                "Interest" => "ByMerchant",
-                "Capture" => $this->capture,
-                "Authenticate" => false,
-                "Recurrent" => false,
-                "SoftDescriptor" => $this->soft_descriptor,
-                "DoSplit" => false,
-                "CreditCard" => $card_data
-            ];
-        } else {
-            $payment_data = [
-                "Provider" => $provider,
-                "Type" => "CreditCard",
-                "Amount" => intval($order->get_total() * 100),
-                "Currency" => "BRL",
-                "Country" => "BRA",
-                "Installments" => $checkout->get_value('braspag_creditcard-card-installments'),
-                "Interest" => "ByMerchant",
-                "Capture" => $this->capture,
-                "Authenticate" => false,
-                "Recurrent" => false,
-                "DoSplit" => false,
-                "CreditCard" => $card_data
-            ];
+            $payment_data['SoftDescriptor'] = $this->soft_descriptor;
         }
+
+        $payment_data = [
+            "Provider" => $provider,
+            "Type" => "CreditCard",
+            "Amount" => intval($order->get_total() * 100),
+            "Currency" => "BRL",
+            "Country" => "BRA",
+            "Installments" => $checkout->get_value('braspag_creditcard-card-installments'),
+            "Interest" => "ByMerchant",
+            "Capture" => $this->capture,
+            "Authenticate" => false,
+            "Recurrent" => false,
+            "SoftDescriptor" => $this->soft_descriptor,
+            "DoSplit" => false,
+            "CreditCard" => $card_data
+        ];
 
         return apply_filters('wc_gateway_braspag_pagador_request_creditcard_payment_builder', $payment_data, $order, $checkout, $cart);
     }
