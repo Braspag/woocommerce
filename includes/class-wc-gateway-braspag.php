@@ -9,6 +9,14 @@ if (!defined('ABSPATH')) {
 class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
 {
     public $enabled;
+    public $id;
+    public $title;
+    public $has_fields;
+    public $method_title;
+    public $supports;
+    protected $init_settings;
+    public $method_description;
+
     protected $test_mode;
     protected $antifraud_enabled;
     protected $antifraud_status;
@@ -45,11 +53,10 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
         $this->enabled = $this->get_option('enabled');
         $this->test_mode = 'yes' === $this->get_option('test_mode');
 
-        $this->test_mode = 'yes' === $this->get_option('test_mode');
-        $this->antifraud_enabled = 'yes' === $this->get_option('antifraud_enabled');
-        $this->antifraud_finger_print_org_id = $this->get_option('antifraud_finger_print_org_id');
-        $this->antifraud_finger_print_merchant_id = $this->get_option('antifraud_finger_print_merchant_id');
-        $this->antifraud_finger_print_session_id = $this->get_option('antifraud_finger_print_session_id');
+        $this->antifraud_enabled = 'yes' === $this->get_option( 'antifraud_enabled' );
+        $this->antifraud_finger_print_org_id = $this->get_option( 'antifraud_finger_print_org_id' );
+        $this->antifraud_finger_print_merchant_id = $this->get_option( 'antifraud_finger_print_merchant_id' );
+        $this->antifraud_finger_print_session_id = $this->get_option( 'antifraud_finger_print_session_id' );
 
         if (WC()->cart) {
             $this->antifraud_finger_print_id = WC()->cart->get_cart_hash();

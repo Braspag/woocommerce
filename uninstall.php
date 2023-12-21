@@ -24,9 +24,11 @@ if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 	delete_option( 'woocommerce_braspag_show_creditcard_justclick_notice' );
 	delete_option( 'woocommerce_braspag_show_debitcard_notice' );
 	delete_option( 'woocommerce_braspag_show_boleto_notice' );
+	delete_option( 'woocommerce_braspag_show_pix_notice' );
 	delete_option( 'woocommerce_braspag_version' );
 	delete_option( 'woocommerce_braspag_creditcard_settings' );
 	delete_option( 'woocommerce_braspag_creditcard_justclick_settings' );
 	delete_option( 'woocommerce_braspag_debitcard_settings' );
 	delete_option( 'woocommerce_braspag_boleto_settings' );
+	delete_option( 'woocommerce_braspag_pix_settings' );
 }

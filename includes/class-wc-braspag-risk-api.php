@@ -1,6 +1,6 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+if (!defined('ABSPATH')) {
+    exit;
 }
 
 /**
@@ -8,20 +8,22 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Communicates with Braspag API.
  */
-class WC_Braspag_Risk_API {
+class WC_Braspag_Risk_API
+{
 
     /**
      *
      */
-	const PRODUCTION_ENDPOINT           = 'https://risk.braspag.com.br/';
-	const SANDBOX_ENDPOINT           = 'https://risksandbox.braspag.com.br/';
-	const BRASPAG_API_VERSION = '2020-02-10';
+    const PRODUCTION_ENDPOINT = 'https://risk.braspag.com.br/';
+    const SANDBOX_ENDPOINT = 'https://risksandbox.braspag.com.br/';
+    const BRASPAG_API_VERSION = '2020-02-10';
 
     /**
      * @param $braspag_settings
      * @return string
      */
-	protected function get_end_point($braspag_settings) {
+    protected function get_end_point($braspag_settings)
+    {
         return 'yes' === $braspag_settings['test_mode'] ? self::SANDBOX_ENDPOINT : self::PRODUCTION_ENDPOINT;
     }
 
@@ -30,25 +32,25 @@ class WC_Braspag_Risk_API {
      * @param $token
      * @return mixed|void
      */
-	public static function get_headers($braspag_settings, $token)
+    public static function get_headers($braspag_settings, $token)
     {
         $requestId = self::get_request_id();
 
-		return apply_filters(
-			'wc_braspag_antifraud_request_headers',
-			array(
-				'Content-Type'              => "application/json",
-				'Authorization'             => "Bearer ".$token,
-				'MerchantId'             => $braspag_settings['merchant_id'],
-				'RequestId' => $requestId,
-			)
-		);
-	}
+        return apply_filters(
+            'wc_braspag_antifraud_request_headers',
+            array(
+                'Content-Type' => "application/json",
+                'Authorization' => "Bearer " . $token,
+                'MerchantId' => $braspag_settings['merchant_id'],
+                'RequestId' => $requestId,
+            )
+        );
+    }
 
     /**
      * @return false|string
      */
-	public function get_request_id()
+    public function get_request_id()
     {
         return substr(base64_encode(gethostname()), 0, 36);
     }
@@ -62,57 +64,57 @@ class WC_Braspag_Risk_API {
      * @return array|object
      * @throws WC_Braspag_Exception
      */
-	public static function request( $request, $api = 'v2/sales/', $token, $method = 'POST', $with_headers = false )
+    public static function request($request, $api = 'v2/sales/', $token, $method = 'POST', $with_headers = false)
     {
-        $braspag_settings = get_option( 'woocommerce_braspag_settings' );
+        $braspag_settings = get_option('woocommerce_braspag_settings');
 
-        WC_Braspag_Logger::log( "{$api} request: " . print_r( $request, true ) );
+        WC_Braspag_Logger::log("{$api} request: " . print_r($request, true));
 
-		$headers         = self::get_headers($braspag_settings, $token);
+        $headers = self::get_headers($braspag_settings, $token);
 
         $end_point = self::get_end_point($braspag_settings);
 
         $requestOptions = array(
-            'method'  => $method,
+            'method' => $method,
             'headers' => $headers,
-            'body'    => json_encode(apply_filters( 'wc_braspag_antifraud_request_body', $request, $api )),
+            'body' => json_encode(apply_filters('wc_braspag_antifraud_request_body', $request, $api)),
             'timeout' => 60,
         );
 
         $response = wp_safe_remote_request(
             $end_point . $api,
             $requestOptions
-		);
+        );
 
-		if ( is_wp_error( $response ) || empty( $response['body'] ) ) {
-			WC_Braspag_Logger::log(
-				'Error Response: ' . print_r( $response, true ) . PHP_EOL . PHP_EOL . 'Failed request: ' . print_r(
-					array(
-						'api'             => $api,
-						'request'         => $request
-					),
-					true
-				)
-			);
+        if (is_wp_error($response) || empty($response['body'])) {
+            WC_Braspag_Logger::log(
+                'Error Response: ' . print_r($response, true) . PHP_EOL . PHP_EOL . 'Failed request: ' . print_r(
+                    array(
+                        'api' => $api,
+                        'request' => $request
+                    ),
+                    true
+                )
+            );
 
-			throw new WC_Braspag_Exception( print_r( $response, true ), __( 'There was a problem connecting to the Braspag API endpoint.', 'woocommerce-braspag' ) );
-		}
+            throw new WC_Braspag_Exception(print_r($response, true), __('There was a problem connecting to the Braspag API endpoint.', 'woocommerce-braspag'));
+        }
 
-		if ( $with_headers ) {
-			return array(
-				'headers' => wp_remote_retrieve_headers( $response ),
-				'body'    => json_decode( $response['body'] ),
-			);
-		}
+        if ($with_headers) {
+            return array(
+                'headers' => wp_remote_retrieve_headers($response),
+                'body' => json_decode($response['body']),
+            );
+        }
 
-		return self::prepare_response($response);
-	}
+        return self::prepare_response($response);
+    }
 
     /**
      * @param $response
      * @return object
      */
-	public static function prepare_response($response)
+    public static function prepare_response($response)
     {
         $response_data = [];
         if (isset($response['body'])) {
