@@ -1,12 +1,8 @@
-# Braspag for WooCommerce
+# WooCommerce
 
 > Módulo para integração da plataforma WooCommerce com o Gateway da Braspag.
 
-![GitHub release (with filter)](https://img.shields.io/github/v/release/Braspag/woocommerce)
-
-![GitHub last commit (branch)](https://img.shields.io/github/last-commit/Braspag/woocommerce/main)
-
-![GitHub issues](https://img.shields.io/github/issues/Braspag/woocommerce)
+![GitHub release (with filter)](https://img.shields.io/github/v/release/Braspag/woocommerce) ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/Braspag/woocommerce/main) ![GitHub issues](https://img.shields.io/github/issues/Braspag/woocommerce)
 
 ## Documentação
 
@@ -77,7 +73,9 @@ Siga nossas intruções para realizar as configurações gerais do módulo da Br
 - Cielo Sitef: Visa, Master, Amex, Elo, Aura, JCB, Diners, Discover
 - Santander: Visa, Master
 - Safra2: Visa, Master, Hipercard, Elo, Amex
+
 _Funcionalidades_
+
 - Checkout Card View
 - Authorize Only
 - Authorize and Capture
@@ -86,6 +84,8 @@ _Funcionalidades_
 - Credit Card Token
 
 #### Credit Card JustClick
+
+A função “JustClick” funcionará apenas com a contratação do serviço do Cartão Protegido da Braspag. Entre em contato conosco através do email para mais detalhes.
 
 _Funcionalidades_
 
@@ -98,7 +98,9 @@ _Funcionalidades_
 - Cielo 3.0: Visa, Master
 - FirstData: Visa, Master
 - GlobalPayments: Visa, Master
+
 _Funcionalidades_
+
 - Authenticate 3DS 2.0
 - Checkout Card View
 
@@ -113,7 +115,9 @@ _Funcionalidades_
 - Caixa
 - Citi Bank
 - Bank Of America
+
 _Funcionalidades_
+
 - Instruções para o consumidor
 - Instruções para o Banco
 - Dias para expiração
