@@ -607,18 +607,23 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
         }
 
         $customer_wants_to_save_card = $checkout->get_value('wc-braspag_creditcard-new-payment-method') == 'true';
+        $brandCard = $checkout->get_value('braspag_creditcard-card-type');
 
         $card_data = [
             "CardNumber" => str_replace(" ", "", $checkout->get_value('braspag_creditcard-card-number')),
             "Holder" => $checkout->get_value('braspag_creditcard-card-holder'),
             "ExpirationDate" => $card_expiration_date,
             "SecurityCode" => $checkout->get_value('braspag_creditcard-card-cvc'),
-            "Brand" => $checkout->get_value('braspag_creditcard-card-type'),
+            "Brand" => $brandCard,
             "SaveCard" => $this->save_card == 'yes' && $customer_wants_to_save_card
         ];
+        
+        $InitiatedTransactionIndicator = [
+            "Category" => "C1",
+            "Subcategory" => "CredentialsOnFile"
+        ];
 
-        $provider = $this
-            ->get_braspag_payment_provider($checkout->get_value('braspag_creditcard-card-type'), $this->test_mode);
+        $provider = $this->get_braspag_payment_provider($checkout->get_value('braspag_creditcard-card-type'), $this->test_mode);
 
         if (isset($this->soft_descriptor) && !empty($this->soft_descriptor)) {
             $payment_data = array_merge($payment_data, [
@@ -635,10 +640,10 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
                 "SoftDescriptor" => $this->soft_descriptor,
                 "DoSplit" => false,
                 "CreditCard" => $card_data,
+                "InitiatedTransactionIndicator" => ($this->save_card == 'yes' && $customer_wants_to_save_card && $brandCard == 'Master')? : $InitiatedTransactionIndicator,
                 "ExtraDataCollection" => $this->extra_data_collection
             ]);
-        }
-        else {
+        } else {
             $payment_data = array_merge($payment_data, [
                 "Provider" => $provider,
                 "Type" => "CreditCard",
@@ -652,6 +657,7 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
                 "Recurrent" => false,
                 "DoSplit" => false,
                 "CreditCard" => $card_data,
+                "InitiatedTransactionIndicator" => ($this->save_card == 'yes' && $customer_wants_to_save_card && $brandCard == 'Master')? : $InitiatedTransactionIndicator,
                 "ExtraDataCollection" => $this->extra_data_collection
             ]);
         }

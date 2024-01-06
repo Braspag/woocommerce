@@ -260,6 +260,11 @@ class WC_Gateway_Braspag_CreditCard_JustClick extends WC_Gateway_Braspag_CreditC
             "Brand" => $card_token_object->get_meta('card_type')
         ];
 
+        $InitiatedTransactionIndicator = [
+            "Category" => "C1",
+            "Subcategory" => "CredentialsOnFile"
+        ];
+
         $card_type = $checkout->get_value('braspag_creditcard-card-type');
         $provider = $this->get_braspag_payment_provider($card_type, $this->test_mode);
 
@@ -277,10 +282,10 @@ class WC_Gateway_Braspag_CreditCard_JustClick extends WC_Gateway_Braspag_CreditC
                 "Recurrent" => false,
                 "SoftDescriptor" => $this->soft_descriptor,
                 "DoSplit" => false,
+                "InitiatedTransactionIndicator" => $InitiatedTransactionIndicator,
                 "CreditCard" => $card_data
             ];
-        }
-        else {
+        } else {
             $payment_data = [
                 "Provider" => $provider,
                 "Type" => "CreditCard",
@@ -293,6 +298,7 @@ class WC_Gateway_Braspag_CreditCard_JustClick extends WC_Gateway_Braspag_CreditC
                 "Authenticate" => false,
                 "Recurrent" => false,
                 "DoSplit" => false,
+                "InitiatedTransactionIndicator" => $InitiatedTransactionIndicator,
                 "CreditCard" => $card_data
             ];
         }
