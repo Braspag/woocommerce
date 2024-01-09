@@ -44,7 +44,9 @@ class WC_Gateway_Braspag_CreditCard_JustClick extends WC_Gateway_Braspag_CreditC
 
         $this->title = $this->get_option('title');
         $this->description = $this->get_option('description');
+
         $this->soft_descriptor = substr($this->get_option('SoftDescriptor'), 0, 13);
+
         $this->enabled = $braspag_enabled == 'yes' ? $this->get_option('enabled') : 'no';
         $this->test_mode = $test_mode == 'yes';
         $this->maximum_installments = $this->get_option('maximum_installments');
@@ -102,21 +104,20 @@ class WC_Gateway_Braspag_CreditCard_JustClick extends WC_Gateway_Braspag_CreditC
 
         do_action('wc_gateway_braspag_pagador_creditcard_justclick_display_order_data_before', $this->id);
 
-?>
+        ?>
+                        <table class="woocommerce-table woocommerce-table--order-details shop_table order_details">
+                            <tfoot>
+                            <tr>
+                                <th width="50%" scope="row"><?php echo __("Installments") ?>:</th>
+                                <td>
+                                    <?php echo $order->get_meta('_braspag_creditcard_installments'); ?>x
+                                </td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                        <?php
 
-                <table class="woocommerce-table woocommerce-table--order-details shop_table order_details">
-                    <tfoot>
-                    <tr>
-                        <th width="50%" scope="row"><?php echo __("Installments") ?>:</th>
-                        <td>
-                            <?php echo $order->get_meta('_braspag_creditcard_installments'); ?>x
-                        </td>
-                    </tr>
-                    </tfoot>
-                </table>
-                <?php
-
-                do_action('wc_gateway_braspag_pagador_creditcard_justclick_display_order_data_after', $order);
+                        do_action('wc_gateway_braspag_pagador_creditcard_justclick_display_order_data_after', $order);
     }
 
     public function init_form_fields()
@@ -223,22 +224,21 @@ class WC_Gateway_Braspag_CreditCard_JustClick extends WC_Gateway_Braspag_CreditC
         $fields = wp_parse_args($fields, apply_filters('woocommerce_credit_card_form_fields', $default_fields, $this->id));
         ?>
 
-                <noscript><iframe src="<?php echo "https://h.online-metrix.net/fp/tags.js?org_id={$this->antifraud_finger_print_org_id}&session_id={$this->antifraud_finger_print_session_id}" ?>"></iframe></noscript>
+                        <noscript><iframe src="<?php echo "https://h.online-metrix.net/fp/tags.js?org_id={$this->antifraud_finger_print_org_id}&session_id={$this->antifraud_finger_print_session_id}" ?>"></iframe></noscript>
 
-                <fieldset id="wc-<?php echo esc_attr($this->id); ?>-cc-form" class='wc-credit-card-form wc-payment-form'>
-                    <?php do_action('woocommerce_credit_card_form_start', $this->id); ?>
-                    <?php
-                    foreach ($fields as $field) {
-                        echo $field; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
-                    }
-                    ?>
-                    <?php do_action('woocommerce_credit_card_form_end', $this->id); ?>
-                    <div class="clear"></div>
-                </fieldset>
+                        <fieldset id="wc-<?php echo esc_attr($this->id); ?>-cc-form" class='wc-credit-card-form wc-payment-form'>
+                            <?php do_action('woocommerce_credit_card_form_start', $this->id); ?>
+                            <?php
+                            foreach ($fields as $field) {
+                                echo $field; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+                            }
+                            ?>
+                            <?php do_action('woocommerce_credit_card_form_end', $this->id); ?>
+                            <div class="clear"></div>
+                        </fieldset>
 
-                <?php
-                do_action('wc_gateway_braspag_pagador_creditcard_justclick_elements_form_after', $this->id);
-
+                        <?php
+                        do_action('wc_gateway_braspag_pagador_creditcard_justclick_elements_form_after', $this->id);
     }
 
     /**
@@ -260,48 +260,28 @@ class WC_Gateway_Braspag_CreditCard_JustClick extends WC_Gateway_Braspag_CreditC
             "Brand" => $card_token_object->get_meta('card_type')
         ];
 
-        $InitiatedTransactionIndicator = [
-            "Category" => "C1",
-            "Subcategory" => "CredentialsOnFile"
-        ];
-
         $card_type = $checkout->get_value('braspag_creditcard-card-type');
         $provider = $this->get_braspag_payment_provider($card_type, $this->test_mode);
 
         if (isset($this->soft_descriptor) && !empty($this->soft_descriptor)) {
-            $payment_data = [
-                "Provider" => $provider,
-                "Type" => "CreditCard",
-                "Amount" => intval($order->get_total() * 100),
-                "Currency" => "BRL",
-                "Country" => "BRA",
-                "Installments" => $checkout->get_value('braspag_creditcard-card-installments'),
-                "Interest" => "ByMerchant",
-                "Capture" => $this->capture,
-                "Authenticate" => false,
-                "Recurrent" => false,
-                "SoftDescriptor" => $this->soft_descriptor,
-                "DoSplit" => false,
-                "InitiatedTransactionIndicator" => $InitiatedTransactionIndicator,
-                "CreditCard" => $card_data
-            ];
-        } else {
-            $payment_data = [
-                "Provider" => $provider,
-                "Type" => "CreditCard",
-                "Amount" => intval($order->get_total() * 100),
-                "Currency" => "BRL",
-                "Country" => "BRA",
-                "Installments" => $checkout->get_value('braspag_creditcard-card-installments'),
-                "Interest" => "ByMerchant",
-                "Capture" => $this->capture,
-                "Authenticate" => false,
-                "Recurrent" => false,
-                "DoSplit" => false,
-                "InitiatedTransactionIndicator" => $InitiatedTransactionIndicator,
-                "CreditCard" => $card_data
-            ];
+            $payment_data['SoftDescriptor'] = $this->soft_descriptor;
         }
+
+        $payment_data = [
+            "Provider" => $provider,
+            "Type" => "CreditCard",
+            "Amount" => intval($order->get_total() * 100),
+            "Currency" => "BRL",
+            "Country" => "BRA",
+            "Installments" => $checkout->get_value('braspag_creditcard-card-installments'),
+            "Interest" => "ByMerchant",
+            "Capture" => $this->capture,
+            "Authenticate" => false,
+            "Recurrent" => false,
+            "SoftDescriptor" => $this->soft_descriptor,
+            "DoSplit" => false,
+            "CreditCard" => $card_data
+        ];
 
         return apply_filters('wc_gateway_braspag_pagador_request_creditcard_payment_builder', $payment_data, $order, $checkout, $cart);
     }

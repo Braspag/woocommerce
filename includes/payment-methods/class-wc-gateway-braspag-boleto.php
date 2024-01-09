@@ -262,7 +262,6 @@ class WC_Gateway_Braspag_Boleto extends WC_Gateway_Braspag
         do_action('wc_gateway_braspag_pagador_boleto_display_order_data_before', $order);
 
 ?>
-
                 <table class="woocommerce-table woocommerce-table--order-details shop_table order_details">
 
                     <tbody>
