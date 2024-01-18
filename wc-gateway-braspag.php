@@ -5,33 +5,11 @@
  * Description: Take payments on your store using Braspag.
  * Author: Braspag
  * Author URI: https://braspag.com.br/
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
+ * 
  * Version: 2.3.0
  * WP requires at least: 5.3.2
  * WP tested up to: 6.2.2
-=======
- * Version: 2.2.30
- * Requires at least: 5.3.2
- * Tested up to: 6.2.2
->>>>>>> aab9441 (Add method payment PIX)
-=======
- * Version: 2.3.0
- * WP requires at least: 5.3.2
- * WP tested up to: 6.2.2
->>>>>>> c5d2738 (Add method pix)
-=======
- * Version: 2.2.30
- * Requires at least: 5.3.2
- * Tested up to: 6.2.2
->>>>>>> fa33e8b (Add method payment PIX)
-=======
- * Version: 2.3.0
- * WP requires at least: 5.3.2
- * WP tested up to: 6.2.2
->>>>>>> 5d44836 (Add method pix)
+ * 
  * WC requires at least: 4.0.0
  * WC tested up to: 7.9.0
  * Text Domain: woocommerce-braspag
