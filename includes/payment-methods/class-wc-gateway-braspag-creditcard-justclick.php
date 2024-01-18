@@ -253,11 +253,17 @@ class WC_Gateway_Braspag_CreditCard_JustClick extends WC_Gateway_Braspag_CreditC
         $card_token = $checkout->get_value('braspag_creditcard_justclick-card-saved');
 
         $card_token_object = WC_Braspag_Payment_Tokens::get_customer_token($this->get_logged_in_customer_id(), 'braspag', $card_token);
+        $brandCard = $card_token_object->get_meta('card_type');
 
         $card_data = [
             "CardToken" => $card_token,
             "SecurityCode" => $checkout->get_value('braspag_creditcard_justclick-card-cvc'),
-            "Brand" => $card_token_object->get_meta('card_type')
+            "Brand" => $brandCard
+        ];
+
+        $InitiatedTransactionIndicator = [
+            "Category" => "C1",
+            "Subcategory" => "CredentialsOnFile"
         ];
 
         $card_type = $checkout->get_value('braspag_creditcard-card-type');
@@ -265,6 +271,10 @@ class WC_Gateway_Braspag_CreditCard_JustClick extends WC_Gateway_Braspag_CreditC
 
         if (isset($this->soft_descriptor) && !empty($this->soft_descriptor)) {
             $payment_data['SoftDescriptor'] = $this->soft_descriptor;
+        }
+
+        if ($brandCard == 'Master') {
+            $payment_data['InitiatedTransactionIndicator'] = $InitiatedTransactionIndicator;
         }
 
         $payment_data = [
@@ -278,7 +288,6 @@ class WC_Gateway_Braspag_CreditCard_JustClick extends WC_Gateway_Braspag_CreditC
             "Capture" => $this->capture,
             "Authenticate" => false,
             "Recurrent" => false,
-            "SoftDescriptor" => $this->soft_descriptor,
             "DoSplit" => false,
             "CreditCard" => $card_data
         ];
