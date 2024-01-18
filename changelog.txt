@@ -28,7 +28,12 @@
 * Update Readme
 * Update the plugin suitability for the official repository format in Wordpress
 
-= 2.3.0 - 2021-02-10 =
+= 2.3.0 - 2023-12-21 =
 * Add methods payment pix
 * Hotfix
 * Translate
+
+= 2.3.1 - 2024-01-18 =
+* Add included marked begin order
+* Add Master Brand Card validation
+* Add saved card validation
