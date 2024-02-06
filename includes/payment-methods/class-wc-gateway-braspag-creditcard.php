@@ -622,6 +622,8 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
             "Subcategory" => "CredentialsOnFile"
         ];
 
+        $payment_data['Partner'] = "WOO";
+
         $provider = $this
             ->get_braspag_payment_provider($checkout->get_value('braspag_creditcard-card-type'), $this->test_mode);
 
