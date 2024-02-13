@@ -550,7 +550,7 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
                 /* translators: transaction id */
                 $message = sprintf(__('Braspag charge complete (Charge ID: %s)', 'woocommerce-braspag'), $response->body->Payment->PaymentId);
                 $order->add_order_note($message);
-            } elseif (in_array($response->body->Payment->ReasonCode, ['0'])) {
+            } elseif (in_array($response->body->Payment->Status, ['0','3'])) {
                 /* translators: transaction id */
                 $order->update_status('antifraud_reject_order_status', sprintf(__('Braspag charge pending (Charge ID: %s).', 'woocommerce-braspag'), $response->body->Payment->PaymentId));
                 $velocityStatus = $response->body->Payment->VelocityAnalysis->ResultMessage;
@@ -592,7 +592,7 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
 
                 /* translators: transaction id */
                 $order->update_status('pending', sprintf(__('Braspag charge pending (Charge ID: %s).', 'woocommerce-braspag'), $response->body->Payment->PaymentId));
-            } elseif (in_array($response->body->Payment->Status, ['0'])) {
+            } elseif (in_array($response->body->Payment->Status, ['0','3'])) {
 
                     WC_Braspag_Helper::is_wc_lt('3.0') ? update_post_meta($order_id, '_transaction_id', $response->body->Payment->PaymentId) : $order->set_transaction_id($response->body->Payment->PaymentId);
     
