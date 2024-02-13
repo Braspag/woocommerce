@@ -550,6 +550,14 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
                 /* translators: transaction id */
                 $message = sprintf(__('Braspag charge complete (Charge ID: %s)', 'woocommerce-braspag'), $response->body->Payment->PaymentId);
                 $order->add_order_note($message);
+            } elseif (in_array($response->body->Payment->ReasonCode, ['0'])) {
+                /* translators: transaction id */
+                $order->update_status('antifraud_reject_order_status', sprintf(__('Braspag charge pending (Charge ID: %s).', 'woocommerce-braspag'), $response->body->Payment->PaymentId));
+                $velocityStatus = $response->body->Payment->VelocityAnalysis->ResultMessage;
+                $velocity = ($velocityStatus == 'Reject')? 'VelocityAnalysis' : '';
+                $localized_message = __('Payment processing failed.'."{$velocity}", 'woocommerce-braspag') . " " . $response->body->Payment->ProviderReturnMessage . " (Cod. " . $response->body->Payment->ProviderReturnCode . ").";
+                $order->add_order_note($localized_message);
+                throw new WC_Braspag_Exception(print_r($response, true), $localized_message);
             }
         } else {
             if (in_array($response->body->Payment->Status, ['1', '20'])) {
