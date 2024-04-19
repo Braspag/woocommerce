@@ -219,6 +219,21 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
     }
 
     /**
+     * @param $fields
+     */
+    public function get_braspag_authsop_elements($fields)
+    {
+        echo '<div id="bpsop_data">
+                <div id="bpsop_data_auth">
+                    <input type="hidden" name="bpsop_test_environment" class="bpsop_test_environment" value="1"/>
+                    <input type="hidden" name="bpsop_accesstoken" class="bpsop_accesstoken"/>
+                    <input type="hidden" name="bpsop_auth" class="bpsop_auth" value="true"/>
+                </div>
+            </div>
+            ';
+    }
+
+    /**
      * @param $cart
      * @return array
      */
@@ -307,8 +322,35 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
         wp_register_script('wc-braspag-antifraud-fingerprint', "https://h.online-metrix.net/fp/tags.js?org_id={$this->antifraud_finger_print_org_id}&session_id={$this->antifraud_finger_print_session_id}", array(), '', false);
         wp_enqueue_script('wc-braspag-antifraud-fingerprint');
 
+        $this->payment_scripts_authsop();
 
         $this->payment_scripts_auth3ds20();
+    }
+
+        /**
+     * @throws WC_Braspag_Exception
+     */
+    public function payment_scripts_authsop()
+    {
+        $authsop_params = apply_filters('wc_gateway_braspag_pagador_authsop_params', 
+            array(
+                'isTestEnvironment' => $this->test_mode
+            )
+        );
+
+        wp_register_script('wc-braspag-authsop', plugins_url('assets/js/braspag-authsop.js', WC_BRASPAG_MAIN_FILE), array(), WC_BRASPAG_VERSION, true);
+        wp_enqueue_script('wc-braspag-authsop');
+
+        wp_localize_script(
+            'wc-braspag-authsop',
+            'braspag_authsop_params',
+            apply_filters('wc_gateway_braspag_pagador_auth3ds20_params', 
+                array(
+                    'bpsopToken' => $this->get_mpi_auth_token(),
+                    'isTestEnvironment' => $this->test_mode,
+                )
+            )
+        );
     }
 
     /**
