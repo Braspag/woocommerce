@@ -90,14 +90,6 @@ return apply_filters(
             'default' => 'no',
             'desc_tip' => true,
         ),
-        'silent_post_test_mode' => array(
-            'title' => __('Silent Order Post - Test mode', 'woocommerce-braspag'),
-            'label' => __('Enable Test Mode of SOP', 'woocommerce-braspag'),
-            'type' => 'checkbox',
-            'description' => __('Place the payment gateway in test mode using test.', 'woocommerce-braspag'),
-            'default' => 'no',
-            'desc_tip' => true,
-        ),
         'oauth_authentication' => array(
             'title' => "<hr>" . __('OAuth Authentication', 'woocommerce-braspag'),
             'type' => 'title',
