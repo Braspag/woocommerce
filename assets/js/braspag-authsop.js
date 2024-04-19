@@ -17,7 +17,7 @@ function getAccessToken() {
         request.setRequestHeader("MerchantId", merchantId);
         request.setRequestHeader("Authorization", bearerAccessToken);
       } else {
-        console.log('sem beareToken');
+        console.log('sem Access Token');
       }
   
       request.onreadystatechange = function () {
@@ -27,7 +27,7 @@ function getAccessToken() {
             console.log(jsonResponse.AccessToken + "Issued: " + jsonResponse.Issued + "ExpiresIn: " + jsonResponse.ExpiresIn);
           } else {
 
-            console.log("HTTP " + request.status + ": erro ao obter o 'Access Token' do SOP (<b>" + url + "</b>).");7
+            console.log("HTTP " + request.status + ": erro ao obter o 'Access Token' do SOP (" + url + ").");7
           }
         }
       }
