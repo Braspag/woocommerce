@@ -35,14 +35,6 @@ return apply_filters(
             'default' => 'no',
             'desc_tip' => true,
         ),
-        'silent_post' => array(
-            'title' => __('Silent Order Post', 'woocommerce-braspag'),
-            'label' => __('Enable Silent Order Post', 'woocommerce-braspag'),
-            'type' => 'checkbox',
-            'description' => __('Enable API Silent Order Post. This controls the option Sequence Criteria data to send for Braspag.', 'woocommerce-braspag'),
-            'default' => 'no',
-            'desc_tip' => true,
-        ),
         'merchant_id' => array(
             'title' => __('Merchant ID', 'woocommerce-braspag'),
             'type' => 'text',
@@ -83,6 +75,27 @@ return apply_filters(
             'type' => 'text',
             'description' => __('Get your Merchant MCC Code from Braspag Support.', 'woocommerce-braspag'),
             'default' => '',
+            'desc_tip' => true,
+        ),
+        'silent_post' => array(
+            'title' => "<hr>" . __('Silent Order Post', 'woocommerce-braspag'),
+            'type' => 'title',
+            'description' => '',
+        ),
+        'silent_post_enabled' => array(
+            'title' => __('Silent Order Post', 'woocommerce-braspag'),
+            'label' => __('Enable Silent Order Post', 'woocommerce-braspag'),
+            'type' => 'checkbox',
+            'description' => __('Enable API Silent Order Post. This controls the option Sequence Criteria data to send for Braspag.', 'woocommerce-braspag'),
+            'default' => 'no',
+            'desc_tip' => true,
+        ),
+        'silent_post_test_mode' => array(
+            'title' => __('Silent Order Post - Test mode', 'woocommerce-braspag'),
+            'label' => __('Enable Test Mode of SOP', 'woocommerce-braspag'),
+            'type' => 'checkbox',
+            'description' => __('Place the payment gateway in test mode using test.', 'woocommerce-braspag'),
+            'default' => 'no',
             'desc_tip' => true,
         ),
         'oauth_authentication' => array(
