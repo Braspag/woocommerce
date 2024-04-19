@@ -83,7 +83,7 @@ return apply_filters(
             'description' => '',
         ),
         'silent_post_enabled' => array(
-            'title' => __('Silent Order Post', 'woocommerce-braspag'),
+            'title' => __('Enable/Disable', 'woocommerce-braspag'),
             'label' => __('Enable Silent Order Post', 'woocommerce-braspag'),
             'type' => 'checkbox',
             'description' => __('Enable API Silent Order Post. This controls the option Sequence Criteria data to send for Braspag.', 'woocommerce-braspag'),
