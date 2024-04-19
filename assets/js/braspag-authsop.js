@@ -1,23 +1,23 @@
 console.log('bpEnvironment: '+braspag_authsop_params.bpEnvironment);
-console.log('bpSopToken: '+braspag_authsop_params.bpSopToken);
+console.log('bpOauthToken: '+braspag_authsop_params.bpOauthToken);
 console.log('bpMerchantId: '+braspag_authsop_params.bpMerchantId);
 
 function getAccessToken() {
     var merchantId = braspag_authsop_params.bpMerchantId;
     var environment = braspag_authsop_params.bpEnvironment;
-    var bearerAccessToken = braspag_authsop_params.bpSopToken;
+    var bearerOauthToken = "Bearer " + braspag_authsop_params.bpOauthToken;
   
-    var url = environment + "?merchantid=" + merchantId;
+    var url = environment;
     var request = new XMLHttpRequest();
   
     if ('withCredentials' in request) {
-      if (bearerAccessToken) {
-        url = environment+ "/accesstoken";
+      if (bearerOauthToken) {
+        url = environment + "/accesstoken";
         request.open("POST", url, true);
         request.setRequestHeader("MerchantId", merchantId);
-        request.setRequestHeader("Authorization", bearerAccessToken);
+        request.setRequestHeader("Authorization", bearerOauthToken);
       } else {
-        console.log('sem Access Token');
+        console.log('sem Bearer Token');
       }
   
       request.onreadystatechange = function () {
@@ -26,8 +26,7 @@ function getAccessToken() {
             var jsonResponse = JSON.parse(request.responseText);
             console.log(jsonResponse.AccessToken + "Issued: " + jsonResponse.Issued + "ExpiresIn: " + jsonResponse.ExpiresIn);
           } else {
-
-            console.log("HTTP " + request.status + ": erro ao obter o 'Access Token' do SOP (" + url + ").");7
+            console.log("HTTP " + request.status + ": erro ao obter o 'Access Token' do SOP (" + url + ").");
           }
         }
       }
@@ -47,3 +46,4 @@ function getAccessToken() {
       request.send();
     }
 }
+getAccessToken();
