@@ -341,13 +341,20 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
         wp_register_script('wc-braspag-authsop', plugins_url('assets/js/braspag-authsop.js', WC_BRASPAG_MAIN_FILE), array(), WC_BRASPAG_VERSION, true);
         wp_enqueue_script('wc-braspag-authsop');
 
+        if($this->test_mode == 'yes'){
+            $enviroment = 'https://transactionsandbox.pagador.com.br/post/api/public/v2';
+        }else{
+            $enviroment = 'https://www.pagador.com.br/post/api/public/v2';
+        }
+
         wp_localize_script(
             'wc-braspag-authsop',
             'braspag_authsop_params',
             apply_filters('wc_gateway_braspag_pagador_authsop_params', 
                 array(
-                    'bpsopToken' => $this->get_mpi_auth_token(),
-                    'isTestEnvironment' => $this->test_mode,
+                    'bpMerchantId' => $this->get_option('merchant_id');
+                    'bpBopToken' => $this->get_mpi_auth_token(),
+                    'bpEnvironment' => $this->enviroment,
                 )
             )
         );
