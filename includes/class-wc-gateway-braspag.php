@@ -352,9 +352,9 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
             'braspag_authsop_params',
             apply_filters('wc_gateway_braspag_pagador_authsop_params', 
                 array(
-                    'bpMerchantId' => $this->get_option('merchant_id');
+                    'bpMerchantId' => $this->get_option('merchant_id'),
                     'bpBopToken' => $this->get_mpi_auth_token(),
-                    'bpEnvironment' => $this->enviroment,
+                    'bpEnvironment' => $enviroment,
                 )
             )
         );
