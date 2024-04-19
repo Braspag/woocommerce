@@ -344,7 +344,7 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
         wp_localize_script(
             'wc-braspag-authsop',
             'braspag_authsop_params',
-            apply_filters('wc_gateway_braspag_pagador_auth3ds20_params', 
+            apply_filters('wc_gateway_braspag_pagador_authsop_params', 
                 array(
                     'bpsopToken' => $this->get_mpi_auth_token(),
                     'isTestEnvironment' => $this->test_mode,
