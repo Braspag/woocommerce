@@ -16,7 +16,6 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
     public $supports;
     protected $init_settings;
     public $method_description;
-
     protected $test_mode;
     protected $antifraud_enabled;
     protected $antifraud_status;
@@ -26,6 +25,7 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
     protected $antifraud_finger_print_id;
     protected $extra_data_collection;
     protected $soft_descriptor;
+    protected $silentorderpost_enabled;
 
     public function __construct()
     {
@@ -52,6 +52,8 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
 
         $this->enabled = $this->get_option('enabled');
         $this->test_mode = 'yes' === $this->get_option('test_mode');
+
+        $this->silentorderpost_enabled = $this->get_option('silent_post_enabled');
 
         $this->antifraud_enabled = 'yes' === $this->get_option( 'antifraud_enabled' );
         $this->antifraud_finger_print_org_id = $this->get_option( 'antifraud_finger_print_org_id' );
@@ -291,6 +293,16 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
 
         wp_register_script('wc-braspag', plugins_url('assets/js/braspag.js', WC_BRASPAG_MAIN_FILE), array('prototype', 'jquery-payment'), WC_BRASPAG_VERSION, true);
         wp_enqueue_script('wc-braspag');
+
+        if($this->silentorderpost_enabled == 'yes'){
+            if($this->test_mode == 'yes'){
+                wp_register_script('wc-braspag-silent-order-post', "https://transactionsandbox.pagador.com.br/post/Scripts/silentorderpost-1.0.min.js", array(), '', false);
+                wp_enqueue_script('wc-braspag-silent-order-post');
+            }else{
+                wp_register_script('wc-braspag-silent-order-post', "https://www.pagador.com.br/post/scripts/silentorderpost-1.0.min.js", array(), '', false);
+                wp_enqueue_script('wc-braspag-silent-order-post');
+            }
+        }
 
         wp_register_script('wc-braspag-antifraud-fingerprint', "https://h.online-metrix.net/fp/tags.js?org_id={$this->antifraud_finger_print_org_id}&session_id={$this->antifraud_finger_print_session_id}", array(), '', false);
         wp_enqueue_script('wc-braspag-antifraud-fingerprint');
