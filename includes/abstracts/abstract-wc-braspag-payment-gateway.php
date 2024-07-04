@@ -321,6 +321,29 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway
     }
 
     /**
+     * @return mixed
+     * @throws WC_Braspag_Exception
+     */
+    public function get_oauth_token_sop()
+    {
+        WC_Braspag_Logger::log("Info: Begin processing OAuth request.");
+
+        $oauth_request_builder = get_option('woocommerce_braspag_settings');
+        $oauth_request_builder['body'] = [
+            'scope' => 'SilentOrderPostApp',
+            'grant_type' => 'client_credentials'
+        ];
+
+        $oauth_response = $this->braspag_oauth_request($oauth_request_builder, 'oauth2/token');
+
+        if (!empty($oauth_response->errors)) {
+            $this->throw_localized_message($oauth_response);
+        }
+
+        return $oauth_response->body->access_token;
+    }
+
+    /**
      * @param $request
      * @param $api
      * @return array|object
