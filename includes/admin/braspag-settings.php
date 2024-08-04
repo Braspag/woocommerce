@@ -90,6 +90,20 @@ return apply_filters(
             'default' => 'no',
             'desc_tip' => true,
         ),
+        'sop_authentication_client_id' => array(
+            'title' => __('SOP - Client ID', 'woocommerce-braspag'),
+            'type' => 'text',
+            'description' => __('Get your SOP Client ID from Braspag Support.', 'woocommerce-braspag'),
+            'default' => '',
+            'desc_tip' => true,
+        ),
+        'sop_authentication_client_secret' => array(
+            'title' => __('SOP - Client Secret', 'woocommerce-braspag'),
+            'type' => 'text',
+            'description' => __('Get your SOP Client Secret from Braspag Support.', 'woocommerce-braspag'),
+            'default' => '',
+            'desc_tip' => true,
+        ),
         'oauth_authentication' => array(
             'title' => "<hr>" . __('OAuth Authentication', 'woocommerce-braspag'),
             'type' => 'title',
