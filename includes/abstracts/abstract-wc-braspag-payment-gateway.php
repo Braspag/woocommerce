@@ -330,11 +330,12 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway
 
         $oauth_request_builder = get_option('woocommerce_braspag_settings');
         $oauth_request_builder['body'] = [
-            'scope' => 'SilentOrderPostApp',
             'grant_type' => 'client_credentials'
         ];
 
         $oauth_response = $this->braspag_oauth_request($oauth_request_builder, 'oauth2/token');
+
+        WC_Braspag_Logger::log("{$api} request: " . print_r($oauth_response, true));
 
         if (!empty($oauth_response->errors)) {
             $this->throw_localized_message($oauth_response);
