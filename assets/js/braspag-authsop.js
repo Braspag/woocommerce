@@ -2,6 +2,7 @@ console.log('bpEnvironment: '+braspag_authsop_params.bpEnvironment);
 console.log('bpOauthToken: '+braspag_authsop_params.bpOauthToken);
 console.log('bpMerchantId: '+braspag_authsop_params.bpMerchantId);
 console.log('bpMerchantIdSOP: '+braspag_authsop_params.bpMerchantIdSOP);
+console.log('bpAccessToken: '+braspag_authsop_params.bpAccessToken);
 
 function getAccessToken() {
     var merchantId = braspag_authsop_params.bpMerchantId;

@@ -347,14 +347,21 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
             $enviroment = 'https://www.pagador.com.br/post/api/public/v2';
         }
 
+        $sop_authentication_client_id = $this->get_option('sop_authentication_client_id');
+
+        $auth_sop_token = $this->get_oauth_token_sop();
+        // public function get_access_token_sop($enviroment, $endpoint, $method, $auth_sop_token, $merchant_id)
+        $access_sop_token = $this->get_access_token_sop($enviroment, 'accesstoken', 'POST', $auth_sop_token, $sop_authentication_client_id);
+
         wp_localize_script(
             'wc-braspag-authsop',
             'braspag_authsop_params',
             apply_filters('wc_gateway_braspag_pagador_authsop_params', 
                 array(
                     'bpMerchantId' => $this->get_option('merchant_id'),
-                    'bpMerchantIdSOP' => $this->get_option('sop_authentication_client_id'),
-                    'bpOauthToken' => $this->get_oauth_token_sop(),
+                    'bpMerchantIdSOP' => $sop_authentication_client_id,
+                    'bpOauthToken' => $auth_sop_token,
+                    'bpAccessToken' => $access_sop_token,
                     'bpEnvironment' => $enviroment,
                 )
             )

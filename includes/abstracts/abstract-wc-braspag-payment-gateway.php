@@ -284,6 +284,30 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway
      * @return array|object
      * @throws WC_Braspag_Exception
      */
+    public function braspag_sop_request($request, $api)
+    {        
+        $response = self::request($request, $api, 'POST');
+
+        if (!empty($response->errors)) {
+            return $response;
+        }
+
+        WC_Braspag_Logger::log("Braspag Auth Requested");
+
+        return $response;
+    }
+
+    public static request($endpoint, $api = 'oauth2/token', $method = 'POST', $with_headers = false){
+
+    }
+
+
+    /**
+     * @param $request
+     * @param $api
+     * @return array|object
+     * @throws WC_Braspag_Exception
+     */
     public function braspag_oauth_request($request, $api)
     {
         $sop = isset($sop) ? true : false;
@@ -320,6 +344,78 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway
         }
 
         return $oauth_response->body->access_token;
+    }
+
+    /*
+
+  
+    if ('withCredentials' in request) {
+      if (bearerOauthToken) {
+        url = environment + "/accesstoken";
+        request.open("POST", url, true);
+        request.setRequestHeader("MerchantId", bpMerchantIdSOP);
+        request.setRequestHeader("Authorization", bearerOauthToken);
+      } else {
+        console.log('sem Bearer Token');
+      }
+  
+      request.onreadystatechange = function () {
+        if (request.readyState == 4) {
+          if (request.status == 201) {
+            var jsonResponse = JSON.parse(request.responseText);
+            console.log(jsonResponse.AccessToken + "Issued: " + jsonResponse.Issued + "ExpiresIn: " + jsonResponse.ExpiresIn);
+          } else {
+            console.log("HTTP " + request.status + ": erro ao obter o 'Access Token' do SOP (" + url + ").");
+          }
+        }
+      }
+      request.setRequestHeader("Accept", "application/json");
+      request.send();
+    } else if (XDomainRequest) {
+      request = new XDomainRequest();
+      request.timeout = 3000;
+      request.open('POST', url);
+      request.onload = function () {
+        var jsonResponse = JSON.parse(request.responseText);
+        console.log(jsonResponse.AccessToken + "Issued: " + jsonResponse.Issued + "ExpiresIn: " + jsonResponse.ExpiresIn);
+      }
+      request.onerror = function () {
+        console.log("Erro ao obter o 'Access Token' do SOP.");
+      }
+      request.send();
+    }
+}
+    
+    */
+
+    /**
+     * @param mixed $enviroment
+     * @param mixed $endpoint
+     * @param mixed $method
+     * @param mixed $auth_sop_token
+     * @param mixed $merchant_id
+     * @return mixed
+     * @throws WC_Braspag_Exception
+     */
+    public function get_access_token_sop($enviroment, $endpoint, $method, $auth_sop_token, $merchant_id)
+    {
+        WC_Braspag_Logger::log("Info: SOP -> Begin processing Get Access Token request.");
+
+        $sop_request_builder = array();
+
+        $sop_request_builder['MerchantId'] = $merchant_id;
+        $sop_request_builder['Authorization'] = $auth_sop_token;
+
+        $sop_response = $this->braspag_oauth_request($sop_request_builder, $endpoint);
+
+        WC_Braspag_Logger::log("SOP -> request: " . print_r($sop_response, true));
+
+        if (!empty($sop_response->errors)) {
+            $this->throw_localized_message($sop_response);
+        }
+
+        //return $sop_response->body->access_token;
+        return $sop_response->body;
     }
 
     /**
