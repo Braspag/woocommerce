@@ -285,10 +285,10 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway
      * @return array|object
      * @throws WC_Braspag_Exception
      */
-    public function braspag_oauth_request($request, $api)
+    public function braspag_oauth_request($request, $api, $sop = false)
     {
         $sop = isset($sop) ? true : false;
-        
+
         $response = WC_Braspag_OAuth_API::request($request, $api, 'POST', $sop);
 
         if (!empty($response->errors)) {
@@ -383,7 +383,7 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway
         $sop_request_builder['MerchantId'] = $merchant_id;
         $sop_request_builder['Authorization'] = $auth_sop_token;
 
-        $sop_response = $this->braspag_sop_request($sop_request_builder, $enviroment.'/'.$endpoint);
+        $sop_response = $this->braspag_sop_request($sop_request_builder, $enviroment . '/' . $endpoint);
 
         WC_Braspag_Logger::log("SOP -> request: " . print_r($sop_response, true));
 
@@ -468,7 +468,7 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway
             'grant_type' => 'client_credentials'
         ];
 
-        $oauth_response = $this->braspag_oauth_request($oauth_request_builder, 'oauth2/token');
+        $oauth_response = $this->braspag_oauth_request($oauth_request_builder, 'oauth2/token', true);
 
         WC_Braspag_Logger::log("SOP -> request: " . print_r($oauth_response, true));
 
