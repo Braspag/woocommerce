@@ -443,7 +443,7 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway
 
         WC_Braspag_Logger::log("Braspag Auth Requested");
 
-        return $response;
+        return $response->body->AccessToken;
     }
 
     /**
