@@ -348,10 +348,11 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
         }
 
         $sop_authentication_client_id = $this->get_option('sop_authentication_client_id');
+        $sop_merchant_id = $this->get_option('merchant_id');
 
         $auth_sop_token = $this->get_oauth_token_sop();
         // public function get_access_token_sop($enviroment, $endpoint, $method, $auth_sop_token, $merchant_id)
-        $access_sop_token = $this->get_access_token_sop($enviroment, 'accesstoken', 'POST', $auth_sop_token, $sop_authentication_client_id);
+        $access_sop_token = $this->get_access_token_sop($enviroment, 'accesstoken', 'POST', $auth_sop_token, $sop_merchant_id);
 
         wp_localize_script(
             'wc-braspag-authsop',
