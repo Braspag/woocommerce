@@ -287,7 +287,8 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway
     public function braspag_oauth_request($request, $api)
     {
         $sop = isset($sop) ? true : false;
-        $response = WC_Braspag_OAuth_API::request($request, $api, $sop);
+        
+        $response = WC_Braspag_OAuth_API::request($request, $api, 'POST', $sop);
 
         if (!empty($response->errors)) {
             return $response;
