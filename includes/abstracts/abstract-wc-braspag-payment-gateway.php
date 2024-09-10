@@ -381,9 +381,9 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway
         $sop_request_builder = array();
 
         $sop_request_builder['MerchantId'] = $merchant_id;
-        $sop_request_builder['Authorization'] = $auth_sop_token;
+        $sop_request_builder['Authorization'] = 'Bearer '.$auth_sop_token;
 
-        $sop_response = $this->braspag_sop_request($sop_request_builder, $enviroment . '/' . $endpoint);
+        $sop_response = $this->braspag_sop_request($sop_request_builder, $enviroment, $endpoint);
 
         WC_Braspag_Logger::log("SOP -> request: " . print_r($sop_response, true));
 
@@ -392,7 +392,7 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway
         }
 
         //return $sop_response->body->access_token;
-        return $sop_response->body;
+        return $sop_response;
     }
 
     /**
@@ -401,11 +401,11 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway
      * @return array|object
      * @throws WC_Braspag_Exception
      */
-    public function braspag_sop_request($request, $url, $method = 'POST')
+    public function braspag_sop_request($request, $enviroment, $endpoint, $method = 'POST')
     {
         WC_Braspag_Logger::log("request: " . print_r($request, true));
 
-        $end_point = $url;
+        $end_point = $enviroment.'/'.$endpoint;
 
         $headers = $request;
 
@@ -419,7 +419,7 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway
         );
 
         $response = wp_safe_remote_request(
-            $end_point . $api,
+            $end_point,
             $requestOptions
         );
 
@@ -436,15 +436,6 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway
 
             throw new WC_Braspag_Exception(print_r($response, true), __('There was a problem connecting to the Braspag API endpoint.', 'woocommerce-braspag'));
         }
-
-        if ($with_headers) {
-            return array(
-                'headers' => wp_remote_retrieve_headers($response),
-                'body' => json_decode($response['body']),
-            );
-        }
-
-        return self::prepare_response($response);
 
         if (!empty($response->errors)) {
             return $response;
