@@ -19,6 +19,39 @@ class WC_Braspag_OAuth_API
     const BRASPAG_API_VERSION = '2020-02-10';
 
 
+/**
+     * @param $request
+     * @return mixed|void
+     * @throws WC_Braspag_Exception
+     */
+    public static function get_headers_sop($request)
+    {
+        if (
+            !isset($request['sop_authentication_client_id'])
+            || !isset($request['sop_authentication_client_secret'])
+        ) {
+            throw new WC_Braspag_Exception(
+                print_r(
+                    $request,
+                    true
+                ),
+                __('Invalid Oauth Request Data', 'woocommerce-braspag')
+            );
+        }
+
+        $authorization = self::get_authorization(
+            $request['sop_authentication_client_id'], $request['sop_authentication_client_secret']
+        );
+
+        return apply_filters(
+            'wc_braspag_request_headers',
+            array(
+                'Content-Type' => "application/x-www-form-urlencoded; charset=UTF-8",
+                'Authorization' => "Basic " . $authorization
+            )
+        );
+    }
+
     /**
      * @param $request
      * @return mixed|void
@@ -66,15 +99,16 @@ class WC_Braspag_OAuth_API
      * @param $request
      * @param string $api
      * @param string $method
+     * @param bool $sop
      * @param bool $with_headers
      * @return array|object
      * @throws WC_Braspag_Exception
      */
-    public static function request($request, $api = 'oauth2/token', $method = 'POST', $with_headers = false)
+    public static function request($request, $api = 'oauth2/token', $method = 'POST', $sop = false, $with_headers = false)
     {
         WC_Braspag_Logger::log("{$api} request: " . print_r($request, true));
 
-        $headers = self::get_headers($request);
+        $headers = $sop ? self::get_headers_sop($request) : self::get_headers($request);
 
         $end_point = 'yes' === $request['test_mode'] ? self::SANDBOX_ENDPOINT : self::PRODUCTION_ENDPOINT;
 
