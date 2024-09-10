@@ -326,7 +326,7 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway
      */
     public function get_oauth_token_sop()
     {
-        WC_Braspag_Logger::log("Info: Begin processing OAuth request.");
+        WC_Braspag_Logger::log("Info: SOP -> Begin processing OAuth request.");
 
         $oauth_request_builder = get_option('woocommerce_braspag_settings');
         $oauth_request_builder['body'] = [
@@ -335,7 +335,7 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway
 
         $oauth_response = $this->braspag_oauth_request($oauth_request_builder, 'oauth2/token');
 
-        WC_Braspag_Logger::log("{$api} request: " . print_r($oauth_response, true));
+        WC_Braspag_Logger::log("SOP -> {$api} request: " . print_r($oauth_response, true));
 
         if (!empty($oauth_response->errors)) {
             $this->throw_localized_message($oauth_response);

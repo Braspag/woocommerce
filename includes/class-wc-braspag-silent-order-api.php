@@ -140,4 +140,36 @@ class WC_Braspag_Silent_Order_API
 
         return (object) $response_data;
     }
+
+    /**
+     * Função para obter o Access Token via API da Braspag
+     *
+     * @return void
+     */
+    public function get_access_token() {
+        $url = $this->environment_url . '/accesstoken';
+        $headers = array(
+            'MerchantId: ' . $this->merchant_id,
+            'Authorization: Bearer ' . $this->oauth_token,
+            'Accept: application/json'
+        );
+
+        $response = wp_remote_post($url, array(
+            'headers' => $headers,
+            'timeout' => 30,
+        ));
+
+        if (is_wp_error($response)) {
+            return new WP_Error('request_failed', 'Erro ao obter o Access Token da Braspag.');
+        }
+
+        $body = wp_remote_retrieve_body($response);
+        $data = json_decode($body);
+
+        if (isset($data->AccessToken)) {
+            return $data->AccessToken;
+        } else {
+            return new WP_Error('invalid_response', 'Resposta inválida ao obter o Access Token.');
+        }
+    }
 }
