@@ -323,45 +323,36 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway
         return $oauth_response->body->access_token;
     }
 
-    /*
+     /**
+     * @param $response
+     * @return object
+     */
+    public static function prepare_response($response)
+    {
+        $response_data = [];
+        if (isset($response['body'])) {
 
-  
-    if ('withCredentials' in request) {
-      if (bearerOauthToken) {
-        url = environment + "/accesstoken";
-        request.open("POST", url, true);
-        request.setRequestHeader("MerchantId", bpMerchantIdSOP);
-        request.setRequestHeader("Authorization", bearerOauthToken);
-      } else {
-        console.log('sem Bearer Token');
-      }
-  
-      request.onreadystatechange = function () {
-        if (request.readyState == 4) {
-          if (request.status == 201) {
-            var jsonResponse = JSON.parse(request.responseText);
-            console.log(jsonResponse.AccessToken + "Issued: " + jsonResponse.Issued + "ExpiresIn: " + jsonResponse.ExpiresIn);
-          } else {
-            console.log("HTTP " + request.status + ": erro ao obter o 'Access Token' do SOP (" + url + ").");
-          }
+            $response_body = $response['body'];
+
+            if (is_string($response_body)) {
+                $response_body = json_decode($response_body);
+            }
+
+            $response_data['body'] = $response_body;
         }
-      }
-      request.setRequestHeader("Accept", "application/json");
-      request.send();
-    } else if (XDomainRequest) {
-      request = new XDomainRequest();
-      request.timeout = 3000;
-      request.open('POST', url);
-      request.onload = function () {
-        var jsonResponse = JSON.parse(request.responseText);
-        console.log(jsonResponse.AccessToken + "Issued: " + jsonResponse.Issued + "ExpiresIn: " + jsonResponse.ExpiresIn);
-      }
-      request.onerror = function () {
-        console.log("Erro ao obter o 'Access Token' do SOP.");
-      }
-      request.send();
+
+        if (isset($response['response'])) {
+            $response_data['status'] = $response['response']['code'];
+            $response_data['message'] = $response['response']['message'];
+        }
+
+        if ($response_data['status'] != '200' && $response_data['status'] != '201') {
+            $response_data['errors'] = $response_data['body'];
+            $response_data['body'] = null;
+        }
+
+        return (object) $response_data;
     }
-}
     
     */
 
@@ -443,7 +434,9 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway
 
         WC_Braspag_Logger::log("Braspag Auth Requested");
 
-        return $response->body->AccessToken;
+        $result = self::prepare_response($response);
+
+        return $result->body->access_token;
     }
 
     /**
