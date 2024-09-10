@@ -1,9 +1,11 @@
 console.log('bpEnvironment: '+braspag_authsop_params.bpEnvironment);
 console.log('bpOauthToken: '+braspag_authsop_params.bpOauthToken);
 console.log('bpMerchantId: '+braspag_authsop_params.bpMerchantId);
+console.log('bpMerchantIdSOP: '+braspag_authsop_params.bpMerchantIdSOP);
 
 function getAccessToken() {
     var merchantId = braspag_authsop_params.bpMerchantId;
+    var bpMerchantIdSOP = braspag_authsop_params.bpMerchantIdSOP;
     var environment = braspag_authsop_params.bpEnvironment;
     var bearerOauthToken = "Bearer " + braspag_authsop_params.bpOauthToken;
   
@@ -14,7 +16,7 @@ function getAccessToken() {
       if (bearerOauthToken) {
         url = environment + "/accesstoken";
         request.open("POST", url, true);
-        request.setRequestHeader("MerchantId", merchantId);
+        request.setRequestHeader("MerchantId", bpMerchantIdSOP);
         request.setRequestHeader("Authorization", bearerOauthToken);
       } else {
         console.log('sem Bearer Token');
