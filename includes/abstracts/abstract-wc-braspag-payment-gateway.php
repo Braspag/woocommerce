@@ -434,7 +434,7 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway
 
         $result = self::prepare_response($response);
 
-        return $result->body->access_token;
+        return $result->body;
     }
 
     /**

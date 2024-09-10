@@ -362,7 +362,7 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
                     'bpMerchantId' => $this->get_option('merchant_id'),
                     'bpMerchantIdSOP' => $sop_authentication_client_id,
                     'bpOauthToken' => $auth_sop_token,
-                    'bpAccessToken' => $access_sop_token,
+                    'bpAccessToken' => $access_sop_token->AccessToken,
                     'bpEnvironment' => $enviroment,
                 )
             )
