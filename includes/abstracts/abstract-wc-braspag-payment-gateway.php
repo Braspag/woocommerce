@@ -353,8 +353,6 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway
 
         return (object) $response_data;
     }
-    
-    */
 
     /**
      * @param mixed $enviroment
