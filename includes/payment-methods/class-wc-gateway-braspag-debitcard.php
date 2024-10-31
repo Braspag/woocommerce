@@ -377,7 +377,7 @@ class WC_Gateway_Braspag_DebitCard extends WC_Gateway_Braspag
 
         if (in_array($response->body->Payment->Status, ['2'])) {
 
-            WC_Braspag_Helper::is_wc_lt('3.0') ? update_post_meta($order_id, '_braspag_charge_captured', 'yes') : $order->update_meta_data('_braspag_charge_captured', 'yes');
+            WC_Braspag_Helper::is_wc_lt('3.0') ? $order = wc_get_order($order_id, '_braspag_charge_captured', 'yes') : $order->update_meta_data('_braspag_charge_captured', 'yes');
 
             $order->payment_complete($response->body->Payment->PaymentId);
 
@@ -387,7 +387,7 @@ class WC_Gateway_Braspag_DebitCard extends WC_Gateway_Braspag
         }
         elseif (in_array($response->body->Payment->Status, ['0', '1', '12'])) {
 
-            WC_Braspag_Helper::is_wc_lt('3.0') ? update_post_meta($order_id, '_transaction_id', $response->body->Payment->PaymentId) : $order->set_transaction_id($response->body->Payment->PaymentId);
+            WC_Braspag_Helper::is_wc_lt('3.0') ? $order = wc_get_order($order_id, '_transaction_id', $response->body->Payment->PaymentId) : $order->set_transaction_id($response->body->Payment->PaymentId);
 
             if ($order->has_status(array('pending', 'failed'))) {
                 WC_Braspag_Helper::is_wc_lt('3.0') ? $order->reduce_order_stock() : wc_reduce_stock_levels($order_id);

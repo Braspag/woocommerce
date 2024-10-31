@@ -205,7 +205,7 @@ class WC_Gateway_Braspag_Pix extends WC_Gateway_Braspag
            $dataToSave = array_merge($dataToSave, apply_filters('wc_gateway_braspag_pagador_pix_save_payment_response_data', $dataToSave, $order, $response));
 
             foreach ($dataToSave as $key => $value) {
-                update_post_meta($order_id, $key, $value);
+                $order = wc_get_order($order_id, $key, $value);
             }
         }else{
             $dataToSave = array_merge($dataToSave, apply_filters('wc_gateway_braspag_pagador_pix_save_payment_response_data', $dataToSave, $order, $response));
