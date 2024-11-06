@@ -160,15 +160,14 @@ class WC_Gateway_Braspag_CreditCard_JustClick extends WC_Gateway_Braspag_CreditC
     {
         $installments = $this->maximum_installments;
         $installmentsMinAmount = $this->minimum_amount_of_installment;
+        $grandTotal = WC()->cart->get_total('edit');
 
         if (empty($installments)) {
-            return [];
+            return [sprintf('%1$s x R$ %2$s', 1, number_format($grandTotal, wc_get_price_decimals(), ',', ''))];
         }
 
         $return = array();
         $installments++;
-
-        $grandTotal = WC()->cart->get_total('edit');
 
         for ($i = 1; $i < $installments; $i++) {
             $installmentAmount = $grandTotal / $i;
