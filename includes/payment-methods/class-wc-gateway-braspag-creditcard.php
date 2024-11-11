@@ -229,7 +229,7 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
         $return = array();
         $installments++;
 
-        $grandTotal = WC()->cart->get_cart_contents_total();
+        $grandTotal = WC()->cart->get_total('edit');
 
         for ($i = 1; $i < $installments; $i++) {
             $installmentAmount = $grandTotal / $i;
