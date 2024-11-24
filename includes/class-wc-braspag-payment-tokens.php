@@ -59,9 +59,17 @@ class WC_Braspag_Payment_Tokens extends WC_Payment_Tokens
      */
     public function woocommerce_payment_token_deleted($token_id, $token)
     {
-        if ('braspag' === $token->get_gateway_id()) {
-            $braspag_customer = new WC_Braspag_Customer(get_current_user_id());
-            $braspag_customer->delete_source($token->get_token());
+        if ($token && $token->get_gateway_id() === 'braspag') {
+            $customer_id = get_current_user_id();
+            $customer = new WC_Braspag_Customer($customer_id);
+
+            $token = $token->get_token();
+
+            if (method_exists($customer, 'delete_source')) {
+                $customer->delete_source($token);
+            } else {
+                WC_Braspag_Logger::log("O método delete_source() não está implementado na classe WC_Braspag_Customer.");
+            }
         }
     }
 
