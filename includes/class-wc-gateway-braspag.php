@@ -317,12 +317,12 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
                 wp_register_script('wc-braspag-silent-order-post', "https://www.pagador.com.br/post/scripts/silentorderpost-1.0.min.js", array(), '', false);
                 wp_enqueue_script('wc-braspag-silent-order-post');
             }
+
+            $this->payment_scripts_authsop();
         }
 
         wp_register_script('wc-braspag-antifraud-fingerprint', "https://h.online-metrix.net/fp/tags.js?org_id={$this->antifraud_finger_print_org_id}&session_id={$this->antifraud_finger_print_session_id}", array(), '', false);
         wp_enqueue_script('wc-braspag-antifraud-fingerprint');
-
-        $this->payment_scripts_authsop();
 
         $this->payment_scripts_auth3ds20();
     }
