@@ -34,6 +34,21 @@ function wc_braspag_missing_wc_notice()
 	echo '<div class="error"><p><strong>' . sprintf(esc_html__('Braspag requires WooCommerce to be installed and active. You can download %s here.', 'woocommerce-braspag'), '<a href="https://woocommerce.com/" target="_blank">WooCommerce</a>') . '</strong></p></div>';
 }
 
+/**
+ * Extra Checkout Fields for Brazil fallback notice.
+ *
+ * @return string
+ */
+function wc_braspag_missing_extra_checkout_fields_notice() {
+    echo '<div class="error"><p><strong>' . sprintf(
+        esc_html__(
+            'Braspag requires the Extra Checkout Fields for Brazil plugin to be installed and active. You can download %s here.',
+            'woocommerce-braspag'
+        ),
+        '<a href="https://wordpress.org/plugins/woocommerce-extra-checkout-fields-for-brazil/" target="_blank">Extra Checkout Fields for Brazil</a>'
+    ) . '</strong></p></div>';
+}
+
 add_action('plugins_loaded', 'woocommerce_gateway_braspag_init');
 
 function woocommerce_gateway_braspag_init()
@@ -44,6 +59,12 @@ function woocommerce_gateway_braspag_init()
 		add_action('admin_notices', 'wc_braspag_missing_wc_notice');
 		return;
 	}
+
+    // Verifica Extra Checkout Fields for Brazil.
+    if (!class_exists('Extra_Checkout_Fields_For_Brazil')) {
+        add_action('admin_notices', 'wc_braspag_missing_extra_checkout_fields_notice');
+        return;
+    }
 
 	if (!class_exists('WC_Braspag')):
 		/**
