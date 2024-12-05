@@ -118,11 +118,11 @@ class WC_Braspag_Privacy extends WC_Abstract_Privacy
 					'data' => array(
 						array(
 							'name' => __('Braspag payment id', 'woocommerce-braspag'),
-							'value' => get_post_meta($order->get_id(), '_braspag_source_id', true),
+							'value' => $order->get_meta($order->get_id(), '_braspag_source_id', true),
 						),
 						array(
 							'name' => __('Braspag customer id', 'woocommerce-braspag'),
-							'value' => get_post_meta($order->get_id(), '_braspag_customer_id', true),
+							'value' => $order->get_meta($order->get_id(), '_braspag_customer_id', true),
 						),
 					),
 				);
@@ -181,11 +181,11 @@ class WC_Braspag_Privacy extends WC_Abstract_Privacy
 					'data' => array(
 						array(
 							'name' => __('Braspag payment id', 'woocommerce-braspag'),
-							'value' => get_post_meta($subscription->get_id(), '_braspag_source_id', true),
+							'value' => $order->get_meta($subscription->get_id(), '_braspag_source_id', true),
 						),
 						array(
 							'name' => __('Braspag customer id', 'woocommerce-braspag'),
-							'value' => get_post_meta($subscription->get_id(), '_braspag_customer_id', true),
+							'value' => $order->get_meta($subscription->get_id(), '_braspag_customer_id', true),
 						),
 					),
 				);
@@ -325,7 +325,7 @@ class WC_Braspag_Privacy extends WC_Abstract_Privacy
 		$subscription = current(wcs_get_subscriptions_for_order($order->get_id()));
 		$subscription_id = $subscription->get_id();
 
-		$braspag_source_id = get_post_meta($subscription_id, '_braspag_source_id', true);
+		$braspag_source_id = $order->get_meta($subscription_id, '_braspag_source_id', true);
 
 		if (empty($braspag_source_id)) {
 			return array(false, false, array());
@@ -344,14 +344,14 @@ class WC_Braspag_Privacy extends WC_Abstract_Privacy
 		$renewal_orders = WC_Subscriptions_Renewal_Order::get_renewal_orders($order->get_id());
 
 		foreach ($renewal_orders as $renewal_order_id) {
-			delete_post_meta($renewal_order_id, '_braspag_source_id');
-			delete_post_meta($renewal_order_id, '_braspag_refund_id');
-			delete_post_meta($renewal_order_id, '_braspag_customer_id');
+			$order->delete_meta_data($renewal_order_id, '_braspag_source_id');
+			$order->delete_meta_data($renewal_order_id, '_braspag_refund_id');
+			$order->delete_meta_data($renewal_order_id, '_braspag_customer_id');
 		}
 
-		delete_post_meta($subscription_id, '_braspag_source_id');
-		delete_post_meta($subscription_id, '_braspag_refund_id');
-		delete_post_meta($subscription_id, '_braspag_customer_id');
+		$order->delete_meta_data($subscription_id, '_braspag_source_id');
+		$order->delete_meta_data($subscription_id, '_braspag_refund_id');
+		$order->delete_meta_data($subscription_id, '_braspag_customer_id');
 
 		return array(true, false, array(__('Braspag Subscription Data Erased.', 'woocommerce-braspag')));
 	}
@@ -363,9 +363,9 @@ class WC_Braspag_Privacy extends WC_Abstract_Privacy
 	protected function maybe_handle_order($order)
 	{
 		$order_id = $order->get_id();
-		$braspag_source_id = get_post_meta($order_id, '_braspag_source_id', true);
-		$braspag_refund_id = get_post_meta($order_id, '_braspag_refund_id', true);
-		$braspag_customer_id = get_post_meta($order_id, '_braspag_customer_id', true);
+		$braspag_source_id = $order->get_meta($order_id, '_braspag_source_id', true);
+		$braspag_refund_id = $order->get_meta($order_id, '_braspag_refund_id', true);
+		$braspag_customer_id = $order->get_meta($order_id, '_braspag_customer_id', true);
 
 		if (!$this->is_retention_expired($order->get_date_created()->getTimestamp())) {
 			/* translators: %d Order ID */
@@ -376,9 +376,9 @@ class WC_Braspag_Privacy extends WC_Abstract_Privacy
 			return array(false, false, array());
 		}
 
-		delete_post_meta($order_id, '_braspag_source_id');
-		delete_post_meta($order_id, '_braspag_refund_id');
-		delete_post_meta($order_id, '_braspag_customer_id');
+		$order->delete_meta_data($order_id, '_braspag_source_id');
+		$order->delete_meta_data($order_id, '_braspag_refund_id');
+		$order->delete_meta_data($order_id, '_braspag_customer_id');
 
 		return array(true, false, array(__('Braspag personal data erased.', 'woocommerce-braspag')));
 	}

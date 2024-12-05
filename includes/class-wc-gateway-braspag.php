@@ -541,7 +541,7 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
         }
 
         // Store charge data.
-        WC_Braspag_Helper::is_wc_lt('3.0') ? update_post_meta($order_id, '_braspag_charge_captured', $captured) : $order->update_meta_data('_braspag_charge_captured', $captured);
+        WC_Braspag_Helper::is_wc_lt('3.0') ? $order = wc_get_order($order_id, '_braspag_charge_captured', $captured) : $order->update_meta_data('_braspag_charge_captured', $captured);
 
         if ('yes' === $captured) {
             if (in_array($response->body->Payment->Status, ['2', '20'])) {
@@ -562,7 +562,7 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
         } else {
             if (in_array($response->body->Payment->Status, ['1', '20'])) {
 
-                WC_Braspag_Helper::is_wc_lt('3.0') ? update_post_meta($order_id, '_transaction_id', $response->body->Payment->PaymentId) : $order->set_transaction_id($response->body->Payment->PaymentId);
+                WC_Braspag_Helper::is_wc_lt('3.0') ? $order = wc_get_order($order_id, '_transaction_id', $response->body->Payment->PaymentId) : $order->set_transaction_id($response->body->Payment->PaymentId);
 
                 $payment_status = 'on-hold';
 
@@ -588,7 +588,7 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
 
             } elseif (in_array($response->body->Payment->Status, ['12'])) {
 
-                WC_Braspag_Helper::is_wc_lt('3.0') ? update_post_meta($order_id, '_transaction_id', $response->body->Payment->PaymentId) : $order->set_transaction_id($response->body->Payment->PaymentId);
+                WC_Braspag_Helper::is_wc_lt('3.0') ? $order = wc_get_order($order_id, '_transaction_id', $response->body->Payment->PaymentId) : $order->set_transaction_id($response->body->Payment->PaymentId);
 
                 /* translators: transaction id */
                 $order->update_status('pending', sprintf(__('Braspag charge pending (Charge ID: %s).', 'woocommerce-braspag'), $response->body->Payment->PaymentId));
