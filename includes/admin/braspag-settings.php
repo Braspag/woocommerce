@@ -35,6 +35,14 @@ return apply_filters(
             'default' => 'no',
             'desc_tip' => true,
         ),
+        'silent_post' => array(
+            'title' => __('Silent Order Post', 'woocommerce-braspag'),
+            'label' => __('Enable Silent Order Post', 'woocommerce-braspag'),
+            'type' => 'checkbox',
+            'description' => __('Enable API Silent Order Post. This controls the option Sequence Criteria data to send for Braspag.', 'woocommerce-braspag'),
+            'default' => 'no',
+            'desc_tip' => true,
+        ),
         'merchant_id' => array(
             'title' => __('Merchant ID', 'woocommerce-braspag'),
             'type' => 'text',

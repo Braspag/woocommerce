@@ -229,7 +229,7 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
         $return = array();
         $installments++;
 
-        $grandTotal = WC()->cart->get_cart_contents_total();
+        $grandTotal = WC()->cart->get_total('edit');
 
         for ($i = 1; $i < $installments; $i++) {
             $installmentAmount = $grandTotal / $i;
@@ -621,6 +621,8 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
             "Category" => "C1",
             "Subcategory" => "CredentialsOnFile"
         ];
+
+        $payment_data['Partner'] = "WOO";
 
         $provider = $this
             ->get_braspag_payment_provider($checkout->get_value('braspag_creditcard-card-type'), $this->test_mode);

@@ -470,6 +470,8 @@ class WC_Gateway_Braspag_DebitCard extends WC_Gateway_Braspag
             $payment_data['SoftDescriptor'] = $this->soft_descriptor;
         }
 
+        $payment_data['Partner'] = "WOO";
+
         $payment_data = array_merge($payment_data, [
             "Provider" => $provider,
             "Type" => "DebitCard",
