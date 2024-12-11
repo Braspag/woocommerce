@@ -24,6 +24,24 @@ if (!defined('ABSPATH')) {
 // phpcs:disable WordPress.Files.FileName
 
 /**
+ * Unschedule Token Cleanup
+ *
+ * @return void
+ */
+function unschedule_token_cleanup() {
+	$scheduled_actions = as_get_scheduled_actions([
+		'hook' => 'woocommerce_payment_tokens_cleanup',
+		'status' => ActionScheduler_Store::STATUS_PENDING,
+	]);
+
+	foreach ($scheduled_actions as $action) {
+		as_unschedule_action('woocommerce_payment_tokens_cleanup', $action['args']);
+	}
+}
+
+register_deactivation_hook(__FILE__, 'unschedule_token_cleanup');
+
+/**
  * WooCommerce fallback notice.
  *
  * @return string

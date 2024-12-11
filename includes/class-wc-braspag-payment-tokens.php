@@ -17,6 +17,14 @@ class WC_Braspag_Payment_Tokens extends WC_Payment_Tokens
     {
 
         add_action('woocommerce_payment_token_deleted', array($this, 'woocommerce_payment_token_deleted'), 10, 2);
+        add_action('woocommerce_payment_tokens_cleanup', array($this, 'delete_expired_payment_tokens'));
+        // Agendar a rotina para rodar diariamente
+        function schedule_token_cleanup() {
+            if (!as_next_scheduled_action('woocommerce_payment_tokens_cleanup')) {
+                as_schedule_recurring_action(time(), DAY_IN_SECONDS, 'woocommerce_payment_tokens_cleanup');
+            }
+        }
+        add_action('init', 'schedule_token_cleanup');
     }
 
     /**
@@ -71,6 +79,78 @@ class WC_Braspag_Payment_Tokens extends WC_Payment_Tokens
                 WC_Braspag_Logger::log("O método delete_source() não está implementado na classe WC_Braspag_Customer.");
             }
         }
+    }
+
+    /**
+     * Delete Expired Payment Token
+     * @param $customer_id
+     * @param string $gateway_id
+     * @return void
+     */
+    public function delete_expired_payment_tokens($gateway_id = 'braspag')
+    {
+        // Obter todos os tokens de pagamento salvos no WooCommerce
+        $args = array(
+            'token_id'   => '',
+            'user_id'    => '',
+            'gateway_id' => '',
+            'type'       => '',
+        );
+        $tokens = WC_Payment_Tokens::get_tokens($args);
+
+        WC_Braspag_Logger::log(
+            "Debug: Tokens: ".print_r(count($tokens), true)
+        );
+
+        if (empty($tokens)) {
+            WC_Braspag_Logger::log(
+                "Info: Nenhum token encontrado para verificação de expiração."
+            );
+            return;
+        }
+
+        foreach ($tokens as $token) {
+            // Certifique-se de que é um token relacionado ao Braspag
+            if ($token->get_gateway_id() !== 'braspag') {
+                continue;
+            }
+
+            // Verifique se o token possui uma data de expiração
+            $expiry_month = $token->get_meta('expiry_month');
+            $expiry_year = $token->get_meta('expiry_year');
+
+            // Pula tokens sem data de expiração
+            if (!$expiry_month || !$expiry_year) {
+                continue;
+            }
+
+            // Verifica se o token está expirado
+            $current_year = (int) current_time('Y');
+            $current_month = (int) current_time('m');
+
+            if ($expiry_year < $current_year || ($expiry_year === $current_year && $expiry_month < $current_month)) {
+                // Exclui o token localmente
+                $token->delete();
+
+                // TODO
+                // Opcional: Excluir o token no sistema Braspag
+                // $customer = new WC_Braspag_Customer();
+                // $source_id = $token->get_token();
+                // if (!$customer->delete_source($source_id)) {
+                //     WC_Braspag_Logger::log(
+                //         "Error: Ao excluir o token {$source_id} no Braspag."
+                //     );
+                // } else {
+                //     WC_Braspag_Logger::log(
+                //         "Info: Token {$source_id} excluído com sucesso no Braspag."
+                //     );
+                // }
+            }
+        }
+
+        WC_Braspag_Logger::log(
+            "Info: Rotina de exclusão de tokens expirados concluída."
+        );
     }
 
     /**
