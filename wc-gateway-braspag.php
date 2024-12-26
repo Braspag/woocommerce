@@ -59,8 +59,6 @@ add_action('plugins_loaded', 'woocommerce_gateway_braspag_init');
 
 function woocommerce_gateway_braspag_init()
 {
-	load_plugin_textdomain('woocommerce-braspag', false, plugin_basename(dirname(__FILE__)) . '/languages');
-
 	if (!class_exists('WooCommerce')) {
 		add_action('admin_notices', 'wc_braspag_missing_wc_notice');
 		return;
