@@ -77,7 +77,7 @@ class WC_Braspag_Order_Handler extends WC_Braspag_Payment_Gateway
 
         $this->process_braspag_pagador_action_response($response, $order);
 
-        WC_Braspag_Helper::is_wc_lt('3.0') ? update_post_meta($order_id, '_braspag_charge_captured', 'yes') : $order->update_meta_data('_braspag_charge_captured', 'yes');
+        WC_Braspag_Helper::is_wc_lt('3.0') ? $order = wc_get_order($order_id, '_braspag_charge_captured', 'yes') : $order->update_meta_data('_braspag_charge_captured', 'yes');
         $order->save();
 
         return $this;
@@ -164,7 +164,7 @@ class WC_Braspag_Order_Handler extends WC_Braspag_Payment_Gateway
 
         $this->process_braspag_pagador_action_response($response, $order);
 
-        WC_Braspag_Helper::is_wc_lt('3.0') ? update_post_meta($order_id, '_braspag_charge_refunded', 'yes') : $order->update_meta_data('_braspag_charge_refunded', 'yes');
+        WC_Braspag_Helper::is_wc_lt('3.0') ? $order = wc_get_order($order_id, '_braspag_charge_refunded', 'yes') : $order->update_meta_data('_braspag_charge_refunded', 'yes');
         $order->save();
 
         return $this;
