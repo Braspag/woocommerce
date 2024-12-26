@@ -19,7 +19,8 @@ class WC_Braspag_Payment_Tokens extends WC_Payment_Tokens
         add_action('woocommerce_payment_token_deleted', array($this, 'woocommerce_payment_token_deleted'), 10, 2);
         add_action('woocommerce_payment_tokens_cleanup', array($this, 'delete_expired_payment_tokens'));
         // Agendar a rotina para rodar diariamente
-        function schedule_token_cleanup() {
+        function schedule_token_cleanup()
+        {
             if (!as_next_scheduled_action('woocommerce_payment_tokens_cleanup')) {
                 as_schedule_recurring_action(time(), DAY_IN_SECONDS, 'woocommerce_payment_tokens_cleanup');
             }
@@ -91,15 +92,15 @@ class WC_Braspag_Payment_Tokens extends WC_Payment_Tokens
     {
         // Obter todos os tokens de pagamento salvos no WooCommerce
         $args = array(
-            'token_id'   => '',
-            'user_id'    => '',
+            'token_id' => '',
+            'user_id' => '',
             'gateway_id' => '',
-            'type'       => '',
+            'type' => '',
         );
         $tokens = WC_Payment_Tokens::get_tokens($args);
 
         WC_Braspag_Logger::log(
-            "Debug: Tokens: ".print_r(count($tokens), true)
+            "Debug: Tokens: " . print_r(count($tokens), true)
         );
 
         if (empty($tokens)) {

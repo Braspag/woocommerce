@@ -43,7 +43,10 @@ function unschedule_token_cleanup() {
 	]);
 
 	foreach ($scheduled_actions as $action) {
-		as_unschedule_action('woocommerce_payment_tokens_cleanup', $action['args']);
+		if ($action instanceof ActionScheduler_Action) {
+			$args = $action->get_args(); // Use o método da classe para obter os argumentos
+			as_unschedule_action('woocommerce_payment_tokens_cleanup', $args);
+		}
 	}
 }
 
@@ -90,8 +93,6 @@ add_action('plugins_loaded', 'woocommerce_gateway_braspag_init');
 
 function woocommerce_gateway_braspag_init()
 {
-	load_plugin_textdomain('woocommerce-braspag', false, plugin_basename(dirname(__FILE__)) . '/languages');
-
 	if (!class_exists('WooCommerce')) {
 		add_action('admin_notices', 'wc_braspag_missing_wc_notice');
 		return;
