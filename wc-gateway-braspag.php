@@ -35,7 +35,10 @@ function unschedule_token_cleanup() {
 	]);
 
 	foreach ($scheduled_actions as $action) {
-		as_unschedule_action('woocommerce_payment_tokens_cleanup', $action['args']);
+		if ($action instanceof ActionScheduler_Action) {
+			$args = $action->get_args(); // Use o método da classe para obter os argumentos
+			as_unschedule_action('woocommerce_payment_tokens_cleanup', $args);
+		}
 	}
 }
 
