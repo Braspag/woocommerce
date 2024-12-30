@@ -27,8 +27,8 @@ class WC_Braspag_OAuth_API
     public static function get_headers_sop($request)
     {
         if (
-            !isset($request['sop_authentication_client_id'])
-            || !isset($request['sop_authentication_client_secret'])
+            !isset($request['silentpost_oauth_client_id'])
+            || !isset($request['silentpost_oauth_client_secret'])
         ) {
             throw new WC_Braspag_Exception(
                 print_r(
@@ -40,7 +40,7 @@ class WC_Braspag_OAuth_API
         }
 
         $authorization = self::get_authorization(
-            $request['sop_authentication_client_id'], $request['sop_authentication_client_secret']
+            $request['silentpost_oauth_client_id'], $request['silentpost_oauth_client_secret']
         );
 
         return apply_filters(
@@ -92,6 +92,8 @@ class WC_Braspag_OAuth_API
      */
     public static function get_authorization($client_id, $client_secret)
     {
+        WC_Braspag_Logger::log("Info: OAuth Concat " . print_r($client_id.':'.$client_secret, true));
+
         return base64_encode($client_id . ":" . $client_secret);
     }
 
