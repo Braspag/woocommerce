@@ -90,6 +90,13 @@ return apply_filters(
             'default' => 'no',
             'desc_tip' => true,
         ),
+        'silentpost_merchant_id' => array(
+            'title' => __('SOP Merchant ID', 'woocommerce-braspag'),
+            'type' => 'text',
+            'description' => __('Get your Merchant ID from Braspag Support.', 'woocommerce-braspag'),
+            'default' => '',
+            'desc_tip' => true,
+        ),
         'silentpost_oauth_client_id' => array(
             'title' => __('Client ID', 'woocommerce-braspag'),
             'type' => 'text',
