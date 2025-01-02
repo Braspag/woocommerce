@@ -226,11 +226,12 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
     {
         echo '<div id="bpsop_data">
                 <div id="bpsop_data_token">
-                    <input type="hidden" name="PaymentToken" id="PaymentToken"/>
-                    <input type="hidden" name="CardToken" id="CardToken"/>
+                    <input type="hidden" name="bp-sop-cardtype" id="bp-sop-cardtype" class="bp-sop-cardtype"/>
+                    <input type="hidden" name="bp-sop-cardexpirationdate" id="bp-sop-cardexpirationdate" class="bp-sop-cardexpirationdate"/>
+                    <input type="hidden" name="bp-sop-cardnumber" id="bp-sop-cardnumber" class="bp-sop-cardnumber"/>
                 </div>
             </div>
-            ';
+        ';
     }
 
     /**
@@ -343,17 +344,20 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
         wp_enqueue_script('wc-braspag-authsop');
 
         if ($this->test_mode == 'yes') {
-            $enviroment = 'https://transactionsandbox.pagador.com.br/post/api/public/v2';
+            $url = 'https://transactionsandbox.pagador.com.br/post/api/public/v2';
+            $enviroment = 'sandbox';
         } else {
-            $enviroment = 'https://www.pagador.com.br/post/api/public/v2';
+            $url = 'https://www.pagador.com.br/post/api/public/v2';
+            $enviroment = 'production';
         }
 
-        $silentpost_oauth_client_id = $this->get_option('silentpost_oauth_client_id');
-        $sop_merchant_id = $this->get_option('merchant_id');
+        $sop_oauth_client_id = $this->get_option('silentpost_oauth_client_id');
+        $sop_merchant_id = $this->get_option('silentpost_merchant_id');
+        $merchant_id = $this->get_option('merchant_id');
 
         $auth_sop_token = $this->get_oauth_token_sop();
-        // public function get_access_token_sop($enviroment, $endpoint, $method, $auth_sop_token, $merchant_id)
-        $access_sop_token = $this->get_access_token_sop($enviroment, 'accesstoken', 'POST', $auth_sop_token, $sop_merchant_id);
+
+        $access_sop_token = $this->get_access_token_sop($url, 'accesstoken', 'POST', $auth_sop_token, $sop_merchant_id);
 
         wp_localize_script(
             'wc-braspag-authsop',
@@ -361,11 +365,20 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
             apply_filters(
                 'wc_gateway_braspag_pagador_authsop_params',
                 array(
-                    'bpMerchantId' => $this->get_option('merchant_id'),
-                    'bpMerchantIdSOP' => $silentpost_oauth_client_id,
+                    'bpMerchantId' => $merchant_id,
+                    'bpClientId' => $sop_oauth_client_id,
+                    'bpMerchantIdSOP' => $sop_merchant_id,
                     'bpOauthToken' => $auth_sop_token,
                     'bpAccessToken' => $access_sop_token,
                     'bpEnvironment' => $enviroment,
+                    'testMode' => $this->test_mode,
+                    'provider' => 'brasppag',
+                    'enable' => $this->get_option('silentpost_enabled', 'false'),
+                    'verifyCard' => $this->get_option('silentpost_verify_enable', 'false'),
+                    'binQuery' => $this->get_option('silentpost_binquery_enable', 'false'),
+                    'tokenize' => $this->get_option('silentpost_token_type', 'no'),
+                    'language' => $this->get_option('silentpost_language', 'pt'),
+                    'cvvrequired' => $this->get_option('silentpost_cvvrequired', 'true'),
                 )
             )
         );
