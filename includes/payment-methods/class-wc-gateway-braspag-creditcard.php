@@ -1,4 +1,7 @@
 <?php
+
+use Pusher\Log\Logger;
+
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -58,6 +61,8 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
 
     protected $auth3ds20_mpi_authorize_on_unsupported_brand;
 
+    protected $sop_enabled;
+
     public function __construct()
     {
         $this->retry_interval = 1;
@@ -79,6 +84,7 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
         $this->settings_extra_data();
 
         $braspag_main_settings = get_option('woocommerce_braspag_settings');
+        $this->sop_enabled = isset($braspag_main_settings['silentpost_enabled']) ? $braspag_main_settings['silentpost_enabled'] : 'no';
 
         $braspag_enabled = isset($braspag_main_settings['enabled']) ? $braspag_main_settings['enabled'] : 'no';
         $test_mode = isset($braspag_main_settings['test_mode']) ? $braspag_main_settings['test_mode'] : 'no';
@@ -257,30 +263,53 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
             $installmentsOptions .= "<option value=" . $key . ">" . $installment . "</option>";
         }
 
+        if($this->sop_enabled === 'yes') {
+            $sop_type_class = 'bp-sop-cardtype';
+            $sop_expiry_class = 'bp-sop-cardexpirationdate';
+            $sop_cvc_class = 'bp-sop-cardcvv';
+            $sop_number_class = 'bp-sop-cardnumber';
+            $sop_holder_class = 'bp-sop-cardholdername';
+        }else{
+            $sop_type_class = '';
+            $sop_expiry_class = '';
+            $sop_cvc_class = '';
+            $sop_number_class = '';
+            $sop_holder_class = '';
+        }
+
+        //$sop_type_class = '';
+        $sop_expiry_class = '';
+        //$sop_cvc_class = '';
+        $sop_number_class = '';
+        //$sop_holder_class = '';
+
         $default_fields = array(
             'creditcard-holder-field' => '<p class="form-row form-row-wide">
 				<label for="' . esc_attr($this->id) . '-card-holder">' . esc_html__('Nome do Titular', 'woocommerce-braspag') . '&nbsp;<span class="required">*</span></label>
-				<input id="' . esc_attr($this->id) . '-card-holder" class="input-text wc-braspag-elements-field wc-credit-card-form-card-holder" inputmode="string" autocomplete="cc-holder" autocorrect="no" type="text" autocapitalize="no" spellcheck="no" type="holder" ' . $this->field_name('card-holder') . ' />
+				<input id="' . esc_attr($this->id) . '-card-holder" class="input-text wc-braspag-elements-field wc-credit-card-form-card-holder '.$sop_holder_class.'" inputmode="string" autocomplete="cc-holder" autocorrect="no" type="text" autocapitalize="no" spellcheck="no" type="holder" ' . $this->field_name('card-holder') . ' />
 			</p>',
             'creditcard-number-field' => '<p class="form-row form-row-wide">
 				<label for="' . esc_attr($this->id) . '-card-number">' . esc_html__('Número do Cartão', 'woocommerce-braspag') . '&nbsp;<span class="required">*</span></label>
-				<input id="' . esc_attr($this->id) . '-card-number" class="input-text wc-credit-card-form-braspag-card-number" onkeypress="" inputmode="numeric" autocomplete="cc-number" autocorrect="no" autocapitalize="no" spellcheck="no" type="tel" placeholder="&bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull;" ' . $this->field_name('card-number') . ' />
+				<input id="' . esc_attr($this->id) . '-card-number" class="'.$sop_number_class.' input-text wc-credit-card-form-braspag-card-number" onkeypress="" inputmode="numeric" autocomplete="cc-number" autocorrect="no" autocapitalize="no" spellcheck="no" type="tel" placeholder="&bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull;" ' . $this->field_name('card-number') . ' />
 			</p>',
             'creditcard-expiry-field' => '<p class="form-row form-row-wide">
 				<label for="' . esc_attr($this->id) . '-card-expiry">' . esc_html__('Data de Expiração (MM/YY)', 'woocommerce-braspag') . '&nbsp;<span class="required">*</span></label>
-				<input id="' . esc_attr($this->id) . '-card-expiry" class="input-text wc-credit-card-form-card-expiry" inputmode="numeric" autocomplete="cc-exp" autocorrect="no" autocapitalize="no" spellcheck="no" type="tel" placeholder="' . esc_attr__('MM / YY', 'woocommerce') . '" ' . $this->field_name('card-expiry') . ' />
+				<input id="' . esc_attr($this->id) . '-card-expiry" class="input-text wc-credit-card-form-card-expiry '.$sop_expiry_class.'" inputmode="numeric" autocomplete="cc-exp" autocorrect="no" autocapitalize="no" spellcheck="no" type="tel" placeholder="' . esc_attr__('MM / YY', 'woocommerce') . '" ' . $this->field_name('card-expiry') . ' />
 			</p>',
             'creditcard-cvc-field' => '<p class="form-row form-row-wide">
                 <label for="' . esc_attr($this->id) . '-card-cvc">' . esc_html__('Código de Segurança', 'woocommerce-braspag') . '&nbsp;<span class="required">*</span></label>
-                <input id="' . esc_attr($this->id) . '-card-cvc" class="input-text wc-credit-card-form-card-cvc" inputmode="numeric" autocomplete="off" autocorrect="no" autocapitalize="no" spellcheck="no" type="tel" maxlength="4" placeholder="' . esc_attr__('CVC', 'woocommerce') . '" ' . $this->field_name('card-cvc') . ' style="width:100px" />
+                <input id="' . esc_attr($this->id) . '-card-cvc" class="input-text wc-credit-card-form-card-cvc '.$sop_cvc_class.'" inputmode="numeric" autocomplete="off" autocorrect="no" autocapitalize="no" spellcheck="no" type="tel" maxlength="4" placeholder="' . esc_attr__('CVC', 'woocommerce') . '" ' . $this->field_name('card-cvc') . ' style="width:100px" />
             </p>',
             'creditcard-installments-field' => '<p class="form-row form-row-wide">
 				<label for="' . esc_attr($this->id) . '-card-installments">' . esc_html__('Parcelamento', 'woocommerce-braspag') . '&nbsp;<span class="required">*</span></label>
-				<select id="' . esc_attr($this->id) . '-card-installments" class="input-text wc-credit-card-form-card-cvc"  ' . esc_attr__('MM / YY', 'woocommerce') . '" ' . $this->field_name('card-installments') . ' > 
+				<select id="' . esc_attr($this->id) . '-card-installments" class="input-text wc-credit-card-form-card-cvc '.$sop_type_class.'" ' . $this->field_name('card-installments') . ' > 
 				    "' . $installmentsOptions . '"
 				</select>
 			</p>',
-            'creditcard-type-field' => '<input type="hidden" id="' . esc_attr($this->id) . '-card-type" class="wc-credit-card-form-card-type" ' . $this->field_name('card-type') . ' />'
+            'creditcard-type-field' => '<input type="hidden" id="' . esc_attr($this->id) . '-card-type" class="wc-credit-card-form-card-type " ' . $this->field_name('card-type') . ' />',
+            'creditcard-type-card' => '<input type="hidden" id="' . esc_attr($this->id) . '-card-type-card" class="wc-credit-card-form-card-type-card '.$sop_type_class.'" ' . $this->field_name('card-type-card') . ' value="creditCard" />',
+            'creditcard-card-token' => '<input type="hidden" id="' . esc_attr($this->id) . '-card-cardtoken" class="wc-credit-card-form-card-cardtoken" ' . $this->field_name('card-cardtoken') . '" />',
+            'creditcard-payment-token' => '<input type="hidden" id="' . esc_attr($this->id) . '-card-paymenttoken" class="wc-credit-card-form-card-paymenttoken" ' . $this->field_name('card-paymenttoken') . '" />'
         );
 
         $fields = apply_filters('wc_gateway_braspag_pagador_creditcard_elements_form_filter', $fields);
@@ -288,22 +317,22 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
         $fields = wp_parse_args($fields, apply_filters('woocommerce_credit_card_form_fields', $default_fields, $this->id));
 
         ?>
-                        <noscript><iframe src="<?php echo "https://h.online-metrix.net/fp/tags.js?org_id={$this->antifraud_finger_print_org_id}&session_id={$this->antifraud_finger_print_session_id}" ?>"></iframe></noscript>
+            <noscript><iframe src="<?php echo "https://h.online-metrix.net/fp/tags.js?org_id={$this->antifraud_finger_print_org_id}&session_id={$this->antifraud_finger_print_session_id}" ?>"></iframe></noscript>
 
-                        <fieldset id="wc-<?php echo esc_attr($this->id); ?>-cc-form" class='wc-credit-card-form wc-payment-form'>
-                            <?php do_action('woocommerce_credit_card_form_start', $this->id); ?>
-                            <?php
-                            foreach ($fields as $field) {
-                                echo $field; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
-                            }
-                            ?>
-                            <?php do_action('woocommerce_credit_card_form_end', $this->id); ?>
-                            <div class="clear"></div>
-                        </fieldset>
+            <fieldset id="wc-<?php echo esc_attr($this->id); ?>-cc-form" class='wc-credit-card-form wc-payment-form'>
+                <?php do_action('woocommerce_credit_card_form_start', $this->id); ?>
+                <?php
+                foreach ($fields as $field) {
+                    echo $field; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+                }
+                ?>
+                <?php do_action('woocommerce_credit_card_form_end', $this->id); ?>
+                <div class="clear"></div>
+            </fieldset>
 
-                    <?php
+        <?php
 
-                    do_action('wc_gateway_braspag_pagador_creditcard_elements_form_after', $this->id);
+        do_action('wc_gateway_braspag_pagador_creditcard_elements_form_after', $this->id);
     }
 
     /**
@@ -608,14 +637,37 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
         $customer_wants_to_save_card = $checkout->get_value('wc-braspag_creditcard-new-payment-method') == 'true';
         $brandCard = $checkout->get_value('braspag_creditcard-card-type');
 
+        $cardnumber = [
+            "CardNumber" => str_replace(" ", "", $checkout->get_value('braspag_creditcard-card-number'))
+        ];
+
+        WC_Braspag_Logger::log('SOP: ' . $this->sop_enabled.'saved card: '.$this->save_card);
+
         $card_data = [
-            "CardNumber" => str_replace(" ", "", $checkout->get_value('braspag_creditcard-card-number')),
             "Holder" => $checkout->get_value('braspag_creditcard-card-holder'),
             "ExpirationDate" => $card_expiration_date,
             "SecurityCode" => $checkout->get_value('braspag_creditcard-card-cvc'),
             "Brand" => $brandCard,
             "SaveCard" => $this->save_card == 'yes' && $customer_wants_to_save_card
         ];
+
+        if($this->sop_enabled === 'yes') {
+            if($this->save_card == 'yes' && $customer_wants_to_save_card){
+                $returnData = $checkout->get_value('braspag_creditcard-card-cardtoken');
+                WC_Braspag_Logger::log('Card Token: ' . print_r($returnData, true));
+                $card_data = [
+                    "CardToken" => $returnData
+                ];
+            }else{
+                $returnData = $checkout->get_value('braspag_creditcard-card-paymenttoken');
+                WC_Braspag_Logger::log('Payment Token: ' . print_r($returnData, true));
+                $cardnumber = [
+                    "PaymentToken" => $returnData
+                ];
+            }
+        }
+
+        $card_data = array_merge($card_data, $cardnumber);
 
         $InitiatedTransactionIndicator = [
             "Category" => "C1",
@@ -826,6 +878,7 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
         'yes' !== $this->antifraud_enabled
         || 'yes' !== $this->antifraud_send_with_pagador_transaction
         || 'yes' === $this->auth3ds20_mpi_is_active
+        || 'yes' === $this->sop_enabled
         ) {
             return $payment_data;
         }

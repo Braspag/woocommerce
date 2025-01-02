@@ -17,7 +17,7 @@ var braspagCards = [
 	}, {
 		type: 'elo',
 		typeTitle: 'Elo',
-		patterns: [6363,4389,5041,4514,6362,5067,4576,4011],
+		patterns: [6363, 4389, 5041, 4514, 6362, 5067, 4576, 4011],
 		regex_include: '',
 		regex_exclude: '',
 		format: braspagDefaultCardRegexFormat,
@@ -27,7 +27,7 @@ var braspagCards = [
 	}, {
 		type: 'carnet',
 		typeName: 'Carnet',
-		patterns: [2869,5022,5061,5062,5064,5887,6046,6063,6275,6363,6393,6394,6395],
+		patterns: [2869, 5022, 5061, 5062, 5064, 5887, 6046, 6063, 6275, 6363, 6393, 6394, 6395],
 		format: braspagDefaultCardRegexFormat,
 		regex_include: '^(286900|502275|506(199|2(0[1-6]|1[2-578]|2[289]|3[67]|4[579]|5[01345789]|6[1-79]|7[02-9]|8[0-7]|9[234679])|3(0[0-9]|1[1-479]|2[0239]|3[02-79]|4[0-49]|5[0-79]|6[014-79]|7[0-4679]|8[023467]|9[1234689])|4(0[0-8]|1[0-7]|2[0-46789]|3[0-9]|4[0-69]|5[0-79]|6[0-38]))|588772|604622|606333|627535|636(318|379)|639(388|484|559))',
 		regex_exclude: '',
@@ -37,14 +37,14 @@ var braspagCards = [
 	}, {
 		type: 'cabal',
 		typeName: 'Cabal',
-		patterns: [6042,6043,6271,6035,5896],
+		patterns: [6042, 6043, 6271, 6035, 5896],
 		regex_include: '^((627170)|(589657)|(603522)|(604((20[1-9])|(2[1-9][0-9])|(3[0-9]{2})|(400))))',
 		regex_exclude: '',
 		format: braspagDefaultCardRegexFormat,
 		length: [16],
 		cvcLength: [3],
 		luhn: true
-	},{
+	}, {
 		type: 'visa',
 		typeName: 'Visa',
 		patterns: [4],
@@ -97,7 +97,7 @@ var braspagCards = [
 	}, {
 		type: 'discover',
 		typeName: 'Discover',
-		patterns: [6011,622,64,65],
+		patterns: [6011, 622, 64, 65],
 		regex_include: '',
 		regex_exclude: '',
 		format: braspagDefaultCardRegexFormat,
@@ -127,7 +127,7 @@ var braspagCards = [
 	}, {
 		type: 'hipercard',
 		typeName: 'Hipercard',
-		patterns: [38,60,6062,6370,6375,6376],
+		patterns: [38, 60, 6062, 6370, 6375, 6376],
 		regex_include: '^((606282)|(637095)|(637568)|(637599)|(637609)|(637612))',
 		regex_exclude: '',
 		format: braspagDefaultCardRegexFormat,
@@ -151,12 +151,12 @@ var Braspag = Class.create();
 
 Braspag.prototype = {
 
-	initialize: function() {
+	initialize: function () {
 		this.registerCardType();
 		this.formatCreditCardNumber();
 	},
 
-	getCardInfoFromNumber : function(num) {
+	getCardInfoFromNumber: function (num) {
 		var card, p, pattern, _i, _j, _len, _len1, _ref;
 
 		num = (num + '').replace(/\D/g, '');
@@ -196,9 +196,9 @@ Braspag.prototype = {
 		}
 	},
 
-	registerCardType: function() {
+	registerCardType: function () {
 		let self = this;
-		jQuery('body').on('keyup', '.wc-credit-card-form-braspag-card-number', function(e) {
+		jQuery('body').on('keyup', '.wc-credit-card-form-braspag-card-number', function (e) {
 
 			e.preventDefault();
 			let cardNumber = jQuery(this).val();
@@ -211,9 +211,9 @@ Braspag.prototype = {
 		});
 	},
 
-	formatCreditCardNumber: function() {
+	formatCreditCardNumber: function () {
 		let self = this;
-		jQuery('body').on('keyup', '.wc-credit-card-form-braspag-card-number', function(e) {
+		jQuery('body').on('keyup', '.wc-credit-card-form-braspag-card-number', function (e) {
 			e.preventDefault();
 			let cardNumber = jQuery(this).val();
 			let cardNumberFormated = self.formatCardNumber(cardNumber);
@@ -221,7 +221,7 @@ Braspag.prototype = {
 		});
 	},
 
-	formatCardNumber : function(num) {
+	formatCardNumber: function (num) {
 		var card, groups, upperLength, _ref;
 		num = num.replace(/\D/g, '');
 		card = this.getCardInfoFromNumber(num);
@@ -238,15 +238,14 @@ Braspag.prototype = {
 				return;
 			}
 			groups.shift();
-			groups = jQuery.grep(groups, function(n) {
+			groups = jQuery.grep(groups, function (n) {
 				return n;
 			});
 			return groups.join(' ');
 		}
 	},
-	placeOrder: async function() {
-
-		let checkout_payment_element =  jQuery( '.woocommerce-checkout-payment, .woocommerce-checkout-review-order-table' );
+	placeOrder: async function () {
+		let checkout_payment_element = jQuery('.woocommerce-checkout-payment, .woocommerce-checkout-review-order-table');
 
 		this.blockElement(checkout_payment_element);
 
@@ -259,12 +258,22 @@ Braspag.prototype = {
 			return true;
 		}
 
-		form.submit();
+		sop.logger();
+		let sop_enable = sop.isSopEnabled();
+		if (typeof sop != "undefined" && sop.isSopEnabled()) {
+			console.log('sop_enable: ' + sop_enable);
+
+			sop.registerCardNumberSync();
+			sop.registerCardExpirySync();
+			sop.registerPaymentMethodEvents();
+			sop.bpInit(form);
+		}
+
 		return true;
 	},
-	blockElement : function(element) {
+	blockElement: function (element) {
 
-		element.addClass( 'processing' ).block({
+		element.addClass('processing').block({
 			message: null,
 			overlayCSS: {
 				background: '#fff',
@@ -272,8 +281,8 @@ Braspag.prototype = {
 			}
 		});
 	},
-	unBlockElement : function(element) {
-		element.removeClass( 'processing' ).unblock();
+	unBlockElement: function (element) {
+		element.removeClass('processing').unblock();
 	}
 };
 

@@ -35,14 +35,6 @@ return apply_filters(
             'default' => 'no',
             'desc_tip' => true,
         ),
-        'silent_post' => array(
-            'title' => __('Silent Order Post', 'woocommerce-braspag'),
-            'label' => __('Enable Silent Order Post', 'woocommerce-braspag'),
-            'type' => 'checkbox',
-            'description' => __('Enable API Silent Order Post. This controls the option Sequence Criteria data to send for Braspag.', 'woocommerce-braspag'),
-            'default' => 'no',
-            'desc_tip' => true,
-        ),
         'merchant_id' => array(
             'title' => __('Merchant ID', 'woocommerce-braspag'),
             'type' => 'text',
@@ -85,10 +77,112 @@ return apply_filters(
             'default' => '',
             'desc_tip' => true,
         ),
+        'silentpost' => array(
+            'title' => "<hr>" . __('Silent Order Post', 'woocommerce-braspag'),
+            'type' => 'title',
+            'description' => '',
+        ),
+        'silentpost_enabled' => array(
+            'title' => __('Enable/Disable', 'woocommerce-braspag'),
+            'label' => __('Enable Silent Order Post', 'woocommerce-braspag'),
+            'type' => 'checkbox',
+            'description' => __('Enable API Silent Order Post. This controls the option Sequence Criteria data to send for Braspag.', 'woocommerce-braspag'),
+            'default' => 'no',
+            'desc_tip' => true,
+        ),
+        'silentpost_merchant_id' => array(
+            'title' => __('SOP Merchant ID', 'woocommerce-braspag'),
+            'type' => 'text',
+            'description' => __('Get your Merchant ID from Braspag Support.', 'woocommerce-braspag'),
+            'default' => '',
+            'desc_tip' => true,
+        ),
+        'silentpost_oauth_client_id' => array(
+            'title' => __('Client ID', 'woocommerce-braspag'),
+            'type' => 'text',
+            'description' => __('Get your SOP Client ID from Braspag Support.', 'woocommerce-braspag'),
+            'default' => '',
+            'desc_tip' => true,
+        ),
+        'silentpost_oauth_client_secret' => array(
+            'title' => __('SOP - Client Secret', 'woocommerce-braspag'),
+            'type' => 'text',
+            'description' => __('Get your SOP Client Secret from Braspag Support.', 'woocommerce-braspag'),
+            'default' => '',
+            'desc_tip' => true,
+        ),
+        'silentpost_language' => array(
+            'title' => __('Language', 'woocommerce-braspag'),
+            'type' => 'text',
+            'description' => __('Idioma: "pt" para português | "en" para inglês | "es"para espanhol.', 'woocommerce-braspag'),
+            'default' => 'pt',
+            'desc_tip' => true,
+        ),
+        'silentpost_language_desc' => array(
+            'title' => '',
+            'type' => 'title',
+            'description' => 'Idioma: "pt" para português | "en" para inglês | "es"para espanhol.',
+        ),
+        'silentpost_cvvrequired' => array(
+            'title' => __('Send CVV field as required', 'woocommerce-braspag'),
+            'label' => __('Yes', 'woocommerce-braspag'),
+            'type' => 'checkbox',
+            'description' => __('Se habilitado irá enviar o tipo Card Token.', 'woocommerce-braspag'),
+            'default' => 'yes',
+            'desc_tip' => true,
+        ),
+        'silentpost_cvvrequired_desc' => array(
+            'title' => '',
+            'type' => 'title',
+            'description' => '"false" (desliga a obrigatoriedade de envio do CVV) / "true" (caso contrário).
+             A loja precisa ter autorização da adquirente para transacionar sem o CVV.',
+        ),
+        'silentpost_token_type' => array(
+            'title' => __('Send Card with CardToken', 'woocommerce-braspag'),
+            'label' => __('Yes', 'woocommerce-braspag'),
+            'type' => 'checkbox',
+            'description' => __('Se habilitado irá enviar o tipo Card Token.', 'woocommerce-braspag'),
+            'default' => '',
+            'desc_tip' => true,
+        ),
+        'silentpost_token_type_desc' => array(
+            'title' => '',
+            'type' => 'title',
+            'description' => 'Por padrão será enviado um Token efêmero com duração de 20 minutos e pode ser usado apenas uma vez. 
+            Caso for marcado salva o cartão diretamente no Cartão Protegido, retornando um CardToken ao invés de um PaymentToken.
+            E tambem será salvo no perfil do cliente para ser reutilizado em futuras compras com o JustClick.',
+        ),
+        'silentpost_verify_enable' => array(
+            'title' => __('Send with Verify Card', 'woocommerce-braspag'),
+            'label' => __('Yes', 'woocommerce-braspag'),
+            'type' => 'checkbox',
+            'description' => __('Se habilitado irá enviar o Verify Card.', 'woocommerce-braspag'),
+            'default' => '',
+            'desc_tip' => true,
+        ),
+        'silentpost_verify_desc' => array(
+            'title' => '',
+            'type' => 'title',
+            'description' => '"true" (habilita o ZeroAuth, retornando se o cartão é válido ou não) / "false" (caso contrário).
+            * Saiba mais no manual VerifyCard',
+        ),
+        'silentpost_binquery_enable' => array(
+            'title' => __('Send with Bin Query', 'woocommerce-braspag'),
+            'label' => __('Yes', 'woocommerce-braspag'),
+            'type' => 'checkbox',
+            'description' => __('Se habilitado irá enviar o Bin Query.', 'woocommerce-braspag'),
+            'default' => '',
+            'desc_tip' => true,
+        ),
+        'silentpost_binquery_desc' => array(
+            'title' => '',
+            'type' => 'title',
+            'description' => '"true" (habilita o Consulta BIN, retornando as características do cartão) / "false" (caso contrário).
+             Saiba mais sobre Consulta BIN no manual VerifyCard. Obs.: Disponível somente para Cielo 3.0.*',
+        ),
         'oauth_authentication' => array(
             'title' => "<hr>" . __('OAuth Authentication', 'woocommerce-braspag'),
             'type' => 'title',
-            /* translators: post_notification URL */
             'description' => '',
         ),
         'oauth_authentication_client_id' => array(
