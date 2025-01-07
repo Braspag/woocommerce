@@ -63,6 +63,8 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
 
     protected $sop_enabled;
 
+    protected $sop_tokenize;
+
     public function __construct()
     {
         $this->retry_interval = 1;
@@ -85,6 +87,7 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
 
         $braspag_main_settings = get_option('woocommerce_braspag_settings');
         $this->sop_enabled = isset($braspag_main_settings['silentpost_enabled']) ? $braspag_main_settings['silentpost_enabled'] : 'no';
+        $this->sop_tokenize = isset($braspag_main_settings['silentpost_token_type']) ? $braspag_main_settings['silentpost_token_type'] : 'no';
 
         $braspag_enabled = isset($braspag_main_settings['enabled']) ? $braspag_main_settings['enabled'] : 'no';
         $test_mode = isset($braspag_main_settings['test_mode']) ? $braspag_main_settings['test_mode'] : 'no';
@@ -637,10 +640,6 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
         $customer_wants_to_save_card = $checkout->get_value('wc-braspag_creditcard-new-payment-method') == 'true';
         $brandCard = $checkout->get_value('braspag_creditcard-card-type');
 
-        $cardnumber = [
-            "CardNumber" => str_replace(" ", "", $checkout->get_value('braspag_creditcard-card-number'))
-        ];
-
         WC_Braspag_Logger::log('SOP: ' . $this->sop_enabled.'saved card: '.$this->save_card);
 
         $card_data = [
@@ -652,10 +651,10 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
         ];
 
         if($this->sop_enabled === 'yes') {
-            if($this->save_card == 'yes' && $customer_wants_to_save_card){
+            if($this->save_card == 'yes' && $customer_wants_to_save_card && $this->sop_tokenize === 'yes'){
                 $returnData = $checkout->get_value('braspag_creditcard-card-cardtoken');
                 WC_Braspag_Logger::log('Card Token: ' . print_r($returnData, true));
-                $card_data = [
+                $cardnumber = [
                     "CardToken" => $returnData
                 ];
             }else{
@@ -665,6 +664,10 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
                     "PaymentToken" => $returnData
                 ];
             }
+        }else{
+            $cardnumber = [
+                "CardNumber" => $checkout->get_value('braspag_creditcard-card-number')
+            ];
         }
 
         $card_data = array_merge($card_data, $cardnumber);
