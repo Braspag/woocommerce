@@ -246,30 +246,29 @@ Braspag.prototype = {
 	},
 	placeOrder: async function () {
 		let checkout_payment_element = jQuery('.woocommerce-checkout-payment, .woocommerce-checkout-review-order-table');
+		const form = jQuery('form.woocommerce-checkout');
 
-		this.blockElement(checkout_payment_element);
+		try {
+			this.blockElement(checkout_payment_element);
 
-		let form = jQuery('form.woocommerce-checkout');
+			if (typeof bpmpi != "undefined" && bpmpi.isBpmpiEnabled()) {
+				await bpmpi.placeOrder(form);
+				return true;
+			}
 
-		this.unBlockElement(checkout_payment_element);
-
-		if (typeof bpmpi != "undefined" && bpmpi.isBpmpiEnabled()) {
-			await bpmpi.placeOrder(form);
+			if (typeof sop != "undefined" && sop.isSopEnabled()) {
+				await sop.processSop(form);
+				return true;
+			}
+			
+			form.submit();
 			return true;
+		} catch (e) {
+			console.error('Erro ao processar o pedido:', error);
+        	return false;
+		}finally{
+			this.unBlockElement(checkout_payment_element);
 		}
-
-		sop.logger();
-		let sop_enable = sop.isSopEnabled();
-		if (typeof sop != "undefined" && sop.isSopEnabled()) {
-			console.log('sop_enable: ' + sop_enable);
-
-			sop.registerCardNumberSync();
-			sop.registerCardExpirySync();
-			sop.registerPaymentMethodEvents();
-			sop.bpInit(form);
-		}
-
-		return true;
 	},
 	blockElement: function (element) {
 

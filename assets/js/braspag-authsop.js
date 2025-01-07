@@ -35,7 +35,21 @@ Sop.prototype = {
     this.debitCardMethod = document.querySelector("#payment_method_braspag_debitcard");
     this.sop_enable = braspag_authsop_params.enable || false;
   },
+  processSop: function (form) {
+    try {
+      if (this.testMode) {
+        console.log('SOP Habilitado');
+        this.logger();
+      }
 
+      this.registerCardNumberSync();
+      this.registerCardExpirySync();
+      this.registerPaymentMethodEvents();
+      this.bpInit(form);
+    } catch (error) {
+      console.error('Erro ao processar SOP:', error);
+    }
+  },
   bpInit: function (form) {
     if (this.creditCardMethod && this.creditCardMethod.checked) {
       this.cardType = 'creditCard';
@@ -59,7 +73,7 @@ Sop.prototype = {
         } else {
           element = document.getElementById('braspag_creditcard-card-cardtoken');
           element.value = response.CardToken;
-          console.log('CardToken: ' + response.CardToken).toLowerCase();
+          console.log('CardToken: ' + response.CardToken.toLowerCase());
         }
 
         // enviar o payment token para ser usado no lugar do cartão
