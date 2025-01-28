@@ -26,6 +26,7 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
     protected $extra_data_collection;
     protected $soft_descriptor;
     protected $silentorderpost_enabled;
+    protected $verifycard_enabled;
 
     public function __construct()
     {
@@ -54,6 +55,7 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
         $this->test_mode = 'yes' === $this->get_option('test_mode');
 
         $this->silentorderpost_enabled = $this->get_option('silentpost_enabled');
+        $this->verifycard_enabled = $this->get_option('verifycard_enabled');
 
         $this->antifraud_enabled = 'yes' === $this->get_option('antifraud_enabled');
         $this->antifraud_finger_print_org_id = $this->get_option('antifraud_finger_print_org_id');
@@ -310,6 +312,10 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
         wp_register_script('wc-braspag', plugins_url('assets/js/braspag.js', WC_BRASPAG_MAIN_FILE), array('prototype', 'jquery-payment'), WC_BRASPAG_VERSION, true);
         wp_enqueue_script('wc-braspag');
 
+        if ($this->verifycard_enabled == 'yes') {
+            $this->payment_scripts_verifycard();
+        }
+
         if ($this->silentorderpost_enabled == 'yes') {
             if ($this->test_mode == 'yes') {
                 wp_register_script('wc-braspag-silent-order-post', "https://transactionsandbox.pagador.com.br/post/Scripts/silentorderpost-1.0.min.js", array(), '', false);
@@ -327,6 +333,8 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
 
         $this->payment_scripts_auth3ds20();
     }
+
+    
 
     /**
      * @throws WC_Braspag_Exception
@@ -429,6 +437,34 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
                 )
             );
         }
+    }
+
+    /**
+     * Generate UUID
+     * @return mixed|void
+     */
+    public function generate_uuid()
+    {
+        if (function_exists('random_bytes')) {
+            // Verifica se random_bytes está disponível
+            $data = random_bytes(16);
+        } elseif (function_exists('openssl_random_pseudo_bytes')) {
+            // Verifica se openssl_random_pseudo_bytes está disponível
+            $data = openssl_random_pseudo_bytes(16);
+        } else {
+            // Fallback usando mt_rand (menos seguro, mas funciona em versões antigas)
+            $data = '';
+            for ($i = 0; $i < 16; $i++) {
+                $data .= chr(mt_rand(0, 255));
+            }
+        }
+
+        // Ajusta os bits para versão 4 e variante 10xx
+        $data[6] = chr((ord($data[6]) & 0x0f) | 0x40); // Versão 4 (random)
+        $data[8] = chr((ord($data[8]) & 0x3f) | 0x80); // Variante 10xx
+
+        // Retorna no formato padrão UUID
+        return vsprintf('%08x-%04x-%04x-%04x-%12x', str_split(bin2hex($data), 4));
     }
 
     /**
