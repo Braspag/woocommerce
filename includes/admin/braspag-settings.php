@@ -180,6 +180,19 @@ return apply_filters(
             'description' => '"true" (habilita o Consulta BIN, retornando as características do cartão) / "false" (caso contrário).
              Saiba mais sobre Consulta BIN no manual VerifyCard. Obs.: Disponível somente para Cielo 3.0.*',
         ),
+        'verifycard' => array(
+            'title' => "<hr>" . __('Verify Card', 'woocommerce-braspag'),
+            'type' => 'title',
+            'description' => '',
+        ),
+        'verifycard_enabled' => array(
+            'title' => __('Enable/Disable', 'woocommerce-braspag'),
+            'label' => __('Enable Verify Card', 'woocommerce-braspag'),
+            'type' => 'checkbox',
+            'description' => __('Enable API Verify Card. This controls the option Sequence Criteria data to send for Braspag.', 'woocommerce-braspag'),
+            'default' => 'no',
+            'desc_tip' => true,
+        ),
         'oauth_authentication' => array(
             'title' => "<hr>" . __('OAuth Authentication', 'woocommerce-braspag'),
             'type' => 'title',

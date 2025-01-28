@@ -38,7 +38,7 @@ Sop.prototype = {
   processSop: function (form) {
     try {
       if (this.testMode) {
-        console.log('SOP Habilitado');
+        console.log('Modo Test Habilitado');
         this.logger();
       }
 
