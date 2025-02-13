@@ -34,7 +34,7 @@ class WC_Braspag_Pagador_API_Query
     /**
      * @return false|string
      */
-    public function get_request_id()
+    public static function get_request_id()
     {
         return substr(base64_encode(gethostname()), 0, 36);
     }
