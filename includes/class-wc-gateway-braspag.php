@@ -26,6 +26,7 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
     protected $extra_data_collection;
     protected $soft_descriptor;
     protected $silentorderpost_enabled;
+    protected $verifycard_enabled;
 
     public function __construct()
     {
@@ -54,6 +55,7 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
         $this->test_mode = 'yes' === $this->get_option('test_mode');
 
         $this->silentorderpost_enabled = $this->get_option('silentpost_enabled');
+        $this->verifycard_enabled = $this->get_option('verifycard_enabled');
 
         $this->antifraud_enabled = 'yes' === $this->get_option('antifraud_enabled');
         $this->antifraud_finger_print_org_id = $this->get_option('antifraud_finger_print_org_id');
@@ -322,10 +324,59 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
             $this->payment_scripts_authsop();
         }
 
+        if ($this->verifycard_enabled == 'yes') {
+            $this->payment_scripts_verifycard();
+        }
+
         wp_register_script('wc-braspag-antifraud-fingerprint', "https://h.online-metrix.net/fp/tags.js?org_id={$this->antifraud_finger_print_org_id}&session_id={$this->antifraud_finger_print_session_id}", array(), '', false);
         wp_enqueue_script('wc-braspag-antifraud-fingerprint');
 
         $this->payment_scripts_auth3ds20();
+    }
+
+    /**
+     * @throws WC_Braspag_Exception
+     */
+    public function payment_scripts_verifycard()
+    {
+        $verifycard_params = apply_filters(
+            'wc_gateway_braspag_pagador_verifycard_params',
+            array(
+                'isTestEnvironment' => $this->test_mode
+            )
+        );
+
+        wp_register_script('wc-braspag-verifycard', plugins_url('assets/js/braspag-verifycard.js', WC_BRASPAG_MAIN_FILE), array(), WC_BRASPAG_VERSION, true);
+        wp_enqueue_script('wc-braspag-verifycard');
+
+        if ($this->test_mode == 'yes') {
+            $url = 'https://apisandbox.braspag.com.br/v2/verifycard';
+            $enviroment = 'sandbox';
+        } else {
+            $url = 'https://api.braspag.com.br/v2/verifycard';
+            $enviroment = 'production';
+        }
+
+        $merchant_id = $this->get_option('merchant_id');
+        $merchant_key = $this->get_option('merchant_key');
+        $uuid = wp_generate_uuid4();
+
+        wp_localize_script(
+            'wc-braspag-verifycard',
+            'braspag_verifycard_params',
+            apply_filters(
+                'wc_gateway_braspag_pagador_verifycard_params',
+                array(
+                    'bpMerchantId' => $merchant_id,
+                    'bpMerchantKey' => $merchant_key,
+                    'bpEnvironment' => $enviroment,
+                    'apiUrl' => $url,
+                    'testMode' => $this->test_mode,
+                    'uuid' => $uuid,
+                    'enable' => $this->get_option('verifycard_enabled', 'false'),
+                )
+            )
+        );
     }
 
     /**
