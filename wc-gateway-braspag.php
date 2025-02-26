@@ -179,7 +179,7 @@ function woocommerce_gateway_braspag_init()
 
 		global $wp_version;
 
-		define('WC_BRASPAG_VERSION', '2.3.2');
+		define('WC_BRASPAG_VERSION', '2.3.3');
 		define('WC_BRASPAG_WP_VERSION', $wp_version);
 		define('WC_BRASPAG_MIN_PHP_VER', '5.6.0');
 		define('WC_BRASPAG_MIN_WC_VER', '4.0.0');
