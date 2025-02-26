@@ -160,7 +160,7 @@ class WC_Gateway_Braspag_CreditCard_JustClick extends WC_Gateway_Braspag_CreditC
     {
         $installments = $this->maximum_installments;
         $installmentsMinAmount = $this->minimum_amount_of_installment;
-        $grandTotal = WC()->cart->get_cart_contents_total();
+        $grandTotal = WC()->cart->get_total('edit');
 
         if (empty($installments)) {
             return [sprintf('%1$s x R$ %2$s', 1, number_format($grandTotal, wc_get_price_decimals(), ',', ''))];
@@ -265,6 +265,8 @@ class WC_Gateway_Braspag_CreditCard_JustClick extends WC_Gateway_Braspag_CreditC
             "Category" => "C1",
             "Subcategory" => "CredentialsOnFile"
         ];
+
+        $payment_data['Partner'] = "WOO";
 
         $card_type = $checkout->get_value('braspag_creditcard-card-type');
         $provider = $this->get_braspag_payment_provider($card_type, $this->test_mode);

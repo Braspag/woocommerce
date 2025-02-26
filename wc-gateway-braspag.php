@@ -1,20 +1,30 @@
 <?php
 /**
+ * Braspag for WooCommerce Oficial
+ * 
+ * @package           Braspag
+ * @author            Braspag
+ * @copyright         2024 Braspag
+ * @license           GPL-3.0
+ * 
+ * @wordpress-plugin
  * Plugin Name: Braspag for WooCommerce Oficial
  * Plugin URI: https://wordpress.org/plugins/woocommerce-braspag/
  * Description: Take payments on your store using Braspag.
  * Author: Braspag
  * Author URI: https://braspag.com.br/
- * 
- * Version: 2.3.1
- * WP requires at least: 5.3.2
- * WP tested up to: 6.2.2
- * 
+ *
+ * Version: 2.3.3
+ * Requires at least: 5.3.2
+ * Tested up to: 6.2.2
+ * Requires PHP: 7.0
+ *
  * WC requires at least: 4.0.0
  * WC tested up to: 7.9.0
+ * License URI:       https://opensource.org/license/gpl-3/
  * Text Domain: woocommerce-braspag
  * Domain Path: /languages
- *
+ * Requires Plugins: woocommerce, woocommerce-extra-checkout-fields-for-brazil
  */
 
 if (!defined('ABSPATH')) {
@@ -24,26 +34,143 @@ if (!defined('ABSPATH')) {
 // phpcs:disable WordPress.Files.FileName
 
 /**
+ * Unschedule Token Cleanup
+ *
+ * @return void
+ */
+function unschedule_token_cleanup() {
+	$scheduled_actions = as_get_scheduled_actions([
+		'hook' => 'woocommerce_payment_tokens_cleanup',
+		'status' => ActionScheduler_Store::STATUS_PENDING,
+	]);
+
+	foreach ($scheduled_actions as $action) {
+		if ($action instanceof ActionScheduler_Action) {
+			$args = $action->get_args(); // Use o método da classe para obter os argumentos
+			as_unschedule_action('woocommerce_payment_tokens_cleanup', $args);
+		}
+	}
+}
+
+register_deactivation_hook(__FILE__, 'unschedule_token_cleanup');
+
+/**
  * WooCommerce fallback notice.
  *
  * @return string
  */
+
+ add_action('before_woocommerce_init', function(){
+
+    if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+
+    }
+
+});
+
 function wc_braspag_missing_wc_notice()
 {
 	/* translators: 1. URL link. */
 	echo '<div class="error"><p><strong>' . sprintf(esc_html__('Braspag requires WooCommerce to be installed and active. You can download %s here.', 'woocommerce-braspag'), '<a href="https://woocommerce.com/" target="_blank">WooCommerce</a>') . '</strong></p></div>';
 }
 
+/**
+ * Extra Checkout Fields for Brazil fallback notice.
+ *
+ * @return string
+ */
+function wc_braspag_missing_extra_checkout_fields_notice()
+{
+	echo '<div class="error"><p><strong>' . sprintf(
+		esc_html__(
+			'Braspag requires the Extra Checkout Fields for Brazil plugin to be installed and active. You can download %s here.',
+			'woocommerce-braspag'
+		),
+		'<a href="https://wordpress.org/plugins/woocommerce-extra-checkout-fields-for-brazil/" target="_blank">Extra Checkout Fields for Brazil</a>'
+	) . '</strong></p></div>';
+}
+
 add_action('plugins_loaded', 'woocommerce_gateway_braspag_init');
 
 function woocommerce_gateway_braspag_init()
 {
-	load_plugin_textdomain('woocommerce-braspag', false, plugin_basename(dirname(__FILE__)) . '/languages');
-
 	if (!class_exists('WooCommerce')) {
 		add_action('admin_notices', 'wc_braspag_missing_wc_notice');
 		return;
 	}
+
+	// Verifica Extra Checkout Fields for Brazil.
+	if (!class_exists('Extra_Checkout_Fields_For_Brazil')) {
+		add_action('admin_notices', 'wc_braspag_missing_extra_checkout_fields_notice');
+		return;
+	}
+
+	// Adicionar o código que verifica os plugins obrigatórios
+	add_action(
+		'admin_notices',
+		function () {
+			// Verifica se o usuário tem permissões para instalar plugins
+			$currentUserCanInstallPlugins = current_user_can('install_plugins');
+
+			$minilogo = sprintf('%s%s', plugin_dir_url(__FILE__), 'assets/images/minilogo.png');
+			$translations = [
+				'activate_plugin' => __('Activate %s', 'woocommerce-braspag'),
+				'install_plugin' => __('Install %s', 'woocommerce-braspag'),
+				'see_plugin' => __('See %s', 'woocommerce-braspag'),
+				'miss_plugin' => __('The Braspag module needs an active version of %s in order to work!', 'woocommerce-braspag'),
+			];
+
+			$requiredPlugins = [
+				'WooCommerce' => [
+					'slug' => 'woocommerce',
+					'file' => 'woocommerce/woocommerce.php',
+					'url' => 'https://wordpress.org/plugins/woocommerce/',
+				],
+				'Extra Checkout Fields for Brazil' => [
+					'slug' => 'woocommerce-extra-checkout-fields-for-brazil',
+					'file' => 'woocommerce-extra-checkout-fields-for-brazil/woocommerce-extra-checkout-fields-for-brazil.php',
+					'url' => 'https://wordpress.org/plugins/woocommerce-extra-checkout-fields-for-brazil/',
+				],
+			];
+
+			$allPlugins = function_exists('get_plugins') ? get_plugins() : [];
+
+			foreach ($requiredPlugins as $pluginName => $pluginData) {
+				$isInstalled = !empty($allPlugins[$pluginData['file']]); // Verifica se está instalado
+    			$isActive = is_plugin_active($pluginData['file']); // Verifica se está ativo
+
+				// Define a ação e o link com base no estado do plugin
+				if (!$isInstalled && $currentUserCanInstallPlugins) {
+					// Plugin não está instalado
+					$action = 'install';
+					$link = wp_nonce_url(
+						self_admin_url("update.php?action=install-plugin&plugin={$pluginData['slug']}"),
+						"install-plugin_{$pluginData['slug']}"
+					);
+				} elseif (!$isActive && $isInstalled && $currentUserCanInstallPlugins) {
+					// Plugin está instalado, mas não está ativo
+					$action = 'activate';
+					$link = wp_nonce_url(
+						self_admin_url("plugins.php?action=activate&plugin={$pluginData['file']}&plugin_status=all"),
+						"activate-plugin_{$pluginData['file']}"
+					);
+				} else {
+					// Plugin já está ativo ou não pode ser instalado
+					continue;
+				}
+
+				// Exibe o aviso
+				echo sprintf(
+					'<div class="notice notice-error is-dismissible"><p><img src="%s" style="vertical-align: middle; margin-right: 5px;">%s <a href="%s">%s</a></p></div>',
+					esc_url($minilogo),
+					sprintf(esc_html($translations['miss_plugin']), esc_html($pluginName)),
+					esc_url($link),
+					esc_html($translations["{$action}_plugin"])
+				);
+			}
+		}
+	);
 
 	if (!class_exists('WC_Braspag')):
 		/**
@@ -52,7 +179,7 @@ function woocommerce_gateway_braspag_init()
 
 		global $wp_version;
 
-		define('WC_BRASPAG_VERSION', '2.3.1');
+		define('WC_BRASPAG_VERSION', '2.3.3');
 		define('WC_BRASPAG_WP_VERSION', $wp_version);
 		define('WC_BRASPAG_MIN_PHP_VER', '5.6.0');
 		define('WC_BRASPAG_MIN_WC_VER', '4.0.0');

@@ -64,4 +64,34 @@ class WC_Braspag_Logger
 			}
 		}
 	}
+
+	/**
+     * Register the logger as a source.
+     *
+     * @return array
+     */
+    public static function register_logger_source($sources)
+    {
+        $sources[] = self::WC_LOG_FILENAME;
+        return $sources;
+    }
+
+	/**
+     * Ensure logs are eligible for remote logging.
+     *
+     * @param bool $should_log
+     * @param array $context
+     * @return bool
+     */
+    public static function allow_remote_logging($should_log, $context)
+    {
+        if (isset($context['source']) && $context['source'] === self::WC_LOG_FILENAME) {
+            return true; // Enable remote logging for this source
+        }
+        return $should_log;
+    }
 }
+
+// Hooks for WooCommerce Remote Logging
+add_filter('woocommerce_logger_sources', array('WC_Braspag_Logger', 'register_logger_source'));
+add_filter('woocommerce_remote_logger_should_log', array('WC_Braspag_Logger', 'allow_remote_logging'), 10, 2);

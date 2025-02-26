@@ -22,7 +22,7 @@ class WC_Braspag_Helper
 
 		$order_id = WC_Braspag_Helper::is_wc_lt('3.0') ? $order->id : $order->get_id();
 
-		return WC_Braspag_Helper::is_wc_lt('3.0') ? get_post_meta($order_id, self::META_NAME_BRASPAG_CURRENCY, true) : $order->get_meta(self::META_NAME_BRASPAG_CURRENCY, true);
+		return WC_Braspag_Helper::is_wc_lt('3.0') ? $order->get_meta($order_id, self::META_NAME_BRASPAG_CURRENCY, true) : $order->get_meta(self::META_NAME_BRASPAG_CURRENCY, true);
 	}
 
 	/**
@@ -38,7 +38,7 @@ class WC_Braspag_Helper
 
 		$order_id = WC_Braspag_Helper::is_wc_lt('3.0') ? $order->id : $order->get_id();
 
-		WC_Braspag_Helper::is_wc_lt('3.0') ? update_post_meta($order_id, self::META_NAME_BRASPAG_CURRENCY, $currency) : $order->update_meta_data(self::META_NAME_BRASPAG_CURRENCY, $currency);
+		WC_Braspag_Helper::is_wc_lt('3.0') ? $order = wc_get_order($order_id, self::META_NAME_BRASPAG_CURRENCY, $currency) : $order->update_meta_data(self::META_NAME_BRASPAG_CURRENCY, $currency);
 	}
 
 	/**
