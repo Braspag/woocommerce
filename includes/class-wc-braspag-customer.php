@@ -67,4 +67,23 @@ class WC_Braspag_Customer
 	{
 		update_user_option($this->get_user_id(), '_braspag_customer_id', $id, false);
 	}
+
+	/**
+     * Deleta o recurso associado ao token no sistema Braspag.
+     *
+     * @param string $source_id ID do token/recurso a ser excluído.
+     * @return bool True em caso de sucesso, False em caso de falha.
+     */
+    public function delete_source($source_id) {
+        // TODO Realize a requisição à API da Braspag para excluir o token
+        /*$response = $this->api_request('DELETE', "/tokens/{$source_id}");
+
+        if (isset($response['status']) && $response['status'] === 'success') {
+            return true;
+        }*/
+
+        // Log em caso de falha
+        WC_Braspag_Logger::log("Sem ação para deletar o token {$source_id}: ");
+        return false;
+    }
 }
