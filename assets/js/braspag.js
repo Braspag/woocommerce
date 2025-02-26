@@ -154,6 +154,7 @@ Braspag.prototype = {
 	initialize: function () {
 		this.registerCardType();
 		this.formatCreditCardNumber();
+		this.verifyCreditCardNumber();
 	},
 
 	getCardInfoFromNumber: function (num) {
@@ -221,6 +222,36 @@ Braspag.prototype = {
 		});
 	},
 
+	verifyCreditCardNumber: function () {
+		let self = this;
+		jQuery('body').on('blur', '.wc-credit-card-form-card-cvc', async function (e) {
+			e.preventDefault();
+			let cardNumber = jQuery('.wc-credit-card-form-braspag-card-number').val();
+			let cardNumberFormated = self.formatCardNumber(cardNumber);
+			let holderName = jQuery('.wc-credit-card-form-card-holder').val();
+			let ExpirationDate = jQuery('.wc-credit-card-form-card-expiry').val().replace(/\s+/g, '');
+			let securityCode = jQuery(this).val();
+			let brand = jQuery('.wc-credit-card-form-card-type').val();
+			let cardType = self.getCardInfoFromNumber(cardNumber);
+
+			let cardDetails = {
+				cardNumber: cardNumberFormated,
+				holderName: holderName,
+				expirationDate: ExpirationDate,
+				securityCode: securityCode,
+				brand: brand,
+				cardType: cardType.type
+			};
+
+			if (securityCode.length >= 3) {
+				if (typeof verify != "undefined" && verify.isVerifyEnabled()) {
+					await verify.processVerify(cardDetails);
+					return true;
+				}
+			}
+		});
+	},
+
 	formatCardNumber: function (num) {
 		var card, groups, upperLength, _ref;
 		num = num.replace(/\D/g, '');
@@ -260,13 +291,13 @@ Braspag.prototype = {
 				await sop.processSop(form);
 				return true;
 			}
-			
+
 			form.submit();
 			return true;
 		} catch (e) {
 			console.error('Erro ao processar o pedido:', error);
-        	return false;
-		}finally{
+			return false;
+		} finally {
 			this.unBlockElement(checkout_payment_element);
 		}
 	},
