@@ -13,10 +13,12 @@
  * Description: Take payments on your store using Braspag.
  * Author: Braspag
  * Author URI: https://braspag.com.br/
- * Version: 2.3.2
+ *
+ * Version: 2.3.3
  * Requires at least: 5.3.2
  * Tested up to: 6.2.2
  * Requires PHP: 7.0
+ *
  * WC requires at least: 4.0.0
  * WC tested up to: 7.9.0
  * License URI:       https://opensource.org/license/gpl-3/
