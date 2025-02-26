@@ -230,6 +230,8 @@ class WC_Gateway_Braspag_Pix extends WC_Gateway_Braspag
      */
     public function braspag_pagador_pix_payment_request_builder($payment_data, $order, $checkout, $cart)
     {
+        $payment_data['Partner'] = "WOO";
+        
         $payment_data = array_merge($payment_data, [
             "Provider" => $this->available_type,
             "Type" => "Pix",
