@@ -266,6 +266,8 @@ class WC_Gateway_Braspag_CreditCard_JustClick extends WC_Gateway_Braspag_CreditC
             "Subcategory" => "CredentialsOnFile"
         ];
 
+        $payment_data['Partner'] = "WOO";
+
         $card_type = $checkout->get_value('braspag_creditcard-card-type');
         $provider = $this->get_braspag_payment_provider($card_type, $this->test_mode);
 

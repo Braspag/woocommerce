@@ -37,3 +37,24 @@
 * Add included marked begin order
 * Add Master Brand Card validation
 * Add saved card validation
+
+= 2.3.2 - 2024-02-06 =
+* Fix Wrong Total Price in Credit Card
+* Fix Wrong Total Price in Debit Card
+* Fix Wrong Total Price in JustClick
+
+= 2.3.3 - 2024-11-12 =
+* Fix Error Webhook Static Method
+
+= 2.3.4 - 2024-02-27 =
+* Add Marked Partner
+* Add Support Remote Logging WooCommerce
+* Add Support HPOS WooCommerce
+* Fix Cronjob Delete Saved Card Expired
+* Add Silent Order Post
+* Add SOP - Suppor CardToken
+* Add SOP - Suppor PaymentToken
+* Add Validation Velocity
+* Add Verify Card
+* Add VC - Suppor CardToken
+* Add VC - Suppor PaymentToken

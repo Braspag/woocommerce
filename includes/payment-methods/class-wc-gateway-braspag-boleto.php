@@ -224,6 +224,8 @@ class WC_Gateway_Braspag_Boleto extends WC_Gateway_Braspag
         $created_date->add(new DateInterval("P{$days_to_expire}D"));
         $expiration_date = $created_date->format('Y-m-d');
 
+        $payment_data['Partner'] = "WOO";
+
         $payment_data = array_merge($payment_data, [
             "Provider" => $this->available_type,
             "Type" => "Boleto",
