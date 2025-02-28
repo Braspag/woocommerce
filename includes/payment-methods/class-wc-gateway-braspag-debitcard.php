@@ -485,7 +485,8 @@ class WC_Gateway_Braspag_DebitCard extends WC_Gateway_Braspag
             "Interest" => "ByMerchant",
             "Capture" => true,
             "Recurrent" => false,
-            "DoSplit" => false
+            "DoSplit" => false,
+	    "ExtraDataCollection" => $this->extra_data_collection
         ]);
        
         return apply_filters('wc_gateway_braspag_pagador_request_debitcard_payment_builder', $payment_data, $order, $checkout, $cart);
