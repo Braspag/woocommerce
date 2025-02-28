@@ -36,6 +36,9 @@ class WC_Gateway_Braspag_CreditCard_JustClick extends WC_Gateway_Braspag_CreditC
         $this->init_form_fields();
 
         $this->init_settings();
+    	
+    	// Load the settings extra data collection.
+        $this->settings_extra_data();
 
         $braspag_main_settings = get_option('woocommerce_braspag_settings');
 
@@ -291,7 +294,8 @@ class WC_Gateway_Braspag_CreditCard_JustClick extends WC_Gateway_Braspag_CreditC
             "Authenticate" => false,
             "Recurrent" => false,
             "DoSplit" => false,
-            "CreditCard" => $card_data
+            "CreditCard" => $card_data,
+		"ExtraDataCollection" => $this->extra_data_collection
         ];
 
         return apply_filters('wc_gateway_braspag_pagador_request_creditcard_payment_builder', $payment_data, $order, $checkout, $cart);
