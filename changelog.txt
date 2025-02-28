@@ -58,3 +58,6 @@
 * Add Verify Card
 * Add VC - Suppor CardToken
 * Add VC - Suppor PaymentToken
+
+= 2.3.4 - 2024-02-27 =
+* Add ExtraDataCollection
