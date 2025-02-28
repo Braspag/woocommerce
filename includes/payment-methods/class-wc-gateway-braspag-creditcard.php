@@ -702,7 +702,8 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
             "Authenticate" => false,
             "Recurrent" => false,
             "DoSplit" => false,
-            "CreditCard" => $card_data
+            "CreditCard" => $card_data,
+	    "ExtraDataCollection" => $this->extra_data_collection
         ]);
 
         return apply_filters(
