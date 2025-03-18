@@ -83,8 +83,10 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
     public function settings_extra_data()
     {
         $this->extra_data_collection = [
-            "Name" => 'Plataforma',
-            "Value" => 'woocommerce'
+            [
+                "Name" => 'Plataforma',
+                "Value" => 'woocommerce'
+            ]
         ];
     }
 
