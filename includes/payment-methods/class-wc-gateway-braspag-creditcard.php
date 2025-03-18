@@ -703,7 +703,7 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
             "Recurrent" => false,
             "DoSplit" => false,
             "CreditCard" => $card_data,
-	    "ExtraDataCollection" => $this->extra_data_collection
+	        "ExtraDataCollection" => json_decode(json_encode($this->extra_data_collection), true)
         ]);
 
         return apply_filters(
@@ -720,7 +720,7 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
      * @param $order
      * @param $braspag_pagador_request
      * @param $braspag_pagador_response
-     * @return array
+     * @return void
      */
     public function process_antifraud_analysis_transaction($cart, $order, $braspag_pagador_request, $braspag_pagador_response)
     {

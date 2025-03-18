@@ -295,7 +295,7 @@ class WC_Gateway_Braspag_CreditCard_JustClick extends WC_Gateway_Braspag_CreditC
             "Recurrent" => false,
             "DoSplit" => false,
             "CreditCard" => $card_data,
-		"ExtraDataCollection" => $this->extra_data_collection
+		    "ExtraDataCollection" => json_decode(json_encode($this->extra_data_collection), true)
         ];
 
         return apply_filters('wc_gateway_braspag_pagador_request_creditcard_payment_builder', $payment_data, $order, $checkout, $cart);
