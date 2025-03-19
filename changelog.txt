@@ -64,3 +64,6 @@
 
 = 2.3.5.10 - 2024-03-18 =
 * Hotfix ExtraDataCollection JSON Array
+
+= 2.3.5.20 - 2024-03-18 =
+* Hotfix Validation Card Number Before Send
