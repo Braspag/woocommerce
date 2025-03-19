@@ -666,7 +666,7 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
             }
         }else{
             $cardnumber = [
-                "CardNumber" => $checkout->get_value('braspag_creditcard-card-number')
+                "CardNumber" => str_replace(" ", "", $checkout->get_value('braspag_creditcard-card-number'))
             ];
         }
 
