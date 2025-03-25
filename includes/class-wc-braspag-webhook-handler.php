@@ -147,51 +147,75 @@ class WC_Braspag_Webhook_Handler extends WC_Braspag_Payment_Gateway
      */
     public function process_change_type_status_update_response($response, $order)
     {
-        switch ($response->body->Payment->Status) {
+        if (in_array($order->get_status(), array('completed', 'cancelled', 'refunded'), true)) {
+            WC_Braspag_Logger::log('Webhook ignorado: Pedido #' . $order->get_id() . ' já está em status final.');
+            return true;
+        }
+
+        $payment_status = $response->body->Payment->Status;
+        $payment_id = $response->body->Payment->PaymentId;
+
+        switch ($payment_status) {
 
             case '2': #PaymentConfirmed
-                $order->payment_complete($response->body->Payment->PaymentId);
-
-                /* translators: transaction id */
-                $message = sprintf(__('Post Notification Message: Braspag charge complete (Charge ID: %s)', 'woocommerce-braspag'), $response->body->Payment->PaymentId);
-                $order->add_order_note($message);
+                if ($order->get_status() !== 'processing') {
+                    $order->add_meta_data('_braspag_charge_captured', 'yes', true);
+                    $order->update_status('processing', sprintf(__('Webhook: Pagamento confirmado (PaymentId: %s).', 'woocommerce-braspag'), $payment_id));
+                    $order->add_order_note(sprintf(__('Pagamento confirmado pelo webhook. PaymentId: %s.', 'woocommerce-braspag'), $payment_id));
+                }
                 break;
 
             case '1': #Authorized
-                if ($order->has_status(array('pending'))) {
+                if ($order->has_status('pending')) {
                     WC_Braspag_Helper::is_wc_lt('3.0') ? $order->reduce_order_stock() : wc_reduce_stock_levels($order->get_id());
                 }
-
-                /* translators: transaction id */
-                $order->update_status('on-hold', sprintf(__('Post Notification Message: Braspag charge authorized (Charge ID: %s). Process order to take payment, or cancel to remove the pre-authorization.', 'woocommerce-braspag'), $response->body->Payment->PaymentId));
+                if ($order->get_status() !== 'on-hold') {
+                    $order->add_meta_data('_braspag_charge_authorized', 'yes', true);
+                    $order->update_status('on-hold', sprintf(__('Webhook: Pagamento autorizado (PaymentId: %s).', 'woocommerce-braspag'), $payment_id));
+                    $order->add_order_note(sprintf(__('Pagamento autorizado pelo webhook. PaymentId: %s.', 'woocommerce-braspag'), $payment_id));
+                }
                 break;
 
             case '0': #NotFinished
-                $order->update_status('failed', sprintf(__('Post Notification Message: Braspag charge Payment Not Finished (Charge ID: %s).', 'woocommerce-braspag'), $response->body->Payment->PaymentId));
+                if ($order->get_status() !== 'failed') {
+                    $order->update_status('failed', sprintf(__('Webhook: Pagamento não finalizado (PaymentId: %s).', 'woocommerce-braspag'), $payment_id));
+                    $order->add_order_note(sprintf(__('Pagamento não finalizado (PaymentId: %s).', 'woocommerce-braspag'), $payment_id));
+                }
                 break;
             case '12': #Pending
-                $order->update_status('pending', sprintf(__('Post Notification Message: Braspag charge Payment Pending (Charge ID: %s).', 'woocommerce-braspag'), $response->body->Payment->PaymentId));
+                $order->update_status('pending', sprintf(__('Post Notification Message: Braspag charge Payment Pending (Charge ID: %s).', 'woocommerce-braspag'), $payment_id));
+                $order->add_order_note(sprintf(__('Pagamento aguardando aprovação ou esta pendente de pagamento. (PaymentId: %s).', 'woocommerce-braspag'), $payment_id));
                 break;
             case '20': #Scheduled
-                $order->update_status('pending', sprintf(__('Post Notification Message: Braspag charge Payment Scheduled (Charge ID: %s).', 'woocommerce-braspag'), $response->body->Payment->PaymentId));
+                if ($order->get_status() !== 'pending') {
+                    $order->update_status('pending', sprintf(__('Webhook: Pagamento pendente/agendado (PaymentId: %s).', 'woocommerce-braspag'), $payment_id));
+                    $order->add_order_note(sprintf(__('Pagamento pendente ou agendado. PaymentId: %s.', 'woocommerce-braspag'), $payment_id));
+                }
                 break;
 
             case '3': #Denied
             case '10': #Voided
             case '13': #Aborted
                 #cancel
-                $order->update_status('cancelled', sprintf(__('Braspag charge payment Cancelled (Charge ID: %s).', 'woocommerce-braspag'), $response->body->Payment->PaymentId));
+                if ($order->get_status() !== 'cancelled') {
+                    $order->update_status('cancelled', sprintf(__('Webhook: Pagamento cancelado (PaymentId: %s).', 'woocommerce-braspag'), $payment_id));
+                    $order->add_order_note(sprintf(__('Pagamento cancelado. PaymentId: %s.', 'woocommerce-braspag'), $payment_id));
+                }
                 break;
 
             case '11': #Refunded
                 #refund
-                $order->update_status('refunded', sprintf(__('Braspag charge refunded (Charge ID: %s).', 'woocommerce-braspag'), $response->body->Payment->PaymentId));
+                if ($order->get_status() !== 'refunded') {
+                    $order->update_status('refunded', sprintf(__('Webhook: Pagamento reembolsado (PaymentId: %s).', 'woocommerce-braspag'), $payment_id));
+                    $order->add_order_note(sprintf(__('Pagamento reembolsado. PaymentId: %s.', 'woocommerce-braspag'), $payment_id));
+                }
                 break;
 
             default:
                 throw new WC_Braspag_Exception('Process Webhook Change Type Status Update Error: Invalid Order Status');
         }
 
+        $order->save();
         return true;
     }
 }
