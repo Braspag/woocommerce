@@ -62,8 +62,11 @@
 = 2.3.5 - 2024-02-27 =
 * Add ExtraDataCollection
 
-= 2.3.5.10 - 2024-03-18 =
+= 2.3.5.10 - 2025-03-18 =
 * Hotfix ExtraDataCollection JSON Array
 
-= 2.3.5.20 - 2024-03-18 =
+= 2.3.5.20 - 2025-03-19 =
 * Hotfix Validation Card Number Before Send
+
+= 2.3.5.30 - 2025-03-28 =
+* Hotfix Changed logic for update order
