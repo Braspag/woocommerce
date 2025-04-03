@@ -120,7 +120,9 @@ Sop.prototype = {
 
         const errorLink = document.createElement('a');
         errorLink.setAttribute('href', '#payment');
-        errorLink.innerHTML = `error: HTTP ${response.Code} - ${response.Message}`;
+        errorLink.innerHTML = `
+                    error: HTTP ${response.Code} - ${response.Message}
+                `;
 
         errorItem.appendChild(errorLink);
 
