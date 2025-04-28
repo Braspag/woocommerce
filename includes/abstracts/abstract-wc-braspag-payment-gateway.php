@@ -490,6 +490,8 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway
             'MerchantName' => $mpi_auth_token_request_builder['merchant_name'],
             'MCC' => $mpi_auth_token_request_builder['mcc']
         ];
+        WC_Braspag_Logger::log("Info: Begin processing Mpi Auth request." . print_r($mpi_auth_token_request_builder['body'], true));
+
 
         $mpi_auth_token_response = $this->braspag_mpi_request($mpi_auth_token_request_builder, 'v2/auth/token');
 
