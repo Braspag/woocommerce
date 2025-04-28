@@ -154,7 +154,7 @@ Braspag.prototype = {
 	initialize: function () {
 		this.registerCardType();
 		this.formatCreditCardNumber();
-		this.verifyCreditCardNumber();
+		//this.verifyCreditCardNumber();
 	},
 
 	getCardInfoFromNumber: function (num) {
@@ -306,7 +306,6 @@ Braspag.prototype = {
 		}
 	},
 	blockElement: function (element) {
-
 		element.addClass('processing').block({
 			message: null,
 			overlayCSS: {
