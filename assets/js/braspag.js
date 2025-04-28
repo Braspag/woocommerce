@@ -302,7 +302,6 @@ Braspag.prototype = {
 		}
 	},
 	blockElement: function (element) {
-
 		element.addClass('processing').block({
 			message: null,
 			overlayCSS: {

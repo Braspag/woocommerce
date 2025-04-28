@@ -19,6 +19,8 @@ BraspagAuth3ds20.prototype = {
     this.isTestEnvironment = braspag_auth3ds20_params.isTestEnvironment;
     this.paymentType = '';
 
+    jQuery('.bpmpi_accesstoken').val(this.bpmpiToken);
+
     await this.startTransaction();
   },
 
@@ -196,7 +198,8 @@ BraspagAuth3ds20.prototype = {
   renderCredicardData: function () {
 
     this.bpmpiRenderer.renderBpmpiData('bpmpi_paymentmethod', '', 'Credit');
-    this.bpmpiRenderer.renderBpmpiData('bpmpi_auth_notifyonly', false, this.isBpmpiMasterCardNotifyOnlyEnabledCC);
+    //this.bpmpiRenderer.renderBpmpiData('bpmpi_auth_notifyonly', false, this.isBpmpiMasterCardNotifyOnlyEnabledCC);
+    this.bpmpiRenderer.renderBpmpiData('bpmpi_auth_notifyonly', false, this.isBpmpiMasterCardNotifyOnlyEnabledCC == 1 ? 'true' : 'false');
 
     let creditcardExpiration = jQuery('#braspag_creditcard-card-expiry').val().split('/');
 
@@ -224,7 +227,8 @@ BraspagAuth3ds20.prototype = {
   renderDebitcardData: function () {
 
     this.bpmpiRenderer.renderBpmpiData('bpmpi_paymentmethod', '', 'Debit');
-    this.bpmpiRenderer.renderBpmpiData('bpmpi_auth_notifyonly', false, this.isBpmpiMasterCardNotifyOnlyEnabledDC);
+    //this.bpmpiRenderer.renderBpmpiData('bpmpi_auth_notifyonly', false, this.isBpmpiMasterCardNotifyOnlyEnabledDC);
+    this.bpmpiRenderer.renderBpmpiData('bpmpi_auth_notifyonly', false, this.isBpmpiMasterCardNotifyOnlyEnabledDC == 1 ? 'true' : 'false');
 
     let debitcardExpiration = jQuery('#braspag_debitcard-card-expiry').val().split('/');
 
