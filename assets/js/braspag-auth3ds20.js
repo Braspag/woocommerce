@@ -130,7 +130,6 @@ BraspagAuth3ds20.prototype = {
 
       } else if (paymentMethod == 'braspag_debitcard') {
         this.paymentType = 'debitcard';
-
       } else {
         this.disableBpmpi();
         return true;
@@ -155,7 +154,6 @@ BraspagAuth3ds20.prototype = {
     var self = this;
 
     if (self.paymentType == 'creditcard') {
-
       if (!this.isBpmpiEnabledCC) {
         return false;
       }
