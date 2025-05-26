@@ -236,6 +236,8 @@ Braspag.prototype = {
 			let securityCode = jQuery(this).val();
 			let brand = jQuery('.wc-credit-card-form-card-type').val();
 			let cardType = self.getCardInfoFromNumber(cardNumber);
+			const creditCardSelected = document.querySelector("#payment_method_braspag_creditcard")?.checked;
+			const debitCardSelected = document.querySelector("#payment_method_braspag_debitcard")?.checked;
 
 			let cardDetails = {
 				cardNumber: cardNumberFormated,
@@ -246,7 +248,7 @@ Braspag.prototype = {
 				cardType: cardType.type
 			};
 
-			if (securityCode.length >= 3) {
+			if ((creditCardSelected || debitCardSelected) && securityCode.length >= 3) {
 				if (typeof verify != "undefined" && verify.isVerifyEnabled()) {
 					await verify.processVerify(cardDetails);
 					return true;
@@ -281,6 +283,8 @@ Braspag.prototype = {
 	placeOrder: async function () {
 		let checkout_payment_element = jQuery('.woocommerce-checkout-payment, .woocommerce-checkout-review-order-table');
 		const form = jQuery('form.woocommerce-checkout');
+		const creditCardSelected = document.querySelector("#payment_method_braspag_creditcard")?.checked;
+		const debitCardSelected = document.querySelector("#payment_method_braspag_debitcard")?.checked;
 
 		try {
 			this.blockElement(checkout_payment_element);
@@ -290,7 +294,7 @@ Braspag.prototype = {
 				return true;
 			}
 
-			if (typeof sop != "undefined" && sop.isSopEnabled()) {
+			if ((creditCardSelected || debitCardSelected) && typeof sop != "undefined" && sop.isSopEnabled()) {
 				await sop.processSop(form);
 				return true;
 			}
