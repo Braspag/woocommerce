@@ -312,14 +312,14 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
 
         if ($this->auth3DS_enabled == 'yes') {
             // Adiciona o jQuery BlockUI a partir da CDN
-            wp_register_script('jquery-blockui', 'https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.70/jquery.blockUI.min.js', array('jquery'), '2.70', true);
+            wp_register_script('jquery-blockui', 'https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.70/jquery.blockUI.min.js', array('jquery'), '2.70', false);
             wp_enqueue_script('jquery-blockui');
         }
 
         wp_register_style('wc-braspag', plugins_url('assets/css/braspag-styles.css', WC_BRASPAG_MAIN_FILE), array(), WC_BRASPAG_VERSION);
         wp_enqueue_style('wc-braspag');
 
-        wp_register_script('wc-braspag', plugins_url('assets/js/braspag.js', WC_BRASPAG_MAIN_FILE), array('prototype', 'jquery-payment'), WC_BRASPAG_VERSION, true);
+        wp_register_script('wc-braspag', plugins_url('assets/js/braspag.js', WC_BRASPAG_MAIN_FILE), array('prototype', 'jquery-payment', 'jquery-blockui'), WC_BRASPAG_VERSION, true);
         wp_enqueue_script('wc-braspag');
 
         if ($this->silentorderpost_enabled == 'yes') {
@@ -475,7 +475,7 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
             wp_register_script('wc-braspag-auth3ds20-renderer', plugins_url('assets/js/braspag-auth3ds20-renderer.js', WC_BRASPAG_MAIN_FILE), array(), WC_BRASPAG_VERSION, true);
             wp_enqueue_script('wc-braspag-auth3ds20-renderer');
 
-            wp_register_script('wc-braspag-auth3ds20', plugins_url('assets/js/braspag-auth3ds20.js', WC_BRASPAG_MAIN_FILE), array('wc-braspag-auth3ds20-conf', 'wc-braspag-auth3ds20-lib', 'wc-braspag-auth3ds20-renderer'), WC_BRASPAG_VERSION, true);
+            wp_register_script('wc-braspag-auth3ds20', plugins_url('assets/js/braspag-auth3ds20.js', WC_BRASPAG_MAIN_FILE), array('wc-braspag-auth3ds20-conf', 'wc-braspag-auth3ds20-lib', 'wc-braspag-auth3ds20-renderer','wc-braspag'), WC_BRASPAG_VERSION, true);
             wp_enqueue_script('wc-braspag-auth3ds20');
 
             wp_localize_script(

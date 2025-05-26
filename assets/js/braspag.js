@@ -154,7 +154,10 @@ Braspag.prototype = {
 	initialize: function () {
 		this.registerCardType();
 		this.formatCreditCardNumber();
-		//this.verifyCreditCardNumber();
+
+		if (typeof verify != "undefined" && verify.isVerifyEnabled()) {
+			this.verifyCreditCardNumber();
+		}
 	},
 
 	getCardInfoFromNumber: function (num) {
@@ -288,8 +291,8 @@ Braspag.prototype = {
 			}
 
 			if (typeof sop != "undefined" && sop.isSopEnabled()) {
-				// await sop.processSop(form);
-				// return true;
+				await sop.processSop(form);
+				return true;
 			}
 
 			form.submit();
