@@ -212,7 +212,7 @@ class WC_Gateway_Braspag_Pix extends WC_Gateway_Braspag
             }
         }
 
-        if (WC_Braspag_Helper::is_wc_lt('3.0') && !method_exists($order, 'update_meta_data')) {
+        if (!WC_Braspag_Helper::is_wc_lt('3.0') && method_exists($order, 'update_meta_data')) {
             $order->save();
         }
         
@@ -298,7 +298,7 @@ class WC_Gateway_Braspag_Pix extends WC_Gateway_Braspag
                                                             <strong>Escanei o QR Code ou copie o código Pix:</strong>
                                                         </p>
                                                         <?php $imageQrcode = $order->get_meta('_braspag_pix_qr_code_image'); ?>
-                                                        <img alt="QR-Code PIX" src="data:image/png;base64,<?php echo $imageQrcode; ?>" />
+                                                        <image alt="QR-Code PIX" src="data:image/png;base64,<?php echo $imageQrcode; ?>" />
                                                     </td>
                                                 </tr>
 
