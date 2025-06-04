@@ -200,22 +200,35 @@ class WC_Gateway_Braspag_Pix extends WC_Gateway_Braspag
             "_braspag_pix_digitable_line" => $response->body->Payment->QrCodeString
         ];
 
-        // WooCommerce 3.0 or later
-        if (!method_exists($order, 'update_meta_data')) {
-           $dataToSave = array_merge($dataToSave, apply_filters('wc_gateway_braspag_pagador_pix_save_payment_response_data', $dataToSave, $order, $response));
+        $dataToSave = array_merge($dataToSave, apply_filters('wc_gateway_braspag_pagador_pix_save_payment_response_data', $dataToSave, $order, $response));
 
-            foreach ($dataToSave as $key => $value) {
-                $order = wc_get_order($order_id, $key, $value);
+        foreach ($dataToSave as $key => $value) {
+            // WooCommerce 3.0 or later
+            if (WC_Braspag_Helper::is_wc_lt('3.0') && !method_exists($order, 'update_meta_data')) {
+                update_post_meta($order_id, $key, $value);
+            } else {
+                //$order = wc_get_order($order);
+                $order->update_meta_data($key, $value);
             }
-        }else{
-            $dataToSave = array_merge($dataToSave, apply_filters('wc_gateway_braspag_pagador_pix_save_payment_response_data', $dataToSave, $order, $response));
+        }
 
-            foreach ($dataToSave as $key => $data) {
-                $order->update_meta_data($key, $data);
-            }
-
+        if (WC_Braspag_Helper::is_wc_lt('3.0') && !method_exists($order, 'update_meta_data')) {
             $order->save();
         }
+        
+
+        // if (!method_exists($order, 'update_meta_data')) {
+        //     foreach ($dataToSave as $key => $value) {
+        //         //$order = wc_get_order($order_id, $key, $value);
+        //         update_post_meta($order_id, $key, $value);
+        //     }
+        // } else {
+        //     foreach ($dataToSave as $key => $data) {
+        //         $order->update_meta_data($key, $data);
+        //     }
+
+        //     $order->save();
+        // }
 
         return $this;
     }
@@ -231,7 +244,7 @@ class WC_Gateway_Braspag_Pix extends WC_Gateway_Braspag
     public function braspag_pagador_pix_payment_request_builder($payment_data, $order, $checkout, $cart)
     {
         $payment_data['Partner'] = "WOO";
-        
+
         $payment_data = array_merge($payment_data, [
             "Provider" => $this->available_type,
             "Type" => "Pix",
@@ -261,72 +274,72 @@ class WC_Gateway_Braspag_Pix extends WC_Gateway_Braspag
 
         do_action('wc_gateway_braspag_pagador_pix_display_order_data_before', $order);
         $swf_url = esc_url(plugins_url('assets/images/pix.webp', dirname(dirname(__FILE__))));
-        $timer_url = esc_url(plugins_url( 'assets/images/timer.svg', dirname(dirname(__FILE__))));
+        $timer_url = esc_url(plugins_url('assets/images/timer.svg', dirname(dirname(__FILE__))));
         ?>
-                        <div class="header">
-                            <h4>SEU CÓDIGO PIX FOI GERADO</h4>
-                            <img class="image-pix" src="<?php echo $swf_url; ?>" alt="pix">
-                        </div>
-                        <table class="woocommerce-table woocommerce-table--order-details shop_table order_details">
-                            <tbody>
-                                <tr class="woocommerce-table__line-item order_item">
-                                    <td class="woocommerce-table__product-total product-total text-center validade-pix" colspan="2">
-                                        <p class="stopwatch">
-                                            <img class="image-time" src="<?php echo $timer_url; ?>" alt="timer">
-                                             Validade do código Pix até às: <strong><?php echo $expirationDate; ?></strong>
-                                        </p>
-                                    </td>
-                                </tr>
+                                        <div class="header">
+                                            <h4>SEU CÓDIGO PIX FOI GERADO</h4>
+                                            <img class="image-pix" src="<?php echo $swf_url; ?>" alt="pix">
+                                        </div>
+                                        <table class="woocommerce-table woocommerce-table--order-details shop_table order_details">
+                                            <tbody>
+                                                <tr class="woocommerce-table__line-item order_item">
+                                                    <td class="woocommerce-table__product-total product-total text-center validade-pix" colspan="2">
+                                                        <p class="stopwatch">
+                                                            <img class="image-time" src="<?php echo $timer_url; ?>" alt="timer">
+                                                             Validade do código Pix até às: <strong><?php echo $expirationDate; ?></strong>
+                                                        </p>
+                                                    </td>
+                                                </tr>
 
-                                <tr class="woocommerce-table__line-item order_item">
-                                    <td class="woocommerce-table__product-total product-total text-center image-qrcode" colspan="2">
-                                        <p>
-                                            Para pagar no banco on-line ou aplicativo do seu banco,
-                                            <strong>Escanei o QR Code ou copie o código Pix:</strong>
-                                        </p>
-                                        <?php $imageQrcode = $order->get_meta('_braspag_pix_qr_code_image'); ?>
-                                        <image alt="QR-Code PIX" src="data:image/png;base64,<?php echo $imageQrcode; ?>" />
-                                    </td>
-                                </tr>
+                                                <tr class="woocommerce-table__line-item order_item">
+                                                    <td class="woocommerce-table__product-total product-total text-center image-qrcode" colspan="2">
+                                                        <p>
+                                                            Para pagar no banco on-line ou aplicativo do seu banco,
+                                                            <strong>Escanei o QR Code ou copie o código Pix:</strong>
+                                                        </p>
+                                                        <?php $imageQrcode = $order->get_meta('_braspag_pix_qr_code_image'); ?>
+                                                        <img alt="QR-Code PIX" src="data:image/png;base64,<?php echo $imageQrcode; ?>" />
+                                                    </td>
+                                                </tr>
 
-                                <tr class="woocommerce-table__line-item order_item">
-                                    <td class="woocommerce-table__product-total product-total text-center">
-                                        <textarea disabled id="linha-digitavel"><?php echo $order->get_meta('_braspag_pix_digitable_line'); ?></textarea>
-                                        <br>
-                                        <button onclick="copiarTexto()"><b>Copiar código Pix</b></button>
-                                    </td>
-                                </tr>
+                                                <tr class="woocommerce-table__line-item order_item">
+                                                    <td class="woocommerce-table__product-total product-total text-center">
+                                                        <textarea disabled id="linha-digitavel"><?php echo $order->get_meta('_braspag_pix_digitable_line'); ?></textarea>
+                                                        <br>
+                                                        <button onclick="copiarTexto()"><b>Copiar código Pix</b></button>
+                                                    </td>
+                                                </tr>
 
-                                <tr class="woocommerce-table__line-item order_item">
-                                    <td class="woocommerce-table__product-total product-total text-center" colspan="2">
-                                        <p>
-                                            Como pagar com Pix:
+                                                <tr class="woocommerce-table__line-item order_item">
+                                                    <td class="woocommerce-table__product-total product-total text-center" colspan="2">
+                                                        <p>
+                                                            Como pagar com Pix:
 
-                                            <ol>
-                                                <li>1 - Acesse o app ou site do seu banco</li>
-                                                <li>2 - Busque a opção para pagamento com pix</li>
-                                                <li>3 - Escaneie o QR code ou copie o código Pix</li>
-                                                <li>4 - Pronto! Você verá a confirmação do pagamento</li>
-                                            </ol>
-                                        </p>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <script>
-                            function copiarTexto() {
-                                let textoCopiado = document.getElementById("linha-digitavel");
+                                                            <ol>
+                                                                <li>1 - Acesse o app ou site do seu banco</li>
+                                                                <li>2 - Busque a opção para pagamento com pix</li>
+                                                                <li>3 - Escaneie o QR code ou copie o código Pix</li>
+                                                                <li>4 - Pronto! Você verá a confirmação do pagamento</li>
+                                                            </ol>
+                                                        </p>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <script>
+                                            function copiarTexto() {
+                                                let textoCopiado = document.getElementById("linha-digitavel");
 
-                                textoCopiado.select();
-                                textoCopiado.setSelectionRange(0, 99999);
+                                                textoCopiado.select();
+                                                textoCopiado.setSelectionRange(0, 99999);
 
-                                navigator.clipboard.writeText(textoCopiado.value);
+                                                navigator.clipboard.writeText(textoCopiado.value);
 
-                                console.log("O texto é: " + textoCopiado.value);
-                            }
-                        </script>
-                        <?php
+                                                console.log("O texto é: " + textoCopiado.value);
+                                            }
+                                        </script>
+                                        <?php
 
-                        do_action('wc_gateway_braspag_pagador_pix_display_order_data_after', $order);
+                                        do_action('wc_gateway_braspag_pagador_pix_display_order_data_after', $order);
     }
 }
