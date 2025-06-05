@@ -70,3 +70,7 @@
 
 = 2.3.5.30 - 2025-03-28 =
 * Hotfix Changed logic for update order
+
+= 2.3.5.31 - 2025-06-05 =
+* Hotfix QrCode Pix order
+* Hotfix Pix order new version WC
