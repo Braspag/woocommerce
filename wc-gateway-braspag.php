@@ -38,7 +38,8 @@ if (!defined('ABSPATH')) {
  *
  * @return void
  */
-function unschedule_token_cleanup() {
+function unschedule_token_cleanup()
+{
 	$scheduled_actions = as_get_scheduled_actions([
 		'hook' => 'woocommerce_payment_tokens_cleanup',
 		'status' => ActionScheduler_Store::STATUS_PENDING,
@@ -60,12 +61,12 @@ register_deactivation_hook(__FILE__, 'unschedule_token_cleanup');
  * @return string
  */
 
- add_action('before_woocommerce_init', function(){
+add_action('before_woocommerce_init', function () {
 
-    if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
-        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
-
-    }
+	if (class_exists(\Automattic\WooCommerce\Utilities\FeaturesUtil::class)) {
+		\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('custom_order_tables', __FILE__, true);
+		\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('cart_checkout_blocks', __FILE__, true);
+	}
 
 });
 
@@ -138,8 +139,8 @@ function woocommerce_gateway_braspag_init()
 
 			foreach ($requiredPlugins as $pluginName => $pluginData) {
 				$isInstalled = !empty($allPlugins[$pluginData['file']]); // Verifica se está instalado
-    			$isActive = is_plugin_active($pluginData['file']); // Verifica se está ativo
-
+				$isActive = is_plugin_active($pluginData['file']); // Verifica se está ativo
+	
 				// Define a ação e o link com base no estado do plugin
 				if (!$isInstalled && $currentUserCanInstallPlugins) {
 					// Plugin não está instalado

@@ -4,7 +4,7 @@ var BraspagAuth3ds20 = Class.create();
 
 BraspagAuth3ds20.prototype = {
 
-  initialize: async function () {
+  initialize: function () {
 
     if (typeof braspag_auth3ds20_params == "undefined") {
       return false;
@@ -18,28 +18,34 @@ BraspagAuth3ds20.prototype = {
     this.isBpmpiMasterCardNotifyOnlyEnabledDC = braspag_auth3ds20_params.isBpmpiMasterCardNotifyOnlyEnabledDC;
     this.isTestEnvironment = braspag_auth3ds20_params.isTestEnvironment;
     this.paymentType = '';
-
+    this.transactionStarted = false;
     jQuery('.bpmpi_accesstoken').val(this.bpmpiToken);
 
-    await this.startTransaction();
+    this.registerPaymentMethodEvents();
   },
 
   startTransaction: async function () {
     var self = this;
 
-    if (this.isBpmpiEnabled()) {
+    if (this.transactionStarted || this.isBpmpiEnabled()) {
+      return true
+    }
 
-      let checkout_payment_element = jQuery('.woocommerce-checkout-payment, .woocommerce-checkout-review-order-table');
+    this.transactionStarted = true;
 
-      braspag.blockElement(checkout_payment_element);
+    let checkout_payment_element = jQuery('.woocommerce-checkout-payment, .woocommerce-checkout-review-order-table');
 
-      self.bpmpiRenderer.renderBpmpiData('bpmpi_auth', false, self.isBpmpiEnabled());
-      self.bpmpiRenderer.renderBpmpiData('bpmpi_accesstoken', false, self.bpmpiToken);
+    braspag.blockElement(checkout_payment_element);
 
+    self.bpmpiRenderer.renderBpmpiData('bpmpi_auth', false, self.isBpmpiEnabled());
+    self.bpmpiRenderer.renderBpmpiData('bpmpi_accesstoken', false, self.bpmpiToken);
+
+    try{
       await bpmpi_load();
-
+    } finally {
       braspag.unBlockElement(checkout_payment_element);
     }
+
 
     return true;
   },
@@ -75,6 +81,28 @@ BraspagAuth3ds20.prototype = {
     }
 
     return;
+  },
+
+  registerPaymentMethodEvents: function () {
+    const self = this;
+    const credit = document.querySelector('#payment_method_braspag_creditcard');
+    const debit = document.querySelector('#payment_method_braspag_debitcard');
+
+    const methods = [credit, debit];
+
+    methods.forEach(function (method) {
+      if (method) {
+        if (method.checked) {
+          self.startTransaction();
+        }
+
+        method.addEventListener('change', function () {
+          if (method.checked) {
+            self.startTransaction();
+          }
+        });
+      }
+    });
   },
 
   placeOrder: async function (form) {
@@ -135,6 +163,7 @@ BraspagAuth3ds20.prototype = {
         return true;
       }
 
+      await self.startTransaction();
       await self.renderData();
       await self.getAuthenticateData();
 
@@ -196,8 +225,7 @@ BraspagAuth3ds20.prototype = {
   renderCredicardData: function () {
 
     this.bpmpiRenderer.renderBpmpiData('bpmpi_paymentmethod', '', 'Credit');
-    //this.bpmpiRenderer.renderBpmpiData('bpmpi_auth_notifyonly', false, this.isBpmpiMasterCardNotifyOnlyEnabledCC);
-    this.bpmpiRenderer.renderBpmpiData('bpmpi_auth_notifyonly', false, this.isBpmpiMasterCardNotifyOnlyEnabledCC == 1 ? 'true' : 'false');
+    this.bpmpiRenderer.renderBpmpiData('bpmpi_auth_notifyonly', false, this.isBpmpiMasterCardNotifyOnlyEnabledCC);
 
     let creditcardExpiration = jQuery('#braspag_creditcard-card-expiry').val().split('/');
 
@@ -225,8 +253,7 @@ BraspagAuth3ds20.prototype = {
   renderDebitcardData: function () {
 
     this.bpmpiRenderer.renderBpmpiData('bpmpi_paymentmethod', '', 'Debit');
-    //this.bpmpiRenderer.renderBpmpiData('bpmpi_auth_notifyonly', false, this.isBpmpiMasterCardNotifyOnlyEnabledDC);
-    this.bpmpiRenderer.renderBpmpiData('bpmpi_auth_notifyonly', false, this.isBpmpiMasterCardNotifyOnlyEnabledDC == 1 ? 'true' : 'false');
+    this.bpmpiRenderer.renderBpmpiData('bpmpi_auth_notifyonly', false, this.isBpmpiMasterCardNotifyOnlyEnabledDC);
 
     let debitcardExpiration = jQuery('#braspag_debitcard-card-expiry').val().split('/');
 
@@ -264,7 +291,7 @@ BraspagAuth3ds20.prototype = {
 
     let shippingAddressValue = jQuery('#shipping_address_1').val();
 
-    this.bpmpiRenderer.renderBpmpiData('bpmpi_shipto_sameasbillto', false, typeof shippingAddress == "undefined" ? true : false);
+    this.bpmpiRenderer.renderBpmpiData('bpmpi_shipto_sameasbillto', false, typeof shippingAddressValue == "undefined" ? true : false);
 
     if (typeof shippingAddressValue != "undefined") {
       this.bpmpiRenderer.renderBpmpiData('bpmpi_shipto_sameasbillto', false, jQuery('#shipping_address_1').val() == '' ? true : false);
