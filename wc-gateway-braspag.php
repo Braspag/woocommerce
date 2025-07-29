@@ -184,6 +184,10 @@ function woocommerce_gateway_braspag_init()
 		$wc_min_version = '4.0.0';
 		$wp_min_version = '5.3.2';
 
+		if (!defined('WC_VERSION')) {
+			define('WC_VERSION', WC()->version ?? get_option('woocommerce_version'));
+		}
+
 		define('WC_BRASPAG_VERSION', $bp_version);
 		define('WC_BRASPAG_WP_VERSION', $wp_version);
 		define('WC_BRASPAG_MIN_PHP_VER', $php_version);
