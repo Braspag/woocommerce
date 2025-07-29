@@ -289,7 +289,7 @@ Braspag.prototype = {
 		try {
 			this.blockElement(checkout_payment_element);
 
-			if (typeof bpmpi != "undefined" && bpmpi.isBpmpiEnabled()) {
+			if ((creditCardSelected || debitCardSelected) && typeof bpmpi != "undefined" && bpmpi.isBpmpiEnabled()) {
 				await bpmpi.placeOrder(form);
 				return true;
 			}
@@ -302,7 +302,7 @@ Braspag.prototype = {
 			form.submit();
 			return true;
 		} catch (e) {
-			console.error('Erro ao processar o pedido:', error);
+			console.error('Erro ao processar o pedido:', e);
 			return false;
 		} finally {
 			this.unBlockElement(checkout_payment_element);

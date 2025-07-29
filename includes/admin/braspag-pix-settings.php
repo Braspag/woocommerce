@@ -44,7 +44,8 @@ return apply_filters(
             'default' => 'Simulado',
             'desc_tip' => true,
             'options' => [
-                "Cielo30" => "Pix Gateway -> Cielo",
+                "Cielo30" => "Pix Gateway -> Cielo30",
+				"Cielo2" => "Pix Gateway -> Cielo2",
                 "Bradesco2" => "Pix Gateway -> Bradesco",
                 "Simulado" => "Simulado"
             ]

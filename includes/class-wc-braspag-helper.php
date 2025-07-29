@@ -11,10 +11,10 @@ class WC_Braspag_Helper
 	const META_NAME_BRASPAG_CURRENCY = '_braspag_currency';
 
 	/**
-	 * @param null $order
+	 * @param $order
 	 * @return bool|mixed
 	 */
-	public static function get_braspag_currency($order = null)
+	public static function get_braspag_currency($order)
 	{
 		if (is_null($order)) {
 			return false;
@@ -26,19 +26,21 @@ class WC_Braspag_Helper
 	}
 
 	/**
-	 * @param null $order
-	 * @param $currency
+	 * @param WC_Order $order
+	 * @param string $currency
 	 * @return bool
 	 */
-	public static function update_braspag_currency($order = null, $currency)
+	public static function update_braspag_currency($order, $currency)
 	{
-		if (is_null($order)) {
+		if (empty($order) || empty($currency)) {
 			return false;
 		}
 
 		$order_id = WC_Braspag_Helper::is_wc_lt('3.0') ? $order->id : $order->get_id();
 
 		WC_Braspag_Helper::is_wc_lt('3.0') ? $order = wc_get_order($order_id, self::META_NAME_BRASPAG_CURRENCY, $currency) : $order->update_meta_data(self::META_NAME_BRASPAG_CURRENCY, $currency);
+
+		return true;
 	}
 
 	/**
@@ -93,7 +95,7 @@ class WC_Braspag_Helper
 	 */
 	public static function is_wc_lt($version)
 	{
-		return version_compare(WC_VERSION, $version, '<');
+		return version_compare(defined('WC_VERSION') ? WC_VERSION : (WC()->version ?? get_option('woocommerce_version')), $version, '<');
 	}
 
 	/**

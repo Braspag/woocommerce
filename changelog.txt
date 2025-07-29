@@ -74,3 +74,7 @@
 = 2.3.5.31 - 2025-06-05 =
 * Hotfix QrCode Pix order
 * Hotfix Pix order new version WC
+
+= 2.3.5.32 - 2025-07-29 =
+* Update compatibility with WooCommerce 10.0.4 and WordPress 6.8.2
+* Fix PHP 8.3 deprecation warnings

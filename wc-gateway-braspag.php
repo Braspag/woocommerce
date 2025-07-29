@@ -14,7 +14,7 @@
  * Author: Braspag
  * Author URI: https://braspag.com.br/
  *
- * Version: 2.3.5.31
+ * Version: 2.3.5.32
  * Requires at least: 5.3.2
  * Tested up to: 6.2.2
  * Requires PHP: 7.0
@@ -38,7 +38,8 @@ if (!defined('ABSPATH')) {
  *
  * @return void
  */
-function unschedule_token_cleanup() {
+function unschedule_token_cleanup()
+{
 	$scheduled_actions = as_get_scheduled_actions([
 		'hook' => 'woocommerce_payment_tokens_cleanup',
 		'status' => ActionScheduler_Store::STATUS_PENDING,
@@ -60,12 +61,12 @@ register_deactivation_hook(__FILE__, 'unschedule_token_cleanup');
  * @return string
  */
 
- add_action('before_woocommerce_init', function(){
+add_action('before_woocommerce_init', function () {
 
-    if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
-        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
-
-    }
+	if (class_exists(\Automattic\WooCommerce\Utilities\FeaturesUtil::class)) {
+		\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('custom_order_tables', __FILE__, true);
+		\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('cart_checkout_blocks', __FILE__, true);
+	}
 
 });
 
@@ -138,8 +139,8 @@ function woocommerce_gateway_braspag_init()
 
 			foreach ($requiredPlugins as $pluginName => $pluginData) {
 				$isInstalled = !empty($allPlugins[$pluginData['file']]); // Verifica se está instalado
-    			$isActive = is_plugin_active($pluginData['file']); // Verifica se está ativo
-
+				$isActive = is_plugin_active($pluginData['file']); // Verifica se está ativo
+	
 				// Define a ação e o link com base no estado do plugin
 				if (!$isInstalled && $currentUserCanInstallPlugins) {
 					// Plugin não está instalado
@@ -178,12 +179,20 @@ function woocommerce_gateway_braspag_init()
 		 */
 
 		global $wp_version;
+		$bp_version = '2.3.5.32';
+		$php_version = '5.6.0';
+		$wc_min_version = '4.0.0';
+		$wp_min_version = '5.3.2';
 
-		define('WC_BRASPAG_VERSION', '2.3.5.31');
+		if (!defined('WC_VERSION')) {
+			define('WC_VERSION', WC()->version ?? get_option('woocommerce_version'));
+		}
+
+		define('WC_BRASPAG_VERSION', $bp_version);
 		define('WC_BRASPAG_WP_VERSION', $wp_version);
-		define('WC_BRASPAG_MIN_PHP_VER', '5.6.0');
-		define('WC_BRASPAG_MIN_WC_VER', '4.0.0');
-		define('WC_BRASPAG_MIN_WP_VER', '5.3.2');
+		define('WC_BRASPAG_MIN_PHP_VER', $php_version);
+		define('WC_BRASPAG_MIN_WC_VER', $wc_min_version);
+		define('WC_BRASPAG_MIN_WP_VER', $wp_min_version);
 		define('WC_BRASPAG_MAIN_FILE', __FILE__);
 		define('WC_BRASPAG_PLUGIN_URL', untrailingslashit(plugins_url(basename(plugin_dir_path(__FILE__)), basename(__FILE__))));
 		define('WC_BRASPAG_PLUGIN_PATH', untrailingslashit(plugin_dir_path(__FILE__)));
