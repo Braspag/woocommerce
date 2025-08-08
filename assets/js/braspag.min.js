@@ -147,7 +147,9 @@ var braspagCards = [
 	}
 ];
 
-var Braspag = Class.create();
+function Braspag() {
+        this.initialize();
+}
 
 Braspag.prototype = {
 
@@ -202,11 +204,9 @@ Braspag.prototype = {
 
 	registerCardType: function () {
 		let self = this;
-		jQuery('body').on('keyup', '.wc-credit-card-form-braspag-card-number', function (e) {
-
-			e.preventDefault();
-			let cardNumber = jQuery(this).val();
-			let card = self.getCardInfoFromNumber(cardNumber);
+                jQuery('body').on('keyup', '.wc-credit-card-form-braspag-card-number', function () {
+                        let cardNumber = jQuery(this).val();
+                        let card = self.getCardInfoFromNumber(cardNumber);
 
 			if (card != undefined) {
 				jQuery(this).attr('class', 'input-text wc-credit-card-form-braspag-card-number').addClass(card.type);
@@ -217,20 +217,18 @@ Braspag.prototype = {
 
 	formatCreditCardNumber: function () {
 		let self = this;
-		jQuery('body').on('keyup', '.wc-credit-card-form-braspag-card-number', function (e) {
-			e.preventDefault();
-			let cardNumber = jQuery(this).val();
-			let cardNumberFormated = self.formatCardNumber(cardNumber);
-			jQuery(this).val(cardNumberFormated);
-		});
+                jQuery('body').on('keyup', '.wc-credit-card-form-braspag-card-number', function () {
+                        let cardNumber = jQuery(this).val();
+                        let cardNumberFormated = self.formatCardNumber(cardNumber);
+                        jQuery(this).val(cardNumberFormated);
+                });
 	},
 
 	verifyCreditCardNumber: function () {
 		let self = this;
-		jQuery('body').on('blur', '.wc-credit-card-form-card-cvc', async function (e) {
-			e.preventDefault();
-			let cardNumber = jQuery('.wc-credit-card-form-braspag-card-number').val();
-			let cardNumberFormated = self.formatCardNumber(cardNumber);
+                jQuery('body').on('blur', '.wc-credit-card-form-card-cvc', async function () {
+                        let cardNumber = jQuery('.wc-credit-card-form-braspag-card-number').val();
+                        let cardNumberFormated = self.formatCardNumber(cardNumber);
 			let holderName = jQuery('.wc-credit-card-form-card-holder').val();
 			let ExpirationDate = jQuery('.wc-credit-card-form-card-expiry').val().replace(/\s+/g, '');
 			let securityCode = jQuery(this).val();
@@ -322,4 +320,4 @@ Braspag.prototype = {
 	}
 };
 
-var braspag = new Braspag;
+var braspag = new Braspag();
