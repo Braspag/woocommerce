@@ -14,13 +14,13 @@
  * Author: Braspag
  * Author URI: https://braspag.com.br/
  *
- * Version: 2.3.5.31
+ * Version: 2.3.5.33
  * Requires at least: 5.3.2
- * Tested up to: 6.2.2
+ * Tested up to: 6.8.2
  * Requires PHP: 7.0
  *
  * WC requires at least: 4.0.0
- * WC tested up to: 7.9.0
+ * WC tested up to: 10.0.4
  * License URI:       https://opensource.org/license/gpl-3/
  * Text Domain: woocommerce-braspag
  * Domain Path: /languages
@@ -179,7 +179,7 @@ function woocommerce_gateway_braspag_init()
 
 		global $wp_version;
 
-		define('WC_BRASPAG_VERSION', '2.3.5.31');
+		define('WC_BRASPAG_VERSION', '2.3.5.33');
 		define('WC_BRASPAG_WP_VERSION', $wp_version);
 		define('WC_BRASPAG_MIN_PHP_VER', '5.6.0');
 		define('WC_BRASPAG_MIN_WC_VER', '4.0.0');
