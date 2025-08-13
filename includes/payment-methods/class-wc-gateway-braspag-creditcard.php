@@ -433,7 +433,7 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
                 ]
                 );
 
-                $card_token = $response->body->Payment->CreditCard->CardToken;
+                $card_token = $response->body->Payment->CreditCard->CardToken ?? null;
 
                 if ('yes' === $this->save_card && !empty($card_token)) {
                     $this->process_payment_response_creditcard_card_token($card_token, $response);
@@ -666,7 +666,7 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
             }
         }else{
             $cardnumber = [
-                "CardNumber" => $checkout->get_value('braspag_creditcard-card-number')
+                "CardNumber" => str_replace(" ", "", $checkout->get_value('braspag_creditcard-card-number'))
             ];
         }
 
@@ -702,7 +702,8 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
             "Authenticate" => false,
             "Recurrent" => false,
             "DoSplit" => false,
-            "CreditCard" => $card_data
+            "CreditCard" => $card_data,
+	        "ExtraDataCollection" => json_decode(json_encode($this->extra_data_collection), true)
         ]);
 
         return apply_filters(
@@ -719,7 +720,7 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
      * @param $order
      * @param $braspag_pagador_request
      * @param $braspag_pagador_response
-     * @return array
+     * @return void
      */
     public function process_antifraud_analysis_transaction($cart, $order, $braspag_pagador_request, $braspag_pagador_response)
     {

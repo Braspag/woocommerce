@@ -323,7 +323,7 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway
         return $oauth_response->body->access_token;
     }
 
-     /**
+    /**
      * @param $response
      * @return object
      */
@@ -371,7 +371,7 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway
 
         $sop_request_builder['Content-Type'] = 'application/json';
         $sop_request_builder['MerchantId'] = $merchant_id;
-        $sop_request_builder['Authorization'] = 'Bearer '.$auth_sop_token;
+        $sop_request_builder['Authorization'] = 'Bearer ' . $auth_sop_token;
 
         $sop_response = $this->braspag_sop_request($sop_request_builder, $enviroment, $endpoint);
 
@@ -392,7 +392,7 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway
      */
     public function braspag_sop_request($request, $enviroment, $endpoint, $method = 'POST')
     {
-        $end_point = $enviroment.'/'.$endpoint;
+        $end_point = $enviroment . '/' . $endpoint;
 
         $headers = $request;
 
@@ -490,12 +490,17 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway
             'MerchantName' => $mpi_auth_token_request_builder['merchant_name'],
             'MCC' => $mpi_auth_token_request_builder['mcc']
         ];
+        WC_Braspag_Logger::log("Info: Begin processing Mpi Auth request." . print_r($mpi_auth_token_request_builder['body'], true));
+
 
         $mpi_auth_token_response = $this->braspag_mpi_request($mpi_auth_token_request_builder, 'v2/auth/token');
 
         if (!empty($mpi_auth_token_response->errors)) {
             $this->throw_localized_message($mpi_auth_token_response);
+            WC_Braspag_Logger::log("ERROR: Begin processing Mpi Auth request:" . print_r($mpi_auth_token_response, true));
         }
+
+        WC_Braspag_Logger::log("Info: Begin processing Mpi Auth request:" . print_r($mpi_auth_token_response, true));
 
         return $mpi_auth_token_response->body->access_token;
     }

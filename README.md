@@ -32,6 +32,7 @@ Para acessar a nossa documentação completa do Módulo WooCommerce, [clique aqu
 
 - Wordpress: versão 5.7 | WooCommerce: versão 5.1.0
 - Wordpress: versão 6.2.2 | WooCommerce: versão 7.9.0
+- Wordpress: versão 6.7.2 | WooCommerce: versão 9.7.0
 
 #### Beta (Em Homologação)
 - Wordpress: versão 6.7.2 | WooCommerce: versão 9.7.0
