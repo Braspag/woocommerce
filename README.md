@@ -2,14 +2,12 @@
 
 > Módulo para integração da plataforma WooCommerce com o Gateway da Braspag.
 
-![GitHub release (with filter)](https://img.shields.io/github/v/release/Braspag/woocommerce) ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/Braspag/woocommerce/main) ![GitHub issues](https://img.shields.io/github/issues/Braspag/woocommerce)
-
-[![Versão mínima do PHP](https://img.shields.io/badge/php-%3E%3D%207.4-8892BF.svg?style=flat-square)](https://php.net/)
-[![Última versão](https://img.shields.io/github/v/release/r-martins/PagBank-WooCommerce)](https://github.com/r-martins/PagBank-WooCommerce)
-![Último commit (develop)](https://img.shields.io/github/last-commit/r-martins/PagBank-WooCommerce/develop)
-![WordPress Plugin: Tested WP Version](https://img.shields.io/wordpress/plugin/tested/pagbank-connect)
+![GitHub release (with filter)](https://img.shields.io/github/v/release/Braspag/woocommerce) ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/Braspag/woocommerce/main) ![GitHub issues](https://img.shields.io/github/issues/Braspag/woocommerce) [![Versão mínima do PHP](https://img.shields.io/badge/php-%3E%3D%207.4-8892BF.svg?style=flat-square)](https://php.net/)
+[![Última versão](https://img.shields.io/github/v/release/Braspag/woocommerce)](https://github.com/Braspag/woocommerce)
+![Último commit (develop)](https://img.shields.io/github/last-commit/r-martins/devellop-labs/woocommerce-braspag/staging)
+<!--![WordPress Plugin: Tested WP Version](https://img.shields.io/wordpress/plugin/tested/pagbank-connect)
 ![Downloads por mês](https://img.shields.io/wordpress/plugin/dm/pagbank-connect)
-![Avaliação dos clientes no WordPress](https://img.shields.io/wordpress/plugin/stars/pagbank-connect?color=yellow)
+![Avaliação dos clientes no WordPress](https://img.shields.io/wordpress/plugin/stars/pagbank-connect?color=yellow)-->
 
 ## Documentação
 
@@ -37,9 +35,8 @@ Para acessar a nossa documentação completa do Módulo WooCommerce, [clique aqu
 
 #### versão testadas
 
-- Wordpress: versão 5.7 | WooCommerce: versão 5.1.0
+- Wordpress: versão 5.7.0 | WooCommerce: versão 5.1.0
 - Wordpress: versão 6.2.2 | WooCommerce: versão 7.9.0
-- Wordpress: versão 6.7.2 | WooCommerce: versão 9.7.0
 
 #### Beta (Em Homologação)
 - Wordpress: versão 6.7.2 | WooCommerce: versão 9.7.0
