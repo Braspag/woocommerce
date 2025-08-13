@@ -147,14 +147,19 @@ var braspagCards = [
 	}
 ];
 
-var Braspag = Class.create();
+function Braspag() {
+        this.initialize();
+}
 
 Braspag.prototype = {
 
 	initialize: function () {
 		this.registerCardType();
 		this.formatCreditCardNumber();
-		this.verifyCreditCardNumber();
+
+		if (typeof verify != "undefined" && verify.isVerifyEnabled()) {
+			this.verifyCreditCardNumber();
+		}
 	},
 
 	getCardInfoFromNumber: function (num) {
@@ -199,11 +204,9 @@ Braspag.prototype = {
 
 	registerCardType: function () {
 		let self = this;
-		jQuery('body').on('keyup', '.wc-credit-card-form-braspag-card-number', function (e) {
-
-			e.preventDefault();
-			let cardNumber = jQuery(this).val();
-			let card = self.getCardInfoFromNumber(cardNumber);
+                jQuery('body').on('keyup', '.wc-credit-card-form-braspag-card-number', function () {
+                        let cardNumber = jQuery(this).val();
+                        let card = self.getCardInfoFromNumber(cardNumber);
 
 			if (card != undefined) {
 				jQuery(this).attr('class', 'input-text wc-credit-card-form-braspag-card-number').addClass(card.type);
@@ -214,25 +217,25 @@ Braspag.prototype = {
 
 	formatCreditCardNumber: function () {
 		let self = this;
-		jQuery('body').on('keyup', '.wc-credit-card-form-braspag-card-number', function (e) {
-			e.preventDefault();
-			let cardNumber = jQuery(this).val();
-			let cardNumberFormated = self.formatCardNumber(cardNumber);
-			jQuery(this).val(cardNumberFormated);
-		});
+                jQuery('body').on('keyup', '.wc-credit-card-form-braspag-card-number', function () {
+                        let cardNumber = jQuery(this).val();
+                        let cardNumberFormated = self.formatCardNumber(cardNumber);
+                        jQuery(this).val(cardNumberFormated);
+                });
 	},
 
 	verifyCreditCardNumber: function () {
 		let self = this;
-		jQuery('body').on('blur', '.wc-credit-card-form-card-cvc', async function (e) {
-			e.preventDefault();
-			let cardNumber = jQuery('.wc-credit-card-form-braspag-card-number').val();
-			let cardNumberFormated = self.formatCardNumber(cardNumber);
+                jQuery('body').on('blur', '.wc-credit-card-form-card-cvc', async function () {
+                        let cardNumber = jQuery('.wc-credit-card-form-braspag-card-number').val();
+                        let cardNumberFormated = self.formatCardNumber(cardNumber);
 			let holderName = jQuery('.wc-credit-card-form-card-holder').val();
 			let ExpirationDate = jQuery('.wc-credit-card-form-card-expiry').val().replace(/\s+/g, '');
 			let securityCode = jQuery(this).val();
 			let brand = jQuery('.wc-credit-card-form-card-type').val();
 			let cardType = self.getCardInfoFromNumber(cardNumber);
+			const creditCardSelected = document.querySelector("#payment_method_braspag_creditcard")?.checked;
+			const debitCardSelected = document.querySelector("#payment_method_braspag_debitcard")?.checked;
 
 			let cardDetails = {
 				cardNumber: cardNumberFormated,
@@ -243,7 +246,7 @@ Braspag.prototype = {
 				cardType: cardType.type
 			};
 
-			if (securityCode.length >= 3) {
+			if ((creditCardSelected || debitCardSelected) && securityCode.length >= 3) {
 				if (typeof verify != "undefined" && verify.isVerifyEnabled()) {
 					await verify.processVerify(cardDetails);
 					return true;
@@ -278,16 +281,18 @@ Braspag.prototype = {
 	placeOrder: async function () {
 		let checkout_payment_element = jQuery('.woocommerce-checkout-payment, .woocommerce-checkout-review-order-table');
 		const form = jQuery('form.woocommerce-checkout');
+		const creditCardSelected = document.querySelector("#payment_method_braspag_creditcard")?.checked;
+		const debitCardSelected = document.querySelector("#payment_method_braspag_debitcard")?.checked;
 
 		try {
 			this.blockElement(checkout_payment_element);
 
-			if (typeof bpmpi != "undefined" && bpmpi.isBpmpiEnabled()) {
+			if ((creditCardSelected || debitCardSelected) && typeof bpmpi != "undefined" && bpmpi.isBpmpiEnabled()) {
 				await bpmpi.placeOrder(form);
 				return true;
 			}
 
-			if (typeof sop != "undefined" && sop.isSopEnabled()) {
+			if ((creditCardSelected || debitCardSelected) && typeof sop != "undefined" && sop.isSopEnabled()) {
 				await sop.processSop(form);
 				return true;
 			}
@@ -295,14 +300,13 @@ Braspag.prototype = {
 			form.submit();
 			return true;
 		} catch (e) {
-			console.error('Erro ao processar o pedido:', error);
+			console.error('Erro ao processar o pedido:', e);
 			return false;
 		} finally {
 			this.unBlockElement(checkout_payment_element);
 		}
 	},
 	blockElement: function (element) {
-
 		element.addClass('processing').block({
 			message: null,
 			overlayCSS: {
@@ -316,4 +320,4 @@ Braspag.prototype = {
 	}
 };
 
-var braspag = new Braspag;
+var braspag = new Braspag();

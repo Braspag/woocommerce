@@ -179,7 +179,7 @@ class WC_Braspag_Payment_Tokens extends WC_Payment_Tokens
      * @param $token
      * @return bool
      */
-    public static function is_customer_token_already_saved($customer_id, $gateway_id = '', $token)
+    public static function is_customer_token_already_saved($customer_id, $gateway_id = '', $token = null)
     {
         $customer_tokens = parent::get_customer_tokens($customer_id, $gateway_id);
         foreach ($customer_tokens as $customer_token) {
@@ -195,9 +195,9 @@ class WC_Braspag_Payment_Tokens extends WC_Payment_Tokens
      * @param $customer_id
      * @param string $gateway_id
      * @param $token
-     * @return bool
+     * @return bool|WC_Payment_Token
      */
-    public static function get_customer_token($customer_id, $gateway_id = '', $token)
+    public static function get_customer_token($customer_id, $gateway_id = '', $token = null)
     {
         $customer_tokens = parent::get_customer_tokens($customer_id, $gateway_id);
         foreach ($customer_tokens as $customer_token) {
