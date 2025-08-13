@@ -19,8 +19,9 @@ Para acessar a nossa documentação completa do Módulo WooCommerce, [clique aqu
 
 - Conta criada na Braspag com um Token gerado
 - Serviços habilitados na sua conta Braspag
-- **Wordpress** versão 5.3.2 ou maior
-- **Woocomerce** versão 4.0.0 ou maior
+- PHP 7.4 ou superior
+- **Wordpress** versão 5.3.2 ou superior
+- **Woocomerce** versão 4.0.0 ou superior
 - **Plugin Requerido Brazilian Market on WooCommerce**
 
 > É necessária a instalação desse plugin no WordPress, para adicionar recursos de preenchimento de informações pessoais do cliente. [clique aqui](https://wordpress.org/plugins/woocommerce-extra-checkout-fields-for-brazil)
@@ -41,6 +42,16 @@ Para acessar a nossa documentação completa do Módulo WooCommerce, [clique aqu
 
 #### Alfa (Em testes)
 - Wordpress: versão 6.8.2 | WooCommerce: versão 10.0.4
+
+### RECURSOS PRINCIPAIS
+- Suporte nativo ao Checkout Legado.
+- Suporte nativo ao High-Performance Order Storage (HPOS).
+- Suporte nativo a PHP 8.3.
+
+### RECURSOS EM TESTES
+- Suporte ao checkout em Blocos do WooCommerce
+- Suporte ao Fluid Checkout
+- Suporte a 3DS
 
 ### Pré-instalação
 
