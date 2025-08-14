@@ -1,8 +1,12 @@
-# WooCommerce
+# Braspag Payment Gateway Plugin (WooCommerce)
 
 > Módulo para integração da plataforma WooCommerce com o Gateway da Braspag.
 
-![GitHub release (with filter)](https://img.shields.io/github/v/release/Braspag/woocommerce) ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/Braspag/woocommerce/main) ![GitHub issues](https://img.shields.io/github/issues/Braspag/woocommerce)
+![GitHub release (with filter)](https://img.shields.io/github/v/release/Braspag/woocommerce) ![GitHub issues](https://img.shields.io/github/issues/Braspag/woocommerce) [![Versão mínima do PHP](https://img.shields.io/badge/php-%3E%3D%207.4-8892BF.svg?style=flat-square)](https://php.net/) ![Último commit (develop)](https://img.shields.io/github/last-commit/devellop-labs/woocommerce-braspag/staging)
+<!--![GitHub last commit (branch)](https://img.shields.io/github/last-commit/Braspag/woocommerce/main)--> 
+<!--![WordPress Plugin: Tested WP Version](https://img.shields.io/wordpress/plugin/tested/pagbank-connect)
+![Downloads por mês](https://img.shields.io/wordpress/plugin/dm/pagbank-connect)
+![Avaliação dos clientes no WordPress](https://img.shields.io/wordpress/plugin/stars/pagbank-connect?color=yellow)-->
 
 ## Documentação
 
@@ -16,8 +20,9 @@ Para acessar a nossa documentação completa do Módulo WooCommerce, [clique aqu
 
 - Conta criada na Braspag com um Token gerado
 - Serviços habilitados na sua conta Braspag
-- **Wordpress** versão 5.3.2 ou maior
-- **Woocomerce** versão 4.0.0 ou maior
+- PHP 7.4 ou superior
+- **Wordpress** versão 5.3.2 ou superior
+- **Woocomerce** versão 4.0.0 ou superior
 - **Plugin Requerido Brazilian Market on WooCommerce**
 
 > É necessária a instalação desse plugin no WordPress, para adicionar recursos de preenchimento de informações pessoais do cliente. [clique aqui](https://wordpress.org/plugins/woocommerce-extra-checkout-fields-for-brazil)
@@ -30,15 +35,24 @@ Para acessar a nossa documentação completa do Módulo WooCommerce, [clique aqu
 
 #### versão testadas
 
-- Wordpress: versão 5.7 | WooCommerce: versão 5.1.0
+- Wordpress: versão 5.7.0 | WooCommerce: versão 5.1.0
 - Wordpress: versão 6.2.2 | WooCommerce: versão 7.9.0
-- Wordpress: versão 6.7.2 | WooCommerce: versão 9.7.0
 
 #### Beta (Em Homologação)
 - Wordpress: versão 6.7.2 | WooCommerce: versão 9.7.0
 
 #### Alfa (Em testes)
 - Wordpress: versão 6.8.2 | WooCommerce: versão 10.0.4
+
+### RECURSOS PRINCIPAIS
+- Suporte nativo ao Checkout Legado.
+- Suporte nativo ao High-Performance Order Storage (HPOS).
+- Suporte nativo a PHP 8.3.
+
+### RECURSOS EM TESTES
+- Suporte ao checkout em Blocos do WooCommerce
+- Suporte ao Fluid Checkout
+- Suporte a 3DS
 
 ### Pré-instalação
 
