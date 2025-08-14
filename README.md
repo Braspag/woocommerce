@@ -2,7 +2,8 @@
 
 > Módulo para integração da plataforma WooCommerce com o Gateway da Braspag.
 
-![GitHub release (with filter)](https://img.shields.io/github/v/release/Braspag/woocommerce) ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/Braspag/woocommerce/main) ![GitHub issues](https://img.shields.io/github/issues/Braspag/woocommerce) [![Versão mínima do PHP](https://img.shields.io/badge/php-%3E%3D%207.4-8892BF.svg?style=flat-square)](https://php.net/) ![Último commit (develop)](https://img.shields.io/github/last-commit/devellop-labs/woocommerce-braspag/staging)
+![GitHub release (with filter)](https://img.shields.io/github/v/release/Braspag/woocommerce) ![GitHub issues](https://img.shields.io/github/issues/Braspag/woocommerce) [![Versão mínima do PHP](https://img.shields.io/badge/php-%3E%3D%207.4-8892BF.svg?style=flat-square)](https://php.net/) ![Último commit (develop)](https://img.shields.io/github/last-commit/devellop-labs/woocommerce-braspag/staging)
+<!--![GitHub last commit (branch)](https://img.shields.io/github/last-commit/Braspag/woocommerce/main)--> 
 <!--![WordPress Plugin: Tested WP Version](https://img.shields.io/wordpress/plugin/tested/pagbank-connect)
 ![Downloads por mês](https://img.shields.io/wordpress/plugin/dm/pagbank-connect)
 ![Avaliação dos clientes no WordPress](https://img.shields.io/wordpress/plugin/stars/pagbank-connect?color=yellow)-->
