@@ -2,11 +2,11 @@
 Contributors: develloplabs,nexaas
 Tags: credit card, braspag, apple pay, payment request, google pay, woocommerce, automattic
 Wordpress requires at least: 5.3.2
-Wordpress tested up to: 6.2.2
+Wordpress tested up to: 6.8.2
 WooCommerce requires at least: 4.0.0
-WooCommerce tested up to: 7.9.0
+WooCommerce tested up to: 10.0.4
 Requires PHP: 5.6
-Braspag Plugin Stable tag: 2.3.5.31
+Braspag Plugin Stable tag: 2.3.5.33
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 

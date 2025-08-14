@@ -14,13 +14,13 @@
  * Author: Braspag
  * Author URI: https://braspag.com.br/
  *
- * Version: 2.3.5.32
+ * Version: 2.3.5.33
  * Requires at least: 5.3.2
- * Tested up to: 6.2.2
+ * Tested up to: 6.8.2
  * Requires PHP: 7.4
  *
  * WC requires at least: 4.0.0
- * WC tested up to: 7.9.0
+ * WC tested up to: 10.0.4
  * License: GPL-3.0
  * License URI: https://opensource.org/license/gpl-3/
  * Text Domain: woocommerce-braspag
@@ -115,7 +115,7 @@ function wc_braspag_init()
 	 */
 
 	global $wp_version;
-	$bp_version = '2.3.5.32';
+	$bp_version = '2.3.5.33';
 	$min_php_ver = '5.6.0';
 	$min_wc_ver = '4.0.0';
 	$min_wp_ver = '5.3.2';
@@ -165,10 +165,7 @@ function wc_braspag_init()
 	define('WC_BRASPAG_MAIN_FILE', __FILE__);
 	define('WC_BRASPAG_PLUGIN_URL', untrailingslashit(plugins_url(basename(plugin_dir_path(__FILE__)), basename(__FILE__))));
 	define('WC_BRASPAG_PLUGIN_PATH', untrailingslashit(plugin_dir_path(__FILE__)));
-
-
-
-	// Adicionar o código que verifica os plugins obrigatórios
+  
 	add_action(
 		'admin_notices',
 		function () {
