@@ -122,11 +122,11 @@ class WC_Braspag_Admin_Notices
 			}
 
 			if (empty($show_wcver_notice)) {
-				if (version_compare(WC_VERSION, WC_BRASPAG_MIN_WC_VER, '<')) {
+				if (WC_Braspag_Helper::is_wc_lt(WC_BRASPAG_MIN_WC_VER)) {
 					/* translators: 1) int version 2) int version */
 					$message = __('WooCommerce Braspag - The minimum WooCommerce version required for this plugin is %1$s. You are running %2$s.', 'woocommerce-braspag');
 
-					$this->add_admin_notice('wcver', 'notice notice-warning', sprintf($message, WC_BRASPAG_MIN_WC_VER, WC_VERSION), true);
+					$this->add_admin_notice('wcver', 'notice notice-warning', sprintf($message, WC_BRASPAG_MIN_WC_VER, defined('WC_VERSION') ? WC_VERSION : (WC()->version ?? get_option('woocommerce_version'))), true);
 
 					return;
 				}

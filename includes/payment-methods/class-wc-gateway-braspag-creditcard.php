@@ -433,7 +433,7 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
                 ]
                 );
 
-                $card_token = $response->body->Payment->CreditCard->CardToken;
+                $card_token = $response->body->Payment->CreditCard->CardToken ?? null;
 
                 if ('yes' === $this->save_card && !empty($card_token)) {
                     $this->process_payment_response_creditcard_card_token($card_token, $response);
