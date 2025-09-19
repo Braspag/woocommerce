@@ -475,7 +475,7 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
             wp_register_script('wc-braspag-auth3ds20-renderer', plugins_url('assets/js/braspag-auth3ds20-renderer.js', WC_BRASPAG_MAIN_FILE), array(), WC_BRASPAG_VERSION, true);
             wp_enqueue_script('wc-braspag-auth3ds20-renderer');
 
-            wp_register_script('wc-braspag-auth3ds20', plugins_url('assets/js/braspag-auth3ds20.js', WC_BRASPAG_MAIN_FILE), array('wc-braspag-auth3ds20-conf', 'wc-braspag-auth3ds20-lib', 'wc-braspag-auth3ds20-renderer','wc-braspag'), WC_BRASPAG_VERSION, true);
+            wp_register_script('wc-braspag-auth3ds20', plugins_url('assets/js/braspag-auth3ds20.js', WC_BRASPAG_MAIN_FILE), array('wc-braspag-auth3ds20-conf', 'wc-braspag-auth3ds20-lib', 'wc-braspag-auth3ds20-renderer', 'wc-braspag'), WC_BRASPAG_VERSION, true);
             wp_enqueue_script('wc-braspag-auth3ds20');
 
             wp_localize_script(
@@ -554,16 +554,32 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
      */
     public function get_customer_identity_data($order)
     {
+        $personType = (string) $order->get_meta('_billing_persontype'); // '1' = PF, '2' = PJ (padrão plugins BR)
+        $cpf = preg_replace('/\D+/', '', (string) $order->get_meta('_billing_cpf'));
+        $cnpj = preg_replace('/\D+/', '', (string) $order->get_meta('_billing_cnpj'));
 
-        if ('' === $order->get_meta('_billing_persontype')) {
-            return '';
+        if ($personType === '1' || (!$personType && $cpf)) {
+            return ['type' => 'CPF', 'value' => $cpf ?: ''];
         }
 
-        $customer_identity_type = $order->get_meta('_billing_persontype') == '1' ? 'CPF' : 'CNPJ';
-        return [
-            'type' => $customer_identity_type,
-            'value' => preg_replace('/\D+/', '', $customer_identity_type == 'CPF' ? $order->get_meta('_billing_cpf') : $order->get_meta('_billing_cnpj'))
-        ];
+        if ($personType === '2' || (!$personType && $cnpj)) {
+            return ['type' => 'CNPJ', 'value' => $cnpj ?: ''];
+        }
+
+        // Fallbacks (outros plugins/temas costumam usar)
+        $doc = (string) $order->get_meta('_billing_cpf_cnpj');
+        if ($doc === '') {
+            $doc = (string) $order->get_meta('_billing_document');
+        }
+        $doc = preg_replace('/\D+/', '', $doc);
+
+        if ($doc !== '') {
+            $type = (strlen($doc) === 11) ? 'CPF' : ((strlen($doc) === 14) ? 'CNPJ' : '');
+            return ['type' => $type, 'value' => $doc];
+        }
+
+        // Padrão: array vazio (nunca string)
+        return ['type' => '', 'value' => ''];
     }
 
     /**
@@ -585,18 +601,20 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
      */
     public function get_braspag_pagador_request_customer_data($order)
     {
-
         $customer_identity_data = $this->get_customer_identity_data($order);
 
         $billing_address = $order->get_address('billing');
         $shipping_address = $order->get_address('shipping');
 
+        $identity = preg_replace('/\D+/', '', isset($customer_identity_data['value']) ? $customer_identity_data['value'] : '');
+        $identityType = isset($customer_identity_data['type']) ? $customer_identity_data['type'] : '';
+
         return [
             "Name" => $order->get_formatted_billing_full_name(),
             "Email" => $order->get_billing_email(),
             "Phone" => preg_replace('/\D+/', '', $order->get_billing_phone()),
-            "Identity" => preg_replace('/\D+/', '', $customer_identity_data['value']),
-            "IdentityType" => $customer_identity_data['type'],
+            "Identity" => $identity,
+            "IdentityType" => $identityType,
             "Address" => [
                 "Street" => $order->get_billing_address_1(),
                 "Number" => $billing_address['number'],
@@ -629,7 +647,6 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
      */
     public function get_braspag_pagador_request_payment_data($payment_method, $order, $checkout, $cart)
     {
-
         return apply_filters("wc_gateway_braspag_pagador_{$payment_method}_request_payment_builder", [], $order, $checkout, $cart);
     }
 
@@ -812,7 +829,6 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
      */
     public function throw_localized_message($response, $order, $localized_message = '')
     {
-
         if (!empty($response)) {
             $localized_message = $this->get_localized_error_message_from_response($response);
         }
