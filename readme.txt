@@ -6,7 +6,7 @@ Wordpress tested up to: 6.8.2
 WooCommerce requires at least: 4.0.0
 WooCommerce tested up to: 10.0.4
 Requires PHP: 5.6
-Braspag Plugin Stable tag: 2.3.5.34
+Braspag Plugin Stable tag: 2.3.5.30
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
