@@ -87,4 +87,8 @@
 * Support WordPress 6.7.0→6.8.2
 
 = 2.3.5.34
-* Hotfix error offset in identify 
+* Hotfix error offset in identify
+
+= 2.3.5.35
+* Hotfix error post notification
+* Hotfix error antifraude fields limit characters
