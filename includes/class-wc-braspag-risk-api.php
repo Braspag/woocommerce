@@ -22,7 +22,7 @@ class WC_Braspag_Risk_API
      * @param $braspag_settings
      * @return string
      */
-    protected function get_end_point($braspag_settings)
+    public static function get_end_point($braspag_settings)
     {
         return 'yes' === $braspag_settings['test_mode'] ? self::SANDBOX_ENDPOINT : self::PRODUCTION_ENDPOINT;
     }
@@ -50,7 +50,7 @@ class WC_Braspag_Risk_API
     /**
      * @return false|string
      */
-    public function get_request_id()
+    public static function get_request_id()
     {
         return substr(base64_encode(gethostname()), 0, 36);
     }
