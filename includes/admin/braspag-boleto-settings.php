@@ -46,12 +46,11 @@ return apply_filters(
                 "Braspag" => "Boleto Registrado Braspag",
                 "Bradesco2" => "Boleto Registrado Bradesco",
                 "BancoDoBrasil2" => "Boleto Registrado Banco do Brasil",
-                "ItauShopline" => "Boleto Registrado Itau Shopline",
-                "Itau2" => "Boleto Registrado Itau",
+                "ItauShopline" => "Boleto Registrado Itau Shopline (será descontinuado em 29/10/25)",
+                "Itau3" => "Boleto Registrado Itau",
                 "Santander2" => "Boleto Registrado Santander",
                 "Caixa2" => "Boleto Registrado Caixa",
                 "CitiBank2" => "Boleto Registrado Citi Bank",
-                "BankOfAmerica" => "Boleto Registrado Bank Of America",
                 "Simulado" => "Simulado"
             ]
         ),

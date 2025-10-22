@@ -68,7 +68,7 @@ Boleto
 - Braspag
 - Bradesco
 - Banco do Brasil
-- Itau Shopline
+- Itau Shopline (será descontinuado em 29/10/25)
 - Itau
 - Santander
 - Caixa
