@@ -92,3 +92,9 @@
 = 2.3.5.35
 * Hotfix error post notification
 * Hotfix error antifraude fields limit characters
+
+= 2.3.5.36
+* Remove provider itau2 from boleto payment method
+* Remove provider bankofamerica from boleto payment method
+* Add itau3 provider in boleto payment method
+* Add outdated text to itaushopline provider in boleto payment method
