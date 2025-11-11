@@ -463,8 +463,6 @@ class WC_Gateway_Braspag_DebitCard extends WC_Gateway_Braspag
             "Brand" => $checkout->get_value('braspag_debitcard-card-type')
         ];
 
-        WC_Braspag_Logger::log('CardNumber: ' . $cardnumber);
-
         $card_type = $checkout->get_value('braspag_debitcard-card-type');
         $provider = $this->get_braspag_payment_provider($card_type, $this->test_mode);
 

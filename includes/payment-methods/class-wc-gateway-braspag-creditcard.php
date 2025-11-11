@@ -659,8 +659,6 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
             ];
         }
 
-        WC_Braspag_Logger::log('CardNumber: ' . $$cardnumber['CardNumber']);
-
         $card_data = array_merge($card_data, $cardnumber);
 
         $InitiatedTransactionIndicator = [
