@@ -619,16 +619,11 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
      */
     public function braspag_pagador_creditcard_payment_request_builder($payment_data, $order, $checkout, $cart)
     {
-        $card_expiration_date = str_replace(
-            " ",
-            "",
-            $checkout->get_value('braspag_creditcard-card-expiry')
-        );
+        $card_expiration_date = str_replace(" ", "", $checkout->get_value('braspag_creditcard-card-expiry'));
 
         if (preg_match("#^\d{2}\/\d{2}$#is", $card_expiration_date)) {
             $card_expiration_date_exploded = explode("/", $card_expiration_date);
             $card_expiration_date = $card_expiration_date_exploded[0] . "/20" . $card_expiration_date_exploded[1];
-            WC_Braspag_Logger::log('card_expiration_date: ' . print_r($card_expiration_date_exploded, true) . '| card_expiration_date: ' . $card_expiration_date);
         }
 
         $customer_wants_to_save_card = $checkout->get_value('wc-braspag_creditcard-new-payment-method') == 'true';
@@ -663,6 +658,8 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
                 "CardNumber" => str_replace(" ", "", $checkout->get_value('braspag_creditcard-card-number'))
             ];
         }
+
+        WC_Braspag_Logger::log('CardNumber: ' . $$cardnumber['CardNumber']);
 
         $card_data = array_merge($card_data, $cardnumber);
 
@@ -770,6 +767,8 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
             ];
         }
 
+        WC_Braspag_Logger::log('card_expiration_date: ' . print_r($braspag_pagador_request['Payment']['Card']['ExpirationDate'], true));
+        
         $return_data = [
             "MerchantOrderId" => $braspag_pagador_request['MerchantOrderId'],
             "TotalOrderAmount" => intval($order->get_total() * 100),
