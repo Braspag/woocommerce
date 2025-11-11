@@ -240,7 +240,7 @@ BraspagAuth3ds20.prototype = {
     }
 
     if (creditcardExpirationYear.length == 2) {
-      creditcardExpirationYear += '20';
+      creditcardExpirationYear = '20' + creditcardExpirationYear;
     }
 
     this.bpmpiRenderer.renderBpmpiData('bpmpi_cardnumber', false, jQuery('#braspag_creditcard-card-number').val().replace(/\s/g, ''));
@@ -268,7 +268,7 @@ BraspagAuth3ds20.prototype = {
     }
 
     if (debitcardExpirationYear.length == 2) {
-      debitcardExpirationYear += '20';
+      debitcardExpirationYear = '20' + debitcardExpirationYear;
     }
 
     this.bpmpiRenderer.renderBpmpiData('bpmpi_cardnumber', false, jQuery('#braspag_debitcard-card-number').val());
