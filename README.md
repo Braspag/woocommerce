@@ -135,7 +135,6 @@ _Funcionalidades_
 - Santander
 - Caixa
 - Citi Bank
-- Bank Of America
 
 _Funcionalidades_
 
