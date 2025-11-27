@@ -98,3 +98,7 @@
 * Remove provider bankofamerica from boleto payment method
 * Add itau3 provider in boleto payment method
 * Add outdated text to itaushopline provider in boleto payment method
+
+= 2.3.5.37
+* Add BancodoBrasil3 provider in boleto payment method
+* Add deprecated text to itaushopline provider in boleto payment method
