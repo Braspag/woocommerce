@@ -451,21 +451,21 @@ var BP = (function () {
     function setErrorMessage(strMessage, ErrorCode) {
         switch (ErrorCode) {
             case "231":
-                strMessage = $.mage.__('Invalid card data, please check card data and try again!');
+                strMessage = 'Invalid card data, please check card data and try again!';
                 break;
             case "476":
-                strMessage = $.mage.__('Customer cannot be authenticated');
+                strMessage = 'Customer cannot be authenticated';
                 break;
             case 400:
-                strMessage = $.mage.__('Authentication failed, contact us');
+                strMessage = 'Authentication failed, contact us';
                 break;
             default:
-                strMessage = $.mage.__(strMessage);
+                strMessage = strMessage;
 
                 if (strMessage == "NOT_ENROLLED") {
-                    strMessage = $.mage.__('Invalid card data, please contact us!');
+                    strMessage = 'Invalid card data, please contact us!';
                 } else {
-                    strMessage = $.mage.__('Authentication failed, contact us');
+                    strMessage = 'Authentication failed, contact us';
                 }
 
 
