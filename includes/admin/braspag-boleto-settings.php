@@ -45,12 +45,12 @@ return apply_filters(
             'options' => [
                 "Braspag" => "Boleto Registrado Braspag",
                 "Bradesco2" => "Boleto Registrado Bradesco",
-                "BancoDoBrasil2" => "Boleto Registrado Banco do Brasil 2",
-                "BancodoBrasil3" => "Boleto Registrado Banco do Brasil 3",
-                "ItauShopline" => "Boleto Registrado Itau Shopline (Descontinuado em 29/10/25)",
+                "BancoDoBrasil2" => "Boleto Registrado Banco do Brasil (⚠️ Será descontinuado em 31/12/25)",
+                "BancodoBrasil3" => "Boleto Registrado Banco do Brasil",
+                "ItauShopline" => "Boleto Registrado Itau Shopline (⚠️ Descontinuado em 29/10/25)",
                 "Itau3" => "Boleto Registrado Itau",
                 "Santander2" => "Boleto Registrado Santander",
-                "Caixa2" => "Boleto Registrado Caixa",
+                "Caixa2" => "Boleto Registrado Caixa (⚠️ Indisponível por tempo inderterminado)",
                 "CitiBank2" => "Boleto Registrado Citi Bank",
                 "Simulado" => "Simulado"
             ]

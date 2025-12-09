@@ -129,11 +129,12 @@ _Funcionalidades_
 
 - Braspag
 - Bradesco
+- Banco do Brasil 2 (⚠️ Será descontinuado em 31/12/2025)
 - Banco do Brasil
-- Itau Shopline (será descontinuado em 29/10/25)
+- Itau Shopline (⚠️ Descontinuado em 29/10/2025)
 - Itau
 - Santander
-- Caixa
+- Caixa (⚠️ Indisponível por tempo inderterminado)
 - Citi Bank
 
 _Funcionalidades_

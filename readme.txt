@@ -68,11 +68,12 @@ Funcionalidades
 Boleto
 - Braspag
 - Bradesco
+- Banco do Brasil 2 (⚠️ Será descontinuado em 31/12/2025)
 - Banco do Brasil
-- Itau Shopline (Descontinuado em 29/10/2025)
+- Itau Shopline (⚠️ Descontinuado em 29/10/2025)
 - Itau
 - Santander
-- Caixa
+- Caixa (⚠️ Indisponível por tempo inderterminado)
 - Citi Bank
 
 Funcionalidades
