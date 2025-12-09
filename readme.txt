@@ -6,6 +6,7 @@ Wordpress tested up to: 6.8.2
 WooCommerce requires at least: 4.0.0
 WooCommerce tested up to: 10.0.4
 Requires PHP: 5.6
+Braspag Plugin Latest tag: 2.3.5.37
 Braspag Plugin Stable tag: 2.3.5.30
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -67,13 +68,13 @@ Funcionalidades
 Boleto
 - Braspag
 - Bradesco
+- Banco do Brasil 2 (⚠️ Será descontinuado em 31/12/2025)
 - Banco do Brasil
-- Itau Shopline (será descontinuado em 29/10/25)
+- Itau Shopline (⚠️ Descontinuado em 29/10/2025)
 - Itau
 - Santander
-- Caixa
+- Caixa (⚠️ Indisponível por tempo inderterminado)
 - Citi Bank
-- Bank Of 
 
 Funcionalidades
 - Instruções para o consumidor
