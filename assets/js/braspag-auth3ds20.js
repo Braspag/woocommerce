@@ -27,7 +27,7 @@ BraspagAuth3ds20.prototype = {
   startTransaction: async function () {
     var self = this;
 
-    if (this.transactionStarted || this.isBpmpiEnabled()) {
+    if (this.transactionStarted || !this.isBpmpiEnabled()) {
       return true
     }
 
