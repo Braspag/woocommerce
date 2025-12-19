@@ -86,15 +86,23 @@
 * Support HPOS.
 * Support WordPress 6.7.0→6.8.2
 
-= 2.3.5.34
+= 2.3.5.34 - 2025-09-19 =
 * Hotfix error offset in identify
 
-= 2.3.5.35
+= 2.3.5.35 - 2025-10-03 =
 * Hotfix error post notification
 * Hotfix error antifraude fields limit characters
 
-= 2.3.5.36
+= 2.3.5.36 - 2025-10-22 =
 * Remove provider itau2 from boleto payment method
 * Remove provider bankofamerica from boleto payment method
 * Add itau3 provider in boleto payment method
 * Add outdated text to itaushopline provider in boleto payment method
+
+= 2.3.5.37 - 2025-11-27 =
+* Add BancodoBrasil3 provider in boleto payment method
+* Add deprecated text to itaushopline provider in boleto payment method
+
+= 2.3.5.38 - 2025-12-09 =
+* Add outdated text to Caixa2 provider in boleto payment method
+* Add outdated text to BancoDoBrasil2 provider in boleto payment method
