@@ -1,50 +1,55 @@
-# Copyright (C) 2025 Braspag
-# This file is distributed under the GPL-3.0.
+# Copyright (C) 2020 Braspag
+# This file is distributed under the same license as the Braspag for WooCommerce Oficial plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Braspag for WooCommerce Oficial 2.3.5.38\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/woocommerce-braspag-dev\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"Project-Id-Version: Braspag for WooCommerce Oficial 2.2.3\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/woocommerce-"
+"braspag-dev\n"
+"POT-Creation-Date: 2025-12-29T20:34:56+00:00\n"
+"PO-Revision-Date: 2025-12-29 22:21-0300\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-12-29T20:34:56+00:00\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: WP-CLI 2.12.0\n"
+"X-Generator: Poedit 3.8\n"
 "X-Domain: woocommerce-braspag\n"
 
 #. Plugin Name of the plugin
 #: wc-gateway-braspag.php
 msgid "Braspag for WooCommerce Oficial"
-msgstr ""
+msgstr "Braspag para WooCommerce Oficial"
 
 #. Plugin URI of the plugin
 #: wc-gateway-braspag.php
 msgid "https://wordpress.org/plugins/woocommerce-braspag/"
-msgstr ""
+msgstr "https://wordpress.org/plugins/woocommerce-braspag/"
 
 #. Description of the plugin
 #: wc-gateway-braspag.php
 msgid "Take payments on your store using Braspag."
-msgstr ""
+msgstr "Receba pagamentos na sua loja usando o Braspag."
 
 #. Author of the plugin
-#: wc-gateway-braspag.php
-#: includes/admin/class-wc-braspag-privacy.php:14
+#: wc-gateway-braspag.php includes/admin/class-wc-braspag-privacy.php:14
 #: includes/class-wc-gateway-braspag.php:35
 msgid "Braspag"
-msgstr ""
+msgstr "Braspag"
 
 #. Author URI of the plugin
 #: wc-gateway-braspag.php
 msgid "https://braspag.com.br/"
-msgstr ""
+msgstr "https://braspag.com.br/"
 
 #. translators: 1) webhook url
 #: includes/abstracts/abstract-wc-braspag-payment-gateway.php:50
 #, php-format
-msgid "You must add the following webhook endpoint <strong style=\"background-color:#ddd;\">&nbsp;%s&nbsp;</strong> to your <a href=\"https://suporte.braspag.com.br/\" target=\"_blank\">Braspag Account Support</a>. This will enable you to receive notifications on the charge statuses."
+msgid ""
+"You must add the following webhook endpoint <strong style=\"background-"
+"color:#ddd;\">&nbsp;%s&nbsp;</strong> to your <a href=\"https://"
+"suporte.braspag.com.br/\" target=\"_blank\">Braspag Account Support</a>. "
+"This will enable you to receive notifications on the charge statuses."
 msgstr ""
 
 #: includes/abstracts/abstract-wc-braspag-payment-gateway.php:125
@@ -60,7 +65,7 @@ msgstr ""
 #: includes/abstracts/abstract-wc-braspag-payment-gateway.php:165
 #, php-format
 msgid "Braspag payment failed: %s"
-msgstr ""
+msgstr "Falha no patamento: %s"
 
 #: includes/abstracts/abstract-wc-braspag-payment-gateway.php:424
 #: includes/class-wc-braspag-mpi-api.php:101
@@ -70,7 +75,7 @@ msgstr ""
 #: includes/class-wc-braspag-pagador-api.php:140
 #: includes/class-wc-braspag-risk-api.php:107
 msgid "There was a problem connecting to the Braspag API endpoint."
-msgstr ""
+msgstr "Ocorreu um problema ao conectar-se ao endpoint da API Braspag."
 
 #: includes/admin/braspag-boleto-settings.php:10
 #: includes/admin/braspag-creditcard-justclick-settings.php:10
@@ -82,11 +87,11 @@ msgstr ""
 #: includes/admin/braspag-settings.php:189
 #: includes/admin/braspag-settings.php:227
 msgid "Enable/Disable"
-msgstr ""
+msgstr "Habilitar/Desabilitar"
 
 #: includes/admin/braspag-boleto-settings.php:11
 msgid "Enable Braspag Bank Slip"
-msgstr ""
+msgstr "Habilitar Pix Braspag"
 
 #: includes/admin/braspag-boleto-settings.php:17
 #: includes/admin/braspag-creditcard-justclick-settings.php:17
@@ -94,7 +99,7 @@ msgstr ""
 #: includes/admin/braspag-debitcard-settings.php:17
 #: includes/admin/braspag-pix-settings.php:18
 msgid "Title"
-msgstr ""
+msgstr "Título"
 
 #: includes/admin/braspag-boleto-settings.php:19
 #: includes/admin/braspag-creditcard-justclick-settings.php:19
@@ -103,10 +108,12 @@ msgstr ""
 #: includes/admin/braspag-pix-settings.php:20
 msgid "This controls the title which the user sees during checkout."
 msgstr ""
+"Isso controla o título que o usuário vê durante o processo de finalização da "
+"compra."
 
 #: includes/admin/braspag-boleto-settings.php:20
 msgid "Bank Slip"
-msgstr ""
+msgstr "Boleto"
 
 #: includes/admin/braspag-boleto-settings.php:24
 #: includes/admin/braspag-creditcard-justclick-settings.php:24
@@ -114,7 +121,7 @@ msgstr ""
 #: includes/admin/braspag-debitcard-settings.php:24
 #: includes/admin/braspag-pix-settings.php:25
 msgid "Description"
-msgstr ""
+msgstr "Descrição"
 
 #: includes/admin/braspag-boleto-settings.php:26
 #: includes/admin/braspag-boleto-settings.php:68
@@ -124,6 +131,8 @@ msgstr ""
 #: includes/admin/braspag-pix-settings.php:27
 msgid "This controls the description which the user sees during checkout."
 msgstr ""
+"Isso controla a descrição que o usuário vê durante o processo de finalização "
+"da compra."
 
 #: includes/admin/braspag-boleto-settings.php:30
 #: includes/admin/braspag-creditcard-justclick-settings.php:42
@@ -131,100 +140,106 @@ msgstr ""
 #: includes/admin/braspag-debitcard-settings.php:36
 #: includes/admin/braspag-pix-settings.php:31
 msgid "New Order Status"
-msgstr ""
+msgstr "Novo Status de Pedido"
 
 #: includes/admin/braspag-boleto-settings.php:39
 #: includes/admin/braspag-debitcard-settings.php:45
 #: includes/admin/braspag-pix-settings.php:40
 msgid "Available Type"
-msgstr ""
+msgstr "Tipo disponível"
 
 #: includes/admin/braspag-boleto-settings.php:59
 #: includes/admin/braspag-pix-settings.php:54
 msgid "Payment Instructions for Customer"
-msgstr ""
+msgstr "Instruções de pagamento para o cliente"
 
 #: includes/admin/braspag-boleto-settings.php:61
 #: includes/admin/braspag-pix-settings.php:56
-msgid "This controls the payment instructions which the user sees during checkout."
+msgid ""
+"This controls the payment instructions which the user sees during checkout."
 msgstr ""
+"Isso controla as instruções de pagamento que o usuário vê durante a "
+"finalização da compra."
 
 #: includes/admin/braspag-boleto-settings.php:66
 msgid "Payment Instructions for Bank"
-msgstr ""
+msgstr "Instruções de pagamento para o banco"
 
 #: includes/admin/braspag-boleto-settings.php:73
 msgid "Label Print Button"
-msgstr ""
+msgstr "Botão de impressão de etiquetas"
 
 #: includes/admin/braspag-boleto-settings.php:75
 msgid "This controls the label of print button."
-msgstr ""
+msgstr "Isso controla o rótulo do botão de impressão."
 
 #: includes/admin/braspag-boleto-settings.php:80
 msgid "Days to Expire"
-msgstr ""
+msgstr "Dias para expirar"
 
 #: includes/admin/braspag-boleto-settings.php:82
 msgid "This controls the days to Bank Slip expire."
-msgstr ""
+msgstr "Isso controla os dias até o vencimento do comprovante bancário."
 
 #: includes/admin/braspag-creditcard-justclick-settings.php:11
 msgid "Enable Braspag Credit Card JustClick"
-msgstr ""
+msgstr "Habilitar JustClick - Cartão de crédito"
 
 #: includes/admin/braspag-creditcard-justclick-settings.php:20
 msgid "Credit Card JustClick"
-msgstr ""
+msgstr "JustClick - Cartão de crédito - Braspag"
 
 #: includes/admin/braspag-creditcard-justclick-settings.php:30
 #: includes/admin/braspag-creditcard-settings.php:36
 msgid "Payment Action"
-msgstr ""
+msgstr "Ação de pagamento"
 
 #: includes/admin/braspag-creditcard-justclick-settings.php:51
 #: includes/admin/braspag-creditcard-settings.php:65
 msgid "Minimum Amount of Installment"
-msgstr ""
+msgstr "Valor mínimo da parcela"
 
 #: includes/admin/braspag-creditcard-justclick-settings.php:53
 #: includes/admin/braspag-creditcard-settings.php:67
 msgid "This controls the minimum installment amount during the checkout."
 msgstr ""
+"Isso controla o valor mínimo da parcela durante a finalização da compra."
 
 #: includes/admin/braspag-creditcard-justclick-settings.php:57
 #: includes/admin/braspag-creditcard-settings.php:71
 msgid "Maximum Installments"
-msgstr ""
+msgstr "Parcelamento máximo"
 
 #: includes/admin/braspag-creditcard-justclick-settings.php:59
 #: includes/admin/braspag-creditcard-settings.php:73
 msgid "This controls the maximum installment count during the checkout."
 msgstr ""
+"Isso controla o número máximo de parcelas durante o processo de finalização "
+"da compra."
 
 #: includes/admin/braspag-creditcard-justclick-settings.php:63
 #: includes/admin/braspag-creditcard-settings.php:86
 #: includes/admin/braspag-settings.php:222
 msgid "Anti-Fraud"
-msgstr ""
+msgstr "Antifraude"
 
 #: includes/admin/braspag-creditcard-justclick-settings.php:68
 #: includes/admin/braspag-creditcard-settings.php:91
 msgid "Reject Order Status"
-msgstr ""
+msgstr "Status do pedido rejeitado"
 
 #: includes/admin/braspag-creditcard-justclick-settings.php:77
 #: includes/admin/braspag-creditcard-settings.php:100
 msgid "Review Order Status"
-msgstr ""
+msgstr "Verificar status do pedido"
 
 #: includes/admin/braspag-creditcard-settings.php:11
 msgid "Enable Braspag Credit Card"
-msgstr ""
+msgstr "Habilitar Cartão de Crédito Braspag"
 
 #: includes/admin/braspag-creditcard-settings.php:20
 msgid "Credit Card"
-msgstr ""
+msgstr "Cartão de crédito - Braspag"
 
 #: includes/admin/braspag-creditcard-settings.php:30
 #: includes/admin/braspag-debitcard-settings.php:30
@@ -233,20 +248,24 @@ msgstr ""
 
 #: includes/admin/braspag-creditcard-settings.php:32
 #: includes/admin/braspag-debitcard-settings.php:32
-msgid "Value that will be concatenated with the value of registration at the acquirer for identification on the invoice."
+msgid ""
+"Value that will be concatenated with the value of registration at the "
+"acquirer for identification on the invoice."
 msgstr ""
+"Valor que será concatenado com o valor do registro junto ao adquirente para "
+"fins de identificação na fatura."
 
 #: includes/admin/braspag-creditcard-settings.php:48
 msgid "Save Credit Card Token"
-msgstr ""
+msgstr "Salvar Token de Cartão de Crédito"
 
 #: includes/admin/braspag-creditcard-settings.php:77
 msgid "Available Types"
-msgstr ""
+msgstr "Tipos disponíveis"
 
 #: includes/admin/braspag-creditcard-settings.php:109
 msgid "Authentication 3DS 2.0 for Credit Card"
-msgstr ""
+msgstr "Autenticação 3DS 2.0 para cartão de crédito"
 
 #: includes/admin/braspag-creditcard-settings.php:114
 #: includes/admin/braspag-creditcard-settings.php:115
@@ -263,44 +282,44 @@ msgstr ""
 #: includes/admin/braspag-debitcard-settings.php:111
 #: includes/admin/braspag-debitcard-settings.php:119
 msgid "Enable"
-msgstr ""
+msgstr "Habilitar"
 
 #: includes/admin/braspag-creditcard-settings.php:122
 #: includes/admin/braspag-debitcard-settings.php:86
 msgid "MasterCard Notify Only"
-msgstr ""
+msgstr "Somente para notificação da MasterCard"
 
 #: includes/admin/braspag-creditcard-settings.php:130
 #: includes/admin/braspag-debitcard-settings.php:94
 msgid "Authorization On Error"
-msgstr ""
+msgstr "Erro de autorização"
 
 #: includes/admin/braspag-creditcard-settings.php:138
 #: includes/admin/braspag-debitcard-settings.php:102
 msgid "Authorization On Failure"
-msgstr ""
+msgstr "Autorização em caso de falha"
 
 #: includes/admin/braspag-creditcard-settings.php:146
 #: includes/admin/braspag-debitcard-settings.php:110
 msgid "Authorization On Unenrolled"
-msgstr ""
+msgstr "Autorização para não inscritos"
 
 #: includes/admin/braspag-creditcard-settings.php:154
 #: includes/admin/braspag-debitcard-settings.php:118
 msgid "Authorization On Unsupported Brand"
-msgstr ""
+msgstr "Autorização para marcas não suportadas"
 
 #: includes/admin/braspag-debitcard-settings.php:11
 msgid "Enable Braspag Debit Card"
-msgstr ""
+msgstr "Habilitar Cartão de Débito Braspag"
 
 #: includes/admin/braspag-debitcard-settings.php:20
 msgid "Debit Card"
-msgstr ""
+msgstr "Cartão de débito - Braspag"
 
 #: includes/admin/braspag-debitcard-settings.php:54
 msgid "Label Pay Button"
-msgstr ""
+msgstr "Etiqueta botão de pagamento"
 
 #: includes/admin/braspag-debitcard-settings.php:56
 msgid "This controls the label of pay button."
@@ -308,55 +327,66 @@ msgstr ""
 
 #: includes/admin/braspag-debitcard-settings.php:61
 msgid "Automatic Redirect"
-msgstr ""
+msgstr "Redirecionamento automático"
 
 #: includes/admin/braspag-debitcard-settings.php:67
 msgid "Bank Return Url"
-msgstr ""
+msgstr "URL de retorno do banco"
 
 #: includes/admin/braspag-debitcard-settings.php:69
 #, php-format
-msgid "This controls the url to redirect after bank authentication. Example: https://URL.FROM.STORE/my-account/view-order/%s/ to redirect to order view page after authentication."
+msgid ""
+"This controls the url to redirect after bank authentication. Example: "
+"https://URL.FROM.STORE/my-account/view-order/%s/ to redirect to order view "
+"page after authentication."
 msgstr ""
 
 #: includes/admin/braspag-debitcard-settings.php:73
 msgid "Authentication 3DS 2.0 for Debit Card"
-msgstr ""
+msgstr "Autenticação 3DS 2.0 para cartão de débito"
 
 #: includes/admin/braspag-pix-settings.php:11
 msgid "Enable Braspag Pix"
-msgstr ""
+msgstr "Habilitar Pix Braspag"
 
 #: includes/admin/braspag-pix-settings.php:21
 msgid "Pix"
-msgstr ""
+msgstr "Pix"
 
 #: includes/admin/braspag-pix-settings.php:61
 msgid "Seconds to Expire"
-msgstr ""
+msgstr "Segundos para expirar"
 
 #: includes/admin/braspag-pix-settings.php:63
 msgid ""
 "QR Code expiration time, in seconds. Ex: 24 hours = 86400.\r\n"
-"            For provider Cielo30: the expiration time is 24 hours and cannot be configured.\r\n"
-"            For provider Bradesco: the QR Code expiration time can be configured in the Shopfácil panel or at the time of authorization via the parameter."
+"            For provider Cielo30: the expiration time is 24 hours and cannot "
+"be configured.\r\n"
+"            For provider Bradesco: the QR Code expiration time can be "
+"configured in the Shopfácil panel or at the time of authorization via the "
+"parameter."
 msgstr ""
+"Tempo de expiração do QR Code, em segundos. Ex: 24 horas = 86400.\n"
+"            Para provider Cielo30: o tempo de expiração é de 24 horas e não "
+"é parametrizável.\n"
+"            Para provider Bradesco: o tempo de expiração do QR Code pode ser "
+"configurado no painel Shopfácil ou no momento da autorização pelo parâmetro."
 
 #: includes/admin/braspag-settings.php:10
 msgid "Global Settings"
-msgstr ""
+msgstr "Configurações Gerais"
 
 #: includes/admin/braspag-settings.php:17
 msgid "Enable Braspag"
-msgstr ""
+msgstr "Habilitar Braspag"
 
 #: includes/admin/braspag-settings.php:23
 msgid "Test mode"
-msgstr ""
+msgstr "Modo de Teste"
 
 #: includes/admin/braspag-settings.php:24
 msgid "Enable Test Mode"
-msgstr ""
+msgstr "Habilitar Modo de Teste"
 
 #: includes/admin/braspag-settings.php:26
 msgid "Place the payment gateway in test mode using test API credentials."
@@ -364,29 +394,30 @@ msgstr ""
 
 #: includes/admin/braspag-settings.php:31
 msgid "Debug"
-msgstr ""
+msgstr "Depurar"
 
 #: includes/admin/braspag-settings.php:32
 msgid "Log debug messages"
-msgstr ""
+msgstr "Log das mensagens de depuração"
 
 #: includes/admin/braspag-settings.php:34
 msgid "Save debug messages to the WooCommerce System Status log."
 msgstr ""
+"Salve as mensagens de depuração no registro de status do sistema WooCommerce."
 
 #: includes/admin/braspag-settings.php:39
 #: includes/admin/class-wc-braspag-customer-seller-attributes.php:51
 msgid "Merchant ID"
-msgstr ""
+msgstr "ID de Comerciante"
 
 #: includes/admin/braspag-settings.php:41
 #: includes/admin/braspag-settings.php:96
 msgid "Get your Merchant ID from Braspag Support."
-msgstr ""
+msgstr "Obtenha seu ID de Comerciante com o suporte da Braspag."
 
 #: includes/admin/braspag-settings.php:46
 msgid "Merchant Key"
-msgstr ""
+msgstr "Chave de Comerciante"
 
 #: includes/admin/braspag-settings.php:48
 msgid "Get your Merchant Key from Braspag Support."
@@ -394,7 +425,7 @@ msgstr ""
 
 #: includes/admin/braspag-settings.php:53
 msgid "Merchant Name"
-msgstr ""
+msgstr "Nome do Comerciante"
 
 #: includes/admin/braspag-settings.php:55
 msgid "Get your Merchant Name from Braspag Support."
@@ -402,7 +433,7 @@ msgstr ""
 
 #: includes/admin/braspag-settings.php:60
 msgid "Merchant Category"
-msgstr ""
+msgstr "Categoria do comerciante"
 
 #: includes/admin/braspag-settings.php:62
 msgid "Get your Merchant Category from Braspag Support."
@@ -418,7 +449,7 @@ msgstr ""
 
 #: includes/admin/braspag-settings.php:74
 msgid "MCC"
-msgstr ""
+msgstr "MCC"
 
 #: includes/admin/braspag-settings.php:76
 msgid "Get your Merchant MCC Code from Braspag Support."
@@ -433,7 +464,9 @@ msgid "Enable Silent Order Post"
 msgstr ""
 
 #: includes/admin/braspag-settings.php:89
-msgid "Enable API Silent Order Post. This controls the option Sequence Criteria data to send for Braspag."
+msgid ""
+"Enable API Silent Order Post. This controls the option Sequence Criteria "
+"data to send for Braspag."
 msgstr ""
 
 #: includes/admin/braspag-settings.php:94
@@ -444,7 +477,7 @@ msgstr ""
 #: includes/admin/braspag-settings.php:202
 #: includes/admin/braspag-settings.php:308
 msgid "Client ID"
-msgstr ""
+msgstr "ID Cliente"
 
 #: includes/admin/braspag-settings.php:103
 msgid "Get your SOP Client ID from Braspag Support."
@@ -460,11 +493,13 @@ msgstr ""
 
 #: includes/admin/braspag-settings.php:115
 msgid "Language"
-msgstr ""
+msgstr "Linguagem"
 
 #: includes/admin/braspag-settings.php:117
-msgid "Language: \"pt\" for Portuguese | \"en\" for English | \"es\" for Spanish."
+msgid ""
+"Language: \"pt\" for Portuguese | \"en\" for English | \"es\" for Spanish."
 msgstr ""
+"Idioma: \"pt\" para português | \"en\" para inglês | \"es\" para espanhol."
 
 #: includes/admin/braspag-settings.php:127
 msgid "Send CVV field as required"
@@ -476,7 +511,7 @@ msgstr ""
 #: includes/admin/braspag-settings.php:171
 #: includes/admin/braspag-settings.php:235
 msgid "Yes"
-msgstr ""
+msgstr "Sim"
 
 #: includes/admin/braspag-settings.php:130
 #: includes/admin/braspag-settings.php:144
@@ -505,15 +540,19 @@ msgstr ""
 
 #: includes/admin/braspag-settings.php:184
 msgid "Verify Card"
-msgstr ""
+msgstr "Verificação de cartão"
 
 #: includes/admin/braspag-settings.php:190
 msgid "Enable Verify Card"
-msgstr ""
+msgstr "Habilitar Verificação de cartão"
 
 #: includes/admin/braspag-settings.php:192
-msgid "Enable API Verify Card. This controls the option Sequence Criteria data to send for Braspag."
+msgid ""
+"Enable API Verify Card. This controls the option Sequence Criteria data to "
+"send for Braspag."
 msgstr ""
+"Ative a API de verificação de cartão. Isso controla a opção de critérios de "
+"sequência de dados a serem enviados para o Braspag."
 
 #: includes/admin/braspag-settings.php:197
 msgid "OAuth Authentication"
@@ -569,7 +608,8 @@ msgid "Use Order ID"
 msgstr ""
 
 #: includes/admin/braspag-settings.php:259
-msgid "Choose whether you wish to use Order ID to compose Finger Print ID or not"
+msgid ""
+"Choose whether you wish to use Order ID to compose Finger Print ID or not"
 msgstr ""
 
 #: includes/admin/braspag-settings.php:264
@@ -626,35 +666,46 @@ msgstr ""
 
 #. translators: 1) int version 2) int version
 #: includes/admin/class-wc-braspag-admin-notices.php:106
-msgid "WooCommerce Braspag - We recently made changes to Braspag that may impact the appearance of your checkout."
+msgid ""
+"WooCommerce Braspag - We recently made changes to Braspag that may impact "
+"the appearance of your checkout."
 msgstr ""
 
 #. translators: 1) int version 2) int version
 #: includes/admin/class-wc-braspag-admin-notices.php:116
 #, php-format
-msgid "WooCommerce Braspag - The minimum PHP version required for this plugin is %1$s. You are running %2$s."
+msgid ""
+"WooCommerce Braspag - The minimum PHP version required for this plugin is "
+"%1$s. You are running %2$s."
 msgstr ""
 
 #. translators: 1) int version 2) int version
 #: includes/admin/class-wc-braspag-admin-notices.php:127
 #, php-format
-msgid "WooCommerce Braspag - The minimum WooCommerce version required for this plugin is %1$s. You are running %2$s."
+msgid ""
+"WooCommerce Braspag - The minimum WooCommerce version required for this "
+"plugin is %1$s. You are running %2$s."
 msgstr ""
 
 #. translators: 1) int version 2) int version
 #: includes/admin/class-wc-braspag-admin-notices.php:138
 #, php-format
-msgid "Wordpress Braspag - The minimum Wordpress version required for this plugin is %1$s. You are running %2$s."
+msgid ""
+"Wordpress Braspag - The minimum Wordpress version required for this plugin "
+"is %1$s. You are running %2$s."
 msgstr ""
 
 #: includes/admin/class-wc-braspag-admin-notices.php:148
 msgid "WooCommerce Braspag - cURL is not installed."
-msgstr ""
+msgstr "WooCommerce Braspag - cURL não está instalado."
 
 #. translators: 1) link
 #: includes/admin/class-wc-braspag-admin-notices.php:156
 #, php-format
-msgid "Braspag is enabled, but a SSL certificate is not detected. Your checkout may not be secure! Please ensure your server has a valid <a href=\"%1$s\" target=\"_blank\">SSL certificate</a>"
+msgid ""
+"Braspag is enabled, but a SSL certificate is not detected. Your checkout may "
+"not be secure! Please ensure your server has a valid <a href=\"%1$s\" "
+"target=\"_blank\">SSL certificate</a>"
 msgstr ""
 
 #. translators: %1$s Payment method, %2$s List of supported currencies
@@ -689,87 +740,101 @@ msgstr ""
 
 #: includes/admin/class-wc-braspag-privacy.php:16
 msgid "WooCommerce Braspag Order Data"
-msgstr ""
+msgstr "Dados de pedidos do WooCommerce Braspag"
 
 #: includes/admin/class-wc-braspag-privacy.php:19
 msgid "WooCommerce Braspag Subscriptions Data"
-msgstr ""
+msgstr "Dados de assinaturas do WooCommerce Braspag"
 
 #: includes/admin/class-wc-braspag-privacy.php:22
 #: includes/admin/class-wc-braspag-privacy.php:24
 msgid "WooCommerce Braspag Customer Data"
-msgstr ""
+msgstr "Dados de clientes do WooCommerce Braspag"
 
 #: includes/admin/class-wc-braspag-privacy.php:25
 msgid "WooCommerce Braspag Data"
-msgstr ""
+msgstr "Dados Braspag do WooCommerce"
 
 #: includes/admin/class-wc-braspag-privacy.php:38
 msgid "Retain Braspag Data"
-msgstr ""
+msgstr "Reter dados de Braspag"
 
 #: includes/admin/class-wc-braspag-privacy.php:39
 msgid "Retains any Braspag data such as Braspag customer ID, source ID."
 msgstr ""
+"Mantém todos os dados da Braspag, como o ID do cliente Braspag e o ID da "
+"fonte."
 
 #: includes/admin/class-wc-braspag-privacy.php:42
 msgid "N/A"
-msgstr ""
+msgstr "N/A"
 
 #. translators: %s URL to docs
 #: includes/admin/class-wc-braspag-privacy.php:95
 #, php-format
-msgid "By using this extension, you may be storing personal data or sharing data with an external service. <a href=\"%s\" target=\"_blank\">Learn more about how this works, including what you may want to include in your privacy policy.</a>"
+msgid ""
+"By using this extension, you may be storing personal data or sharing data "
+"with an external service. <a href=\"%s\" target=\"_blank\">Learn more about "
+"how this works, including what you may want to include in your privacy "
+"policy.</a>"
 msgstr ""
+"Ao usar esta extensão, você pode estar armazenando dados pessoais ou "
+"compartilhando dados com um serviço externo. <a href=\"%s\" "
+"target=\"_blank\">Saiba mais sobre como isso funciona, incluindo o que você "
+"pode querer incluir em sua política de privacidade.</a>"
 
 #: includes/admin/class-wc-braspag-privacy.php:116
 msgid "Orders"
-msgstr ""
+msgstr "Pedidos"
 
 #: includes/admin/class-wc-braspag-privacy.php:120
 #: includes/admin/class-wc-braspag-privacy.php:183
 #: includes/admin/class-wc-braspag-privacy.php:222
 msgid "Braspag payment id"
-msgstr ""
+msgstr "Braspag ID Pedido"
 
 #: includes/admin/class-wc-braspag-privacy.php:124
 #: includes/admin/class-wc-braspag-privacy.php:187
 #: includes/admin/class-wc-braspag-privacy.php:226
 msgid "Braspag customer id"
-msgstr ""
+msgstr "Braspag ID Cliente"
 
 #: includes/admin/class-wc-braspag-privacy.php:179
 msgid "Subscriptions"
-msgstr ""
+msgstr "Assinaturas"
 
 #: includes/admin/class-wc-braspag-privacy.php:218
 msgid "Customer Data"
-msgstr ""
+msgstr "Dados do cliente"
 
 #: includes/admin/class-wc-braspag-privacy.php:263
 msgid "Braspag User Data Erased."
-msgstr ""
+msgstr "Dados do usuário Braspag apagados."
 
 #. translators: %d Order ID
 #: includes/admin/class-wc-braspag-privacy.php:336
 #: includes/admin/class-wc-braspag-privacy.php:372
 #, php-format
-msgid "Order ID %d is less than set retention days. Personal data retained. (Braspag)"
+msgid ""
+"Order ID %d is less than set retention days. Personal data retained. "
+"(Braspag)"
 msgstr ""
 
 #. translators: %d Order ID
 #: includes/admin/class-wc-braspag-privacy.php:341
 #, php-format
-msgid "Order ID %d contains an active Subscription. Personal data retained. (Braspag)"
+msgid ""
+"Order ID %d contains an active Subscription. Personal data retained. "
+"(Braspag)"
 msgstr ""
 
 #: includes/admin/class-wc-braspag-privacy.php:356
 msgid "Braspag Subscription Data Erased."
-msgstr ""
+msgstr "Dados de assinatura da Braspag apagados."
 
 #: includes/admin/class-wc-braspag-privacy.php:383
 msgid "Braspag personal data erased."
-msgstr ""
+msgstr "Dados pessoais da Braspag apagados."
 
 #: includes/class-wc-braspag-helper.php:54
 msgid "The card number is not a valid credit card number."
@@ -832,11 +897,13 @@ msgid "An error occurred while processing the card."
 msgstr ""
 
 #: includes/class-wc-braspag-helper.php:69
-msgid "Unable to process this payment, please try again or use alternative method."
+msgid ""
+"Unable to process this payment, please try again or use alternative method."
 msgstr ""
 
 #: includes/class-wc-braspag-helper.php:70
-msgid "The billing country is not accepted by SOFORT. Please try another country."
+msgid ""
+"The billing country is not accepted by SOFORT. Please try another country."
 msgstr ""
 
 #: includes/class-wc-braspag-helper.php:71
@@ -886,12 +953,15 @@ msgstr ""
 
 #: includes/class-wc-braspag-webhook-handler.php:186
 #, php-format
-msgid "Post Notification Message: Braspag charge Payment Pending (Charge ID: %s)."
+msgid ""
+"Post Notification Message: Braspag charge Payment Pending (Charge ID: %s)."
 msgstr ""
 
 #: includes/class-wc-braspag-webhook-handler.php:187
 #, php-format
-msgid "Pagamento aguardando aprovação ou esta pendente de pagamento. (PaymentId: %s)."
+msgid ""
+"Pagamento aguardando aprovação ou esta pendente de pagamento. (PaymentId: "
+"%s)."
 msgstr ""
 
 #: includes/class-wc-braspag-webhook-handler.php:191
@@ -952,34 +1022,40 @@ msgstr ""
 #: includes/class-wc-gateway-braspag.php:754
 #: includes/payment-methods/class-wc-gateway-braspag-debitcard.php:401
 #, php-format
-msgid "Braspag charge authorized (Charge ID: %s). Process order to take payment, or cancel to remove the pre-authorization."
+msgid ""
+"Braspag charge authorized (Charge ID: %s). Process order to take payment, or "
+"cancel to remove the pre-authorization."
 msgstr ""
 
 #: includes/class-wc-gateway-braspag.php:770
 #: includes/class-wc-gateway-braspag.php:776
 msgid "Payment processing failed."
-msgstr ""
+msgstr "O processamento do pagamento falhou."
 
 #. translators: 1) Opening anchor tag 2) closing anchor tag
 #: includes/class-wc-gateway-braspag.php:804
 #, php-format
-msgid "If your billing address has been changed for saved payment methods, be sure to remove any %1$ssaved payment methods%2$s on file and re-add them."
+msgid ""
+"If your billing address has been changed for saved payment methods, be sure "
+"to remove any %1$ssaved payment methods%2$s on file and re-add them."
 msgstr ""
 
 #: includes/class-wc-gateway-braspag.php:858
-msgid "Sorry, we are unable to process your payment at this time. Please retry later."
+msgid ""
+"Sorry, we are unable to process your payment at this time. Please retry "
+"later."
 msgstr ""
 
 #: includes/payment-methods/class-wc-gateway-braspag-boleto.php:27
 #: wc-gateway-braspag.php:415
 msgid "Braspag Bank Slip"
-msgstr ""
+msgstr "Boleto Braspag"
 
 #. translators: link to Braspag testing page
 #: includes/payment-methods/class-wc-gateway-braspag-boleto.php:89
 #: includes/payment-methods/class-wc-gateway-braspag-pix.php:94
 msgid "TEST MODE ENABLED."
-msgstr ""
+msgstr "MODO TESTE HABILITADO."
 
 #: includes/payment-methods/class-wc-gateway-braspag-creditcard-justclick.php:27
 #: wc-gateway-braspag.php:413
@@ -988,7 +1064,7 @@ msgstr ""
 
 #: includes/payment-methods/class-wc-gateway-braspag-creditcard-justclick.php:208
 msgid "Saved Card"
-msgstr ""
+msgstr "Salvar cartão"
 
 #: includes/payment-methods/class-wc-gateway-braspag-creditcard-justclick.php:214
 #: includes/payment-methods/class-wc-gateway-braspag-creditcard.php:297
@@ -1002,72 +1078,80 @@ msgstr ""
 
 #: includes/payment-methods/class-wc-gateway-braspag-creditcard.php:496
 msgid "Credit Card Payment Failure."
-msgstr ""
+msgstr "Erro ao processar cartão de crédito."
 
 #: includes/payment-methods/class-wc-gateway-braspag-debitcard.php:306
 msgid "Debit Card Payment Failure."
-msgstr ""
+msgstr "Erro ao processar cartão de débito."
 
 #: includes/payment-methods/class-wc-gateway-braspag-creditcard.php:72
 #: wc-gateway-braspag.php:412
 msgid "Braspag Credit Card"
-msgstr ""
+msgstr "Cartão de crédito - Braspag"
 
 #: includes/payment-methods/class-wc-gateway-braspag-creditcard.php:285
-msgid "Owner's Name"
+msgid "Nome do Titular"
 msgstr ""
 
 #: includes/payment-methods/class-wc-gateway-braspag-creditcard.php:289
-msgid "Card Number"
+msgid "Número do Cartão"
 msgstr ""
 
 #: includes/payment-methods/class-wc-gateway-braspag-creditcard.php:293
-msgid "Expiration Date (MM/YY)"
+msgid "Data de Expiração (MM/YY)"
 msgstr ""
 
 #: includes/payment-methods/class-wc-gateway-braspag-debitcard.php:30
 #: wc-gateway-braspag.php:414
 msgid "Braspag Debit Card"
-msgstr ""
+msgstr "Cartão de Débito - Braspag"
 
 #: includes/payment-methods/class-wc-gateway-braspag-debitcard.php:404
 msgid "Payment processing failed. Please retry."
-msgstr ""
+msgstr "O processamento do pagamento falhou. Por favor, tente novamente."
 
 #: includes/payment-methods/class-wc-gateway-braspag-pix.php:32
 #: wc-gateway-braspag.php:416
 msgid "Braspag Pix"
-msgstr ""
+msgstr "Pix Braspag"
 
 #: wc-gateway-braspag.php:75
 #, php-format
-msgid "Braspag requires WooCommerce to be installed and active. You can download %s here."
+msgid ""
+"Braspag requires WooCommerce to be installed and active. You can download %s "
+"here."
 msgstr ""
+"O Braspag requer que o WooCommerce esteja instalado e ativo. Você pode baixá-"
+"lo %s aqui."
 
 #: wc-gateway-braspag.php:90
 #, php-format
-msgid "Braspag requires the Extra Checkout Fields for Brazil plugin to be installed and active. You can download %s here."
+msgid ""
+"Braspag requires the Extra Checkout Fields for Brazil plugin to be installed "
+"and active. You can download %s here."
 msgstr ""
+"O Braspag requer que o plugin Extra Checkout Fields for Brazil esteja "
+"instalado e ativo. Você pode baixá-lo %s aqui."
 
 #: wc-gateway-braspag.php:132
 #, php-format
 msgid "Braspag requires PHP %s, WordPress %s and WooCommerce %s or higher."
-msgstr ""
+msgstr "Braspag requer PHP %s, WordPress %s e WooCommerce %s ou superior."
 
 #: wc-gateway-braspag.php:177
 #, php-format
 msgid "Activate %s"
-msgstr ""
+msgstr "Ativar %s"
 
 #: wc-gateway-braspag.php:178
 #, php-format
 msgid "Install %s"
-msgstr ""
+msgstr "Parcela %s"
 
 #: wc-gateway-braspag.php:179
 #, php-format
 msgid "See %s"
-msgstr ""
+msgstr "Veja %s"
 
 #: wc-gateway-braspag.php:180
 #, php-format
@@ -1076,4 +1160,10 @@ msgstr ""
 
 #: wc-gateway-braspag.php:373
 msgid "Settings"
-msgstr ""
+msgstr "Configuração"
+
+#~ msgid "Enable Braspag Boleto"
+#~ msgstr "Habilitar Boleto Braspag"
+
+#~ msgid "Braspag Boleto"
+#~ msgstr "Boleto Braspag"
