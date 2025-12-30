@@ -267,7 +267,7 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway
     {
         $token = $default_request_params['token'];
 
-        $response = WC_Braspag_Risk_API::request($request, $api, $token);
+        $response = WC_Braspag_Risk_API::request($request, $token, $api);
 
         if (!empty($response->errors)) {
             return $response;

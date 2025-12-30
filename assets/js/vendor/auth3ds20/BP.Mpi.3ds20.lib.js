@@ -404,7 +404,7 @@ var BP = (function () {
                     Version: e.Version,
                     ReferenceId: e.DirectoryServerTransactionId
                 });
-                setErrorMessage(e.ReturnMessage, e.returnCode);
+                setErrorMessage(e.ReturnMessage, e.ReturnCode);
                 break;
             case "ERROR_OCCURRED":
                 D("onError", {
@@ -449,33 +449,55 @@ var BP = (function () {
         return void 0 !== r.Message ? " - " + r.Message : "";
     }
     function setErrorMessage(strMessage, ErrorCode) {
+        var msg = strMessage;
         switch (ErrorCode) {
             case "231":
-                strMessage = $.mage.__('Invalid card data, please check card data and try again!');
+                msg = 'Invalid card data, please check card data and try again!';
                 break;
             case "476":
-                strMessage = $.mage.__('Customer cannot be authenticated');
+                msg = 'Customer cannot be authenticated';
                 break;
             case 400:
-                strMessage = $.mage.__('Authentication failed, contact us');
+                msg = 'Authentication failed, contact us';
                 break;
             default:
-                strMessage = $.mage.__(strMessage);
-
-                if (strMessage == "NOT_ENROLLED") {
-                    strMessage = $.mage.__('Invalid card data, please contact us!');
+                if (msg === "NOT_ENROLLED") {
+                    msg = 'Invalid card data, please contact us!';
                 } else {
-                    strMessage = $.mage.__('Authentication failed, contact us');
+                    msg = 'Authentication failed, contact us';
                 }
-
 
                 break;
         }
         window.scrollTo(0, 0);
-        messageList.addErrorMessage({
-            message: strMessage
-        });
-        fullScreenLoader.stopLoader();
+        try {
+            var wrapper =
+                document.querySelector(".woocommerce-notices-wrapper") ||
+                document.querySelector(".woocommerce-NoticeGroup") ||
+                document.querySelector("form.checkout") ||
+                document.body;
+
+            // remove notices anteriores geradas pelo MPI (pra não empilhar lixo)
+            var oldNotices = wrapper.querySelectorAll(".braspag-mpi-notice");
+            for (var i = 0; i < oldNotices.length; i++) oldNotices[i].remove();
+
+            var ul = document.createElement("ul");
+            ul.className = "woocommerce-error braspag-mpi-notice";
+            ul.setAttribute("role", "alert");
+
+            var li = document.createElement("li");
+            li.textContent = msg;
+            ul.appendChild(li);
+
+            // prepend quando possível
+            if (wrapper.prepend) wrapper.prepend(ul);
+            else wrapper.insertBefore(ul, wrapper.firstChild);
+
+            if (wrapper.style) wrapper.style.display = "block";
+        } catch (e2) {
+            // último fallback: log
+            try { console.error("[3DS]", msg); } catch (e3) { }
+        }
     }
     var T = u(),
         O = [
@@ -591,4 +613,4 @@ var BP = (function () {
         },
     };
 })();
-bpmpi_load();
+//bpmpi_load();

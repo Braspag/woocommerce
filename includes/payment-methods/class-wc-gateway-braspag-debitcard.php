@@ -4,9 +4,9 @@ if (!defined('ABSPATH')) {
 }
 
 /**
- * WC_Gateway_Braspag class.
+ * WC_Gateway_Braspag_DebitCard class.
  *
- * @extends WC_Payment_Gateway
+ * @extends WC_Gateway_Braspag
  */
 class WC_Gateway_Braspag_DebitCard extends WC_Gateway_Braspag
 {
@@ -39,7 +39,7 @@ class WC_Gateway_Braspag_DebitCard extends WC_Gateway_Braspag
 
         $this->init_settings();
 
-    	// Load the settings extra data collection.
+        // Load the settings extra data collection.
         $this->settings_extra_data();
 
         $braspag_main_settings = get_option('woocommerce_braspag_settings');
@@ -184,20 +184,20 @@ class WC_Gateway_Braspag_DebitCard extends WC_Gateway_Braspag
 
         ?>
 
-                        <fieldset id="wc-<?php echo esc_attr($this->id); ?>-cc-form" class='wc-credit-card-form wc-payment-form'>
-                            <?php do_action('woocommerce_debit_card_form_start', $this->id); ?>
-                            <?php
-                            foreach ($fields as $field) {
-                                echo $field; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
-                            }
-                            ?>
-                            <?php do_action('woocommerce_debit_card_form_end', $this->id); ?>
-                            <div class="clear"></div>
-                        </fieldset>
+                    <fieldset id="wc-<?php echo esc_attr($this->id); ?>-cc-form" class='wc-credit-card-form wc-payment-form'>
+                        <?php do_action('woocommerce_debit_card_form_start', $this->id); ?>
+                        <?php
+                        foreach ($fields as $field) {
+                            echo $field; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+                        }
+                        ?>
+                        <?php do_action('woocommerce_debit_card_form_end', $this->id); ?>
+                        <div class="clear"></div>
+                    </fieldset>
 
-                    <?php
+                <?php
 
-                    do_action('wc_gateway_braspag_pagador_debitcard_elements_form_after', $this->id);
+                do_action('wc_gateway_braspag_pagador_debitcard_elements_form_after', $this->id);
     }
 
     /**
@@ -245,10 +245,10 @@ class WC_Gateway_Braspag_DebitCard extends WC_Gateway_Braspag
             $this->process_pagador_response(
                 $response,
                 $order,
-            [
-                'antifraud_review_order_status' => $this->get_option('antifraud_review_order_status'),
-                'antifraud_reject_order_status' => $this->get_option('antifraud_reject_order_status')
-            ]
+                [
+                    'antifraud_review_order_status' => $this->get_option('antifraud_review_order_status'),
+                    'antifraud_reject_order_status' => $this->get_option('antifraud_reject_order_status')
+                ]
             );
 
             if (isset(WC()->cart)) {
@@ -270,14 +270,12 @@ class WC_Gateway_Braspag_DebitCard extends WC_Gateway_Braspag
                 'result' => 'success',
                 'redirect' => $redirect_url,
             );
-        }
-        catch (WC_Braspag_Exception $e) {
+        } catch (WC_Braspag_Exception $e) {
             wc_add_notice($e->getLocalizedMessage(), 'error');
-            WC_Braspag_Logger::log('Error: ' . $e->getMessage());
+            WC_Braspag_Logger::log('Error: ' . $e->getLocalizedMessage());
 
             do_action('wc_gateway_braspag_pagador_process_payment_error', $e, $order);
 
-            /* translators: error message */
             $order->update_status('failed');
 
             $statuses = array('failed');
@@ -294,74 +292,52 @@ class WC_Gateway_Braspag_DebitCard extends WC_Gateway_Braspag
     }
 
     /**
-     * @param $order
      * @throws WC_Braspag_Exception
      */
-    public function process_payment_validation($order)
+    public function process_payment_validation()
     {
-        $checkout = WC()->checkout();
-
-        if ($this->auth3ds20_mpi_is_active == 'yes') {
-
-            $failureType = $checkout->get_value('bpmpi_auth_failure_type');
-
-            if (
-            $failureType == '4'
-            && $this->auth3ds20_mpi_authorize_on_error == 'no'
-            ) {
-                throw new WC_Braspag_Exception(
-                    print_r([], true),
-                    __("Debit Card Payment Failure. #MPI{$failureType}")
-                    );
-            }
-
-            if (
-            $failureType == '1'
-            && $this->auth3ds20_mpi_authorize_on_failure == 'no'
-            ) {
-                throw new WC_Braspag_Exception(
-                    print_r([], true),
-                    __("Debit Card Payment Failure. #MPI{$failureType}")
-                    );
-            }
-
-            if (
-            $failureType == '2'
-            && $this->auth3ds20_mpi_authorize_on_unenrolled == 'no'
-            ) {
-                throw new WC_Braspag_Exception(
-                    print_r([], true),
-                    __("Debit Card Payment Failure. #MPI{$failureType}")
-                    );
-            }
-
-            if (
-            $failureType == '5'
-            && $this->auth3ds20_mpi_authorize_on_unsupported_brand == 'no'
-            ) {
-                throw new WC_Braspag_Exception(
-                    print_r([], true),
-                    __("Debit Card Payment Failure. #MPI{$failureType}")
-                    );
-            }
-
-            $provider = $this
-                ->get_braspag_payment_provider(
-                $checkout->get_value('braspag_debitcard-card-type'),
-                $this->test_mode
-            );
-
-            if (
-            !$this->test_mode
-            && !preg_match("#cielo#is", $provider)
-            && $failureType != '3'
-            ) {
-                throw new WC_Braspag_Exception(
-                    print_r([], true),
-                    __("Debit Card Payment Failure. #MPI{$failureType}")
-                    );
-            }
+        if ($this->auth3ds20_mpi_is_active !== 'yes') {
+            return;
         }
+
+        $checkout = WC()->checkout();
+        $failureType = (string) $checkout->get_value('bpmpi_auth_failure_type');
+
+        if ($failureType === '' || $failureType === '0') {
+			return;
+		}
+
+        $message = __('Debit Card Payment Failure.', 'woocommerce-braspag');
+        $appendMpi = false;
+
+        switch ($failureType) {
+            case '4':
+                $appendMpi = ($this->auth3ds20_mpi_authorize_on_error === 'no');
+                break;
+            case '1':
+                $appendMpi = ($this->auth3ds20_mpi_authorize_on_failure === 'no');
+                break;
+            case '2':
+                $appendMpi = ($this->auth3ds20_mpi_authorize_on_unenrolled === 'no');
+                break;
+            case '5':
+                $appendMpi = ($this->auth3ds20_mpi_authorize_on_unsupported_brand === 'no');
+                break;
+        }
+
+        $cardType = (string) $checkout->get_value('braspag_creditcard-card-type');
+        $provider = (string) $this->get_braspag_payment_provider($cardType, $this->test_mode);
+
+        if (!$appendMpi && !$this->test_mode && $failureType !== '3' && !preg_match('#cielo#i', $provider)) {
+            $appendMpi = true;
+        }
+
+        $message .= " #MPI{$failureType}";
+
+        throw new WC_Braspag_Exception(
+            print_r([], true),
+            $message
+        );
     }
 
     /**
@@ -387,8 +363,7 @@ class WC_Gateway_Braspag_DebitCard extends WC_Gateway_Braspag
             /* translators: transaction id */
             $message = sprintf(__('Braspag charge complete (Charge ID: %s)', 'woocommerce-braspag'), $response->body->Payment->PaymentId);
             $order->add_order_note($message);
-        }
-        elseif (in_array($response->body->Payment->Status, ['0', '1', '12'])) {
+        } elseif (in_array($response->body->Payment->Status, ['0', '1', '12'])) {
 
             WC_Braspag_Helper::is_wc_lt('3.0') ? $order = wc_get_order($order_id, '_transaction_id', $response->body->Payment->PaymentId) : $order->set_transaction_id($response->body->Payment->PaymentId);
 
@@ -398,8 +373,7 @@ class WC_Gateway_Braspag_DebitCard extends WC_Gateway_Braspag
 
             /* translators: transaction id */
             $order->update_status('on-hold', sprintf(__('Braspag charge authorized (Charge ID: %s). Process order to take payment, or cancel to remove the pre-authorization.', 'woocommerce-braspag'), $response->body->Payment->PaymentId));
-        }
-        else {
+        } else {
 
             $localized_message = __('Payment processing failed. Please retry.', 'woocommerce-braspag');
             $order->add_order_note($localized_message);
@@ -456,8 +430,10 @@ class WC_Gateway_Braspag_DebitCard extends WC_Gateway_Braspag
             $card_expiration_date = $card_expiration_date_exploded[0] . "/20" . $card_expiration_date_exploded[1];
         }
 
+        $cardnumber = str_replace(" ", "", $checkout->get_value('braspag_debitcard-card-number'));
+
         $card_data = [
-            "CardNumber" => str_replace(" ", "", $checkout->get_value('braspag_debitcard-card-number')),
+            "CardNumber" => $cardnumber,
             "Holder" => $checkout->get_value('braspag_debitcard-card-holder'),
             "ExpirationDate" => $card_expiration_date,
             "SecurityCode" => $checkout->get_value('braspag_debitcard-card-cvc'),
@@ -489,9 +465,9 @@ class WC_Gateway_Braspag_DebitCard extends WC_Gateway_Braspag
             "Capture" => true,
             "Recurrent" => false,
             "DoSplit" => false,
-	        "ExtraDataCollection" => json_decode(json_encode($this->extra_data_collection), true)
+            "ExtraDataCollection" => json_decode(json_encode($this->extra_data_collection), true)
         ]);
-       
+
         return apply_filters('wc_gateway_braspag_pagador_request_debitcard_payment_builder', $payment_data, $order, $checkout, $cart);
     }
 
@@ -560,18 +536,18 @@ class WC_Gateway_Braspag_DebitCard extends WC_Gateway_Braspag
 
         ?>
 
-                        <table class="woocommerce-table woocommerce-table--order-details shop_table order_details">
-                            <tfoot>
-                                <tr class="woocommerce-table__line-item order_item">
-                                    <td class="woocommerce-table__product-total product-total text-center" colspan="2">
-                                        <a href="<?php echo $order->get_meta('_braspag_debitcard_authentication_url'); ?>" target="_blank">
-                                            <b><?php echo $this->label_pay_button ?></b>
-                                        </a>
-                                    </td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                <?php
+                                        <table class="woocommerce-table woocommerce-table--order-details shop_table order_details">
+                                            <tfoot>
+                                                <tr class="woocommerce-table__line-item order_item">
+                                                    <td class="woocommerce-table__product-total product-total text-center" colspan="2">
+                                                        <a href="<?php echo $order->get_meta('_braspag_debitcard_authentication_url'); ?>" target="_blank">
+                                                            <b><?php echo $this->label_pay_button ?></b>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                <?php
     }
 
     /**
