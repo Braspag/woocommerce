@@ -8,61 +8,37 @@ if (!defined('ABSPATH')) {
 
 /**
  * Class WC_Gateway_Braspag_CreditCard
+ * 
+ * @extends WC_Gateway_Braspag
  */
 class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
 {
     public $enabled;
-
     protected $test_mode;
-
     protected $capture;
-
     protected $save_card;
-
     protected $available_types;
-
     protected $maximum_installments;
-
     protected $minimum_amount_of_installment;
-
     protected $merchant_category;
-
     protected $antifraud_enabled;
-
     protected $antifraud_send_with_pagador_transaction;
-
     protected $antifraud_options_sequence;
-
     protected $antifraud_options_sequence_criteria;
-
     protected $antifraud_options_capture_on_low_risk;
-
     protected $antifraud_options_void_on_righ_risk;
-
     protected $antifraud_finger_print_org_id;
-
     protected $antifraud_finger_print_merchant_id;
-
     protected $antifraud_finger_print_use_order_id;
-
     protected $antifraud_finger_print_id;
-
     protected $antifraud_finger_print_session_id;
-
     protected $auth3ds20_mpi_is_active;
-
     protected $auth3ds20_mpi_mastercard_notify_only;
-
     protected $auth3ds20_mpi_authorize_on_error;
-
     protected $auth3ds20_mpi_authorize_on_failure;
-
     protected $auth3ds20_mpi_authorize_on_unenrolled;
-
     protected $auth3ds20_mpi_authorize_on_unsupported_brand;
-
     protected $sop_enabled;
-
     protected $sop_tokenize;
 
     public function __construct()
@@ -71,7 +47,7 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
         $this->id = 'braspag_creditcard';
         $this->method_title = __('Braspag Credit Card', 'woocommerce-braspag');
         $this->method_description = __('Take payments via Credit Card with Braspag.');
-        /* translators: 1) link to Braspag register page 2) link to Braspag api keys page */
+
         $this->has_fields = true;
         $this->supports = array(
             'add_payment_method',
@@ -342,7 +318,6 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
     public function process_payment($order_id, $retry = true, $previous_error = false, $use_order_source = false)
     {
         try {
-
             do_action(
                 'wc_gateway_braspag_pagador_creditcard_process_payment_before',
                 $order_id,
@@ -401,7 +376,6 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
             }
 
             if ($process_authorization) {
-
                 $response = $this->braspag_pagador_request($request_builder, 'v2/sales/', $default_request_params);
 
                 if (empty($response->errors)) {
@@ -456,11 +430,10 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
             );
         } catch (WC_Braspag_Exception $e) {
             wc_add_notice($e->getLocalizedMessage(), 'error');
-            WC_Braspag_Logger::log('Error: ' . $e->getMessage());
+            WC_Braspag_Logger::log('Error: ' . $e->getLocalizedMessage());
 
             do_action('wc_gateway_braspag_pagador_process_payment_error', $e, $order);
 
-            /* translators: error message */
             $order->update_status('failed');
 
             $statuses = array('failed');
@@ -477,74 +450,48 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
     }
 
     /**
-     * @param $order
      * @throws WC_Braspag_Exception
      */
-    public function process_payment_validation($order)
+    public function process_payment_validation()
     {
-        $checkout = WC()->checkout();
-
-        if ($this->auth3ds20_mpi_is_active == 'yes') {
-
-            $failureType = $checkout->get_value('bpmpi_auth_failure_type');
-
-            if (
-                $failureType == '4'
-                && $this->auth3ds20_mpi_authorize_on_error == 'no'
-            ) {
-                throw new WC_Braspag_Exception(
-                    print_r([], true),
-                    __("Credit Card Payment Failure. #MPI{$failureType}")
-                );
-            }
-
-            if (
-                $failureType == '1'
-                && $this->auth3ds20_mpi_authorize_on_failure == 'no'
-            ) {
-                throw new WC_Braspag_Exception(
-                    print_r([], true),
-                    __("Credit Card Payment Failure. #MPI{$failureType}")
-                );
-            }
-
-            if (
-                $failureType == '2'
-                && $this->auth3ds20_mpi_authorize_on_unenrolled == 'no'
-            ) {
-                throw new WC_Braspag_Exception(
-                    print_r([], true),
-                    __("Credit Card Payment Failure. #MPI{$failureType}")
-                );
-            }
-
-            if (
-                $failureType == '5'
-                && $this->auth3ds20_mpi_authorize_on_unsupported_brand == 'no'
-            ) {
-                throw new WC_Braspag_Exception(
-                    print_r([], true),
-                    __("Credit Card Payment Failure. #MPI{$failureType}")
-                );
-            }
-
-            $provider = $this
-                ->get_braspag_payment_provider(
-                    $checkout->get_value('braspag_creditcard-card-type'),
-                    $this->test_mode
-                );
-
-            if (
-                !$this->test_mode
-                && !preg_match("#cielo#is", $provider)
-                && $failureType != '3'
-            ) {
-                throw new WC_Braspag_Exception(
-                    print_r([], true),
-                    __("Credit Card Payment Failure. #MPI{$failureType}")
-                );
-            }
+        if ($this->auth3ds20_mpi_is_active !== 'yes') {
+            return;
         }
+
+        $checkout = WC()->checkout();
+        $failureType = (string) $checkout->get_value('bpmpi_auth_failure_type');
+
+        $message = __('Credit Card Payment Failure.', 'woocommerce-braspag');
+        $appendMpi = false;
+
+        switch ($failureType) {
+            case '4':
+                $appendMpi = ($this->auth3ds20_mpi_authorize_on_error === 'no');
+                break;
+            case '1':
+                $appendMpi = ($this->auth3ds20_mpi_authorize_on_failure === 'no');
+                break;
+            case '2':
+                $appendMpi = ($this->auth3ds20_mpi_authorize_on_unenrolled === 'no');
+                break;
+            case '5':
+                $appendMpi = ($this->auth3ds20_mpi_authorize_on_unsupported_brand === 'no');
+                break;
+        }
+
+        $cardType = (string) $checkout->get_value('braspag_creditcard-card-type');
+        $provider = (string) $this->get_braspag_payment_provider($cardType, $this->test_mode);
+
+        if (!$appendMpi && !$this->test_mode && $failureType !== '3' && !preg_match('#cielo#i', $provider)) {
+            $appendMpi = true;
+        }
+
+        $message .= " #MPI{$failureType}";
+
+        throw new WC_Braspag_Exception(
+            print_r([], true),
+            $message
+        );
     }
 
     /**

@@ -4,9 +4,9 @@ if (!defined('ABSPATH')) {
 }
 
 /**
- * WC_Gateway_Braspag class.
+ * WC_Gateway_Braspag_DebitCard class.
  *
- * @extends WC_Payment_Gateway
+ * @extends WC_Gateway_Braspag
  */
 class WC_Gateway_Braspag_DebitCard extends WC_Gateway_Braspag
 {
@@ -272,11 +272,10 @@ class WC_Gateway_Braspag_DebitCard extends WC_Gateway_Braspag
             );
         } catch (WC_Braspag_Exception $e) {
             wc_add_notice($e->getLocalizedMessage(), 'error');
-            WC_Braspag_Logger::log('Error: ' . $e->getMessage());
+            WC_Braspag_Logger::log('Error: ' . $e->getLocalizedMessage());
 
             do_action('wc_gateway_braspag_pagador_process_payment_error', $e, $order);
 
-            /* translators: error message */
             $order->update_status('failed');
 
             $statuses = array('failed');
@@ -293,74 +292,48 @@ class WC_Gateway_Braspag_DebitCard extends WC_Gateway_Braspag
     }
 
     /**
-     * @param $order
      * @throws WC_Braspag_Exception
      */
-    public function process_payment_validation($order)
+    public function process_payment_validation()
     {
-        $checkout = WC()->checkout();
-
-        if ($this->auth3ds20_mpi_is_active == 'yes') {
-
-            $failureType = $checkout->get_value('bpmpi_auth_failure_type');
-
-            if (
-                $failureType == '4'
-                && $this->auth3ds20_mpi_authorize_on_error == 'no'
-            ) {
-                throw new WC_Braspag_Exception(
-                    print_r([], true),
-                    __("Debit Card Payment Failure. #MPI{$failureType}")
-                );
-            }
-
-            if (
-                $failureType == '1'
-                && $this->auth3ds20_mpi_authorize_on_failure == 'no'
-            ) {
-                throw new WC_Braspag_Exception(
-                    print_r([], true),
-                    __("Debit Card Payment Failure. #MPI{$failureType}")
-                );
-            }
-
-            if (
-                $failureType == '2'
-                && $this->auth3ds20_mpi_authorize_on_unenrolled == 'no'
-            ) {
-                throw new WC_Braspag_Exception(
-                    print_r([], true),
-                    __("Debit Card Payment Failure. #MPI{$failureType}")
-                );
-            }
-
-            if (
-                $failureType == '5'
-                && $this->auth3ds20_mpi_authorize_on_unsupported_brand == 'no'
-            ) {
-                throw new WC_Braspag_Exception(
-                    print_r([], true),
-                    __("Debit Card Payment Failure. #MPI{$failureType}")
-                );
-            }
-
-            $provider = $this
-                ->get_braspag_payment_provider(
-                    $checkout->get_value('braspag_debitcard-card-type'),
-                    $this->test_mode
-                );
-
-            if (
-                !$this->test_mode
-                && !preg_match("#cielo#is", $provider)
-                && $failureType != '3'
-            ) {
-                throw new WC_Braspag_Exception(
-                    print_r([], true),
-                    __("Debit Card Payment Failure. #MPI{$failureType}")
-                );
-            }
+        if ($this->auth3ds20_mpi_is_active !== 'yes') {
+            return;
         }
+
+        $checkout = WC()->checkout();
+        $failureType = (string) $checkout->get_value('bpmpi_auth_failure_type');
+
+        $message = __('Debit Card Payment Failure.', 'woocommerce-braspag');
+        $appendMpi = false;
+
+        switch ($failureType) {
+            case '4':
+                $appendMpi = ($this->auth3ds20_mpi_authorize_on_error === 'no');
+                break;
+            case '1':
+                $appendMpi = ($this->auth3ds20_mpi_authorize_on_failure === 'no');
+                break;
+            case '2':
+                $appendMpi = ($this->auth3ds20_mpi_authorize_on_unenrolled === 'no');
+                break;
+            case '5':
+                $appendMpi = ($this->auth3ds20_mpi_authorize_on_unsupported_brand === 'no');
+                break;
+        }
+
+        $cardType = (string) $checkout->get_value('braspag_creditcard-card-type');
+        $provider = (string) $this->get_braspag_payment_provider($cardType, $this->test_mode);
+
+        if (!$appendMpi && !$this->test_mode && $failureType !== '3' && !preg_match('#cielo#i', $provider)) {
+            $appendMpi = true;
+        }
+
+        $message .= " #MPI{$failureType}";
+
+        throw new WC_Braspag_Exception(
+            print_r([], true),
+            $message
+        );
     }
 
     /**
