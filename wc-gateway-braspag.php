@@ -409,10 +409,10 @@ function wc_braspag_init()
 			unset($sections['braspag_pix']);
 
 			$sections['braspag'] = 'Braspag';
-			$sections['braspag_creditcard'] = __('Braspag CreditCard', 'woocommerce-braspag');
-			$sections['braspag_creditcard_justclick'] = __('Braspag CreditCard JustClick', 'woocommerce-braspag');
-			$sections['braspag_debitcard'] = __('Braspag DebitCard', 'woocommerce-braspag');
-			$sections['braspag_boleto'] = __('Braspag Boleto', 'woocommerce-braspag');
+			$sections['braspag_creditcard'] = __('Braspag Credit Card', 'woocommerce-braspag');
+			$sections['braspag_creditcard_justclick'] = __('Braspag Credit Card JustClick', 'woocommerce-braspag');
+			$sections['braspag_debitcard'] = __('Braspag Debit Card', 'woocommerce-braspag');
+			$sections['braspag_boleto'] = __('Braspag Bank Slip', 'woocommerce-braspag');
 			$sections['braspag_pix'] = __('Braspag Pix', 'woocommerce-braspag');
 
 			return $sections;

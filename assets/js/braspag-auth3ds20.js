@@ -27,7 +27,7 @@ BraspagAuth3ds20.prototype = {
   startTransaction: async function () {
     var self = this;
 
-    if (this.transactionStarted || this.isBpmpiEnabled()) {
+    if (this.transactionStarted || !this.isBpmpiEnabled()) {
       return true
     }
 
@@ -40,7 +40,7 @@ BraspagAuth3ds20.prototype = {
     self.bpmpiRenderer.renderBpmpiData('bpmpi_auth', false, self.isBpmpiEnabled());
     self.bpmpiRenderer.renderBpmpiData('bpmpi_accesstoken', false, self.bpmpiToken);
 
-    try{
+    try {
       await bpmpi_load();
     } finally {
       braspag.unBlockElement(checkout_payment_element);
@@ -106,15 +106,12 @@ BraspagAuth3ds20.prototype = {
   },
 
   placeOrder: async function (form) {
-
     try {
       var self = this;
       let paymentForm = jQuery(form);
 
       jQuery('.bpmpi_auth_failure_type').change(function () {
-
         if (self.isBpmpiEnabled()) {
-
           self.bpmpiRenderer.createInputHiddenElement(
             paymentForm, 'payment_authentication_failure_type', 'authentication_failure_type', ''
           );
@@ -155,7 +152,6 @@ BraspagAuth3ds20.prototype = {
 
       if (paymentMethod == 'braspag_creditcard') {
         this.paymentType = 'creditcard';
-
       } else if (paymentMethod == 'braspag_debitcard') {
         this.paymentType = 'debitcard';
       } else {
@@ -223,7 +219,6 @@ BraspagAuth3ds20.prototype = {
   },
 
   renderCredicardData: function () {
-
     this.bpmpiRenderer.renderBpmpiData('bpmpi_paymentmethod', '', 'Credit');
     this.bpmpiRenderer.renderBpmpiData('bpmpi_auth_notifyonly', false, this.isBpmpiMasterCardNotifyOnlyEnabledCC);
 
@@ -239,8 +234,8 @@ BraspagAuth3ds20.prototype = {
       creditcardExpirationYear = creditcardExpiration[1].replace(/\s/g, '');
     }
 
-    if (creditcardExpirationYear.length == 2) {
-      creditcardExpirationYear += '20';
+    if (creditcardExpirationYear.length === 2) {
+      creditcardExpirationYear = '20' + creditcardExpirationYear;
     }
 
     this.bpmpiRenderer.renderBpmpiData('bpmpi_cardnumber', false, jQuery('#braspag_creditcard-card-number').val().replace(/\s/g, ''));
@@ -251,7 +246,6 @@ BraspagAuth3ds20.prototype = {
   },
 
   renderDebitcardData: function () {
-
     this.bpmpiRenderer.renderBpmpiData('bpmpi_paymentmethod', '', 'Debit');
     this.bpmpiRenderer.renderBpmpiData('bpmpi_auth_notifyonly', false, this.isBpmpiMasterCardNotifyOnlyEnabledDC);
 
@@ -267,11 +261,11 @@ BraspagAuth3ds20.prototype = {
       debitcardExpirationYear = debitcardExpiration[1].replace(/\s/g, '');
     }
 
-    if (debitcardExpirationYear.length == 2) {
-      debitcardExpirationYear += '20';
+    if (debitcardExpirationYear.length === 2) {
+      debitcardExpirationYear = '20' + debitcardExpirationYear;
     }
 
-    this.bpmpiRenderer.renderBpmpiData('bpmpi_cardnumber', false, jQuery('#braspag_debitcard-card-number').val());
+    this.bpmpiRenderer.renderBpmpiData('bpmpi_cardnumber', false, jQuery('#braspag_debitcard-card-number').val().replace(/\s/g, ''));
     this.bpmpiRenderer.renderBpmpiData('bpmpi_billto_contactname', false, jQuery('#braspag_debitcard-card-holder').val());
     this.bpmpiRenderer.renderBpmpiData('bpmpi_cardexpirationmonth', false, debitcardExpirationMonth);
     this.bpmpiRenderer.renderBpmpiData('bpmpi_cardexpirationyear', false, debitcardExpirationYear);
@@ -279,7 +273,6 @@ BraspagAuth3ds20.prototype = {
   },
 
   renderAddressData: function () {
-
     this.bpmpiRenderer.renderBpmpiData('bpmpi_billto_phonenumber', false, jQuery('#billing_phone').val().replace(/[^a-zA-Z 0-9]+/g, '').replace(/\s/g, ''));
     this.bpmpiRenderer.renderBpmpiData('bpmpi_billto_email', false, jQuery('#billing_email').val());
     this.bpmpiRenderer.renderBpmpiData('bpmpi_billto_street1', false, jQuery('#billing_address_1').val());
