@@ -114,14 +114,14 @@ return apply_filters(
         'silentpost_language' => array(
             'title' => __('Language', 'woocommerce-braspag'),
             'type' => 'text',
-            'description' => __('Idioma: "pt" para português | "en" para inglês | "es"para espanhol.', 'woocommerce-braspag'),
+            'description' => __('Language: "pt" for Portuguese | "en" for English | "es" for Spanish.', 'woocommerce-braspag'),
             'default' => 'pt',
             'desc_tip' => true,
         ),
         'silentpost_language_desc' => array(
             'title' => '',
             'type' => 'title',
-            'description' => 'Idioma: "pt" para português | "en" para inglês | "es"para espanhol.',
+            'description' => __('Language: "pt" for Portuguese | "en" for English | "es" for Spanish.', 'woocommerce-braspag'),
         ),
         'silentpost_cvvrequired' => array(
             'title' => __('Send CVV field as required', 'woocommerce-braspag'),

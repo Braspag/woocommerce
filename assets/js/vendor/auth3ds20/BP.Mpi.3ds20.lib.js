@@ -467,7 +467,6 @@ var BP = (function () {
                     msg = 'Authentication failed, contact us';
                 }
 
-
                 break;
         }
         window.scrollTo(0, 0);
