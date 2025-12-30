@@ -64,11 +64,18 @@ class WC_Braspag_Risk_API
      * @return array|object
      * @throws WC_Braspag_Exception
      */
-    public static function request($request, $api = 'v2/sales/', $token, $method = 'POST', $with_headers = false)
+    public static function request($request, $token, $api = 'v2/sales/', $method = 'POST', $with_headers = false)
     {
         $braspag_settings = get_option('woocommerce_braspag_settings');
 
         WC_Braspag_Logger::log("{$api} request: " . print_r($request, true));
+
+        if (empty($token)) {
+            throw new WC_Braspag_Exception(
+                'Missing token',
+                __('Token obrigatório ausente para chamar a API da Braspag.', 'woocommerce-braspag')
+            );
+        }
 
         $headers = self::get_headers($braspag_settings, $token);
 
