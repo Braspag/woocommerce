@@ -303,6 +303,10 @@ class WC_Gateway_Braspag_DebitCard extends WC_Gateway_Braspag
         $checkout = WC()->checkout();
         $failureType = (string) $checkout->get_value('bpmpi_auth_failure_type');
 
+        if ($failureType === '' || $failureType === '0') {
+			return;
+		}
+
         $message = __('Debit Card Payment Failure.', 'woocommerce-braspag');
         $appendMpi = false;
 
