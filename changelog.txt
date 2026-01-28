@@ -115,3 +115,6 @@
 * Ensure 4-digit year (YYYY) in the sent payload
 * Improve MPI error handling
 * Sanitize card numbers (remove spaces and non-digits) before sending
+
+= 2.3.5.40 - 2026-01-28 =
+* Hotfix when send hostname to 3DS in WP new version
