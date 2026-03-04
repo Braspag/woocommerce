@@ -300,21 +300,21 @@ return apply_filters(
             'desc_tip' => true,
         ),
         'auth3ds20' => array(
-            'title' => "<hr>" . __('Authentication 3DS 2.0', 'woocommerce-braspag'),
+            'title' => "<hr>" . __('Authentication 3DS 2.2', 'woocommerce-braspag'),
             'type' => 'title',
             'description' => '',
         ),
         'auth3ds20_oauth_authentication_client_id' => array(
             'title' => __('Client ID', 'woocommerce-braspag'),
             'type' => 'text',
-            'description' => __('Get your Authentication 3DS 2.0 OAuth Client ID from Braspag Support.', 'woocommerce-braspag'),
+            'description' => __('Get your Authentication 3DS 2.2 OAuth Client ID from Braspag Support.', 'woocommerce-braspag'),
             'default' => '',
             'desc_tip' => true,
         ),
         'auth3ds20_oauth_authentication_client_secret' => array(
             'title' => __('Client Secret', 'woocommerce-braspag'),
             'type' => 'text',
-            'description' => __('Get your Authentication 3DS 2.0 Client Secret from Braspag Support.', 'woocommerce-braspag'),
+            'description' => __('Get your Authentication 3DS 2.2 Client Secret from Braspag Support.', 'woocommerce-braspag'),
             'default' => '',
             'desc_tip' => true,
         )

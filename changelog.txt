@@ -118,3 +118,13 @@
 
 = 2.3.5.40 - 2026-01-28 =
 * Hotfix when send hostname to 3DS in WP new version
+
+= 2.3.5.41 - 2026-01-28 =
+* Added default case for unhandled failure types.
+* We changed the condition for providers other than Cielo.
+* Added early return when appendMpi
+* Updated the 3DS authentication version from 2.0 to 2.2
+* Add into documentation indicating that Elo and Amex cards are not supported.
+* Fixed a critical bug where the quantity of items in the cart was accessed as an object property instead of an array element.
+* Enabled the execution of anti-fraud analysis simultaneously with 3DS authentication.
+* Validation logic with handling of 3DS failure and error cases.

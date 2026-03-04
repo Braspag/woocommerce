@@ -245,7 +245,7 @@ msgid "Available Types"
 msgstr ""
 
 #: includes/admin/braspag-creditcard-settings.php:109
-msgid "Authentication 3DS 2.0 for Credit Card"
+msgid "Authentication 3DS 2.2 for Credit Card"
 msgstr ""
 
 #: includes/admin/braspag-creditcard-settings.php:114
@@ -320,7 +320,7 @@ msgid "This controls the url to redirect after bank authentication. Example: htt
 msgstr ""
 
 #: includes/admin/braspag-debitcard-settings.php:73
-msgid "Authentication 3DS 2.0 for Debit Card"
+msgid "Authentication 3DS 2.2 for Debit Card"
 msgstr ""
 
 #: includes/admin/braspag-pix-settings.php:11
@@ -613,15 +613,15 @@ msgid "This controls the option Void On Hgh Risk data to send for Braspag."
 msgstr ""
 
 #: includes/admin/braspag-settings.php:303
-msgid "Authentication 3DS 2.0"
+msgid "Authentication 3DS 2.2"
 msgstr ""
 
 #: includes/admin/braspag-settings.php:310
-msgid "Get your Authentication 3DS 2.0 OAuth Client ID from Braspag Support."
+msgid "Get your Authentication 3DS 2.2 OAuth Client ID from Braspag Support."
 msgstr ""
 
 #: includes/admin/braspag-settings.php:317
-msgid "Get your Authentication 3DS 2.0 Client Secret from Braspag Support."
+msgid "Get your Authentication 3DS 2.2 Client Secret from Braspag Support."
 msgstr ""
 
 #. translators: 1) int version 2) int version

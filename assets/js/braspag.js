@@ -6,7 +6,7 @@ var braspagDefaultCardRegexFormat = /(\d{1,4})/g;
 var braspagCards = [
 	{
 		type: 'naranja-nevada',
-		typeTitle: 'Naranja e Nevada',
+		typeName: 'Naranja e Nevada',
 		patterns: [5895],
 		regex_include: '^(589562)',
 		regex_exclude: '',
@@ -16,9 +16,9 @@ var braspagCards = [
 		luhn: true
 	}, {
 		type: 'elo',
-		typeTitle: 'Elo',
-		patterns: [6363, 4389, 5041, 4514, 6362, 5067, 4576, 4011],
-		regex_include: '',
+		typeName: 'Elo',
+		patterns: [6363, 4389, 5041, 4514, 6362, 5067, 4576],
+		regex_include: '^(40117[89]|431274|438935|451416|457393|45763[12]|504175|506(699|7[0-6][0-9]|77[0-8])|509[0-9]{3}|636297|636368|6500(31|33|3[5-9]|4[0-9]|5[01])|6504(0[5-9]|[1-3][0-9])|650(48[5-9]|49[0-9]|5[0-2][0-9]|53[0-8])|650(54[1-9]|5[5-8][0-9]|59[0-8])|650(70[0-9]|71[0-8])|65072[0-7]|650(90[1-9]|91[0-9]|920)|651(65[2-9]|6[6-7][0-9])|6550[01][0-9]|655(02[1-9]|0[3-4][0-9]|05[0-8]))',
 		regex_exclude: '',
 		format: braspagDefaultCardRegexFormat,
 		length: [16],
@@ -98,8 +98,8 @@ var braspagCards = [
 		type: 'discover',
 		typeName: 'Discover',
 		patterns: [6011, 622, 64, 65],
-		regex_include: '',
-		regex_exclude: '',
+		regex_include: '^(6011|65|64[4-9]|622)',
+		regex_exclude: '^(6500(31|33|3[5-9]|4[0-9]|5[01])|6504(0[5-9]|[1-3][0-9])|650(48[5-9]|49[0-9]|5[0-2][0-9]|53[0-8])|650(54[1-9]|5[5-8][0-9]|59[0-8])|650(70[0-9]|71[0-8])|65072[0-7]|650(90[1-9]|91[0-9]|920)|651(65[2-9]|6[6-7][0-9])|6550[01][0-9]|655(02[1-9]|0[3-4][0-9]|05[0-8]))',
 		format: braspagDefaultCardRegexFormat,
 		length: [16],
 		cvcLength: [3],
