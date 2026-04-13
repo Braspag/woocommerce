@@ -128,3 +128,6 @@
 * Fixed a critical bug where the quantity of items in the cart was accessed as an object property instead of an array element.
 * Enabled the execution of anti-fraud analysis simultaneously with 3DS authentication.
 * Validation logic with handling of 3DS failure and error cases.
+
+= 2.3.5.42 - 2026-04-13 =
+* Add BancodoBrasil3 provider in pix payment method
