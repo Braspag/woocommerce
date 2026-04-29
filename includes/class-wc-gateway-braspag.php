@@ -23,6 +23,7 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
     protected $antifraud_finger_print_org_id;
     protected $antifraud_finger_print_session_id;
     protected $antifraud_finger_print_merchant_id;
+    protected $antifraud_finger_print_use_order_id;
     protected $antifraud_finger_print_id;
     protected $antifraud_clearsale_app_key;
     protected $antifraud_generated_session_id;
@@ -75,6 +76,100 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
         add_action('woocommerce_review_order_before_payment', array($this, 'get_braspag_authsop_elements'));
 
         add_action('admin_menu', array($this, 'settings_menu'), 60);
+    }
+
+    public function init_antifraud_settings($settings = null)
+    {
+        if (!is_array($settings)) {
+            $settings = get_option('woocommerce_braspag_settings', array());
+        }
+
+        $this->antifraud_enabled = isset($settings['antifraud_enabled']) ? $settings['antifraud_enabled'] : 'no';
+        $this->antifraud_provider = isset($settings['antifraud_provider']) ? $settings['antifraud_provider'] : 'cybersource';
+        $this->antifraud_finger_print_org_id = isset($settings['antifraud_finger_print_org_id']) ? $settings['antifraud_finger_print_org_id'] : '';
+        $this->antifraud_finger_print_merchant_id = isset($settings['antifraud_finger_print_merchant_id']) ? $settings['antifraud_finger_print_merchant_id'] : '';
+        $this->antifraud_finger_print_use_order_id = isset($settings['antifraud_finger_print_use_order_id']) ? $settings['antifraud_finger_print_use_order_id'] : 'no';
+        $this->antifraud_clearsale_app_key = isset($settings['antifraud_clearsale_app_key']) ? $settings['antifraud_clearsale_app_key'] : '';
+
+        $this->refresh_antifraud_fingerprint_session();
+    }
+
+    protected function refresh_antifraud_fingerprint_session($order = null)
+    {
+        $this->antifraud_finger_print_id = $this->build_antifraud_fingerprint_id($order);
+        $this->antifraud_finger_print_session_id = $this->build_antifraud_session_id($this->antifraud_finger_print_id);
+        $this->antifraud_generated_session_id = $this->antifraud_finger_print_session_id;
+    }
+
+    protected function build_antifraud_fingerprint_id($order = null)
+    {
+        if (
+            'yes' === $this->antifraud_finger_print_use_order_id
+            && $order
+            && is_callable(array($order, 'get_id'))
+        ) {
+            return (string) $order->get_id();
+        }
+
+        if (function_exists('WC') && WC()->cart && is_callable(array(WC()->cart, 'get_cart_hash'))) {
+            return (string) WC()->cart->get_cart_hash();
+        }
+
+        if ($order && is_callable(array($order, 'get_id'))) {
+            return (string) $order->get_id();
+        }
+
+        return '';
+    }
+
+    protected function build_antifraud_session_id($fingerprint_id)
+    {
+        if (empty($this->antifraud_finger_print_merchant_id) || empty($fingerprint_id)) {
+            return '';
+        }
+
+        return $this->antifraud_finger_print_merchant_id . $fingerprint_id;
+    }
+
+    public function get_antifraud_provider_name()
+    {
+        $provider = strtolower((string) $this->antifraud_provider);
+
+        if ('clearsale' === $provider) {
+            return 'ClearSale';
+        }
+
+        return 'Cybersource';
+    }
+
+    public function get_antifraud_browser_fingerprint($order = null)
+    {
+        if ($order || empty($this->antifraud_finger_print_id)) {
+            $this->refresh_antifraud_fingerprint_session($order);
+        }
+
+        return (string) $this->antifraud_finger_print_id;
+    }
+
+    public function get_antifraud_noscript_markup($order = null)
+    {
+        if ('yes' !== $this->antifraud_enabled || 'Cybersource' !== $this->get_antifraud_provider_name()) {
+            return '';
+        }
+
+        $this->refresh_antifraud_fingerprint_session($order);
+
+        if (empty($this->antifraud_finger_print_org_id) || empty($this->antifraud_finger_print_session_id)) {
+            return '';
+        }
+
+        $src = sprintf(
+            'https://h.online-metrix.net/fp/tags.js?org_id=%1$s&session_id=%2$s',
+            rawurlencode($this->antifraud_finger_print_org_id),
+            rawurlencode($this->antifraud_finger_print_session_id)
+        );
+
+        return '<noscript><iframe src="' . esc_url($src) . '"></iframe></noscript>';
     }
 
     public function settings_extra_data()
@@ -400,6 +495,16 @@ JS;
 
     public function enqueue_antifraud_fingerprint_script()
     {
+        if ('yes' !== $this->antifraud_enabled || 'Cybersource' !== $this->get_antifraud_provider_name()) {
+            return;
+        }
+
+        $this->refresh_antifraud_fingerprint_session();
+
+        if (empty($this->antifraud_finger_print_org_id) || empty($this->antifraud_finger_print_session_id)) {
+            return;
+        }
+
         wp_register_script('wc-braspag-antifraud-fingerprint', "https://h.online-metrix.net/fp/tags.js?org_id={$this->antifraud_finger_print_org_id}&session_id={$this->antifraud_finger_print_session_id}", array(), '', false);
         wp_enqueue_script('wc-braspag-antifraud-fingerprint');
     }
