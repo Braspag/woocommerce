@@ -92,7 +92,7 @@
             return null;
         }
 
-        return '/wp-content/plugins/woocommerce-braspag-dev/assets/images/' + card.logo + '.svg';
+        return (settings.assets_url || '') + card.logo + '.svg';
     }
 
     function buildInstallments() {
@@ -351,7 +351,7 @@
                 return __('Informe um número de cartão válido.', 'woocommerce-braspag');
             }
 
-            if (!/^\d{2}\/\d{2}$/.test(cardDetails.expirationDate) && !/^\d{2}\/\d{4}$/.test(getInputValue('braspag_creditcard-card-expiry'))) {
+            if (!/^\d{2}\/\d{2}$/.test(cardDetails.expirationDate)) {
                 return __('Informe uma data de expiração válida.', 'woocommerce-braspag');
             }
 

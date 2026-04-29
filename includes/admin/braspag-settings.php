@@ -218,6 +218,13 @@ return apply_filters(
             /* translators: post_notification URL */
             'description' => $this->display_admin_settings_webhook_description(),
         ),
+        'webhook_secret' => array(
+            'title' => __('Webhook Secret', 'woocommerce-braspag'),
+            'type' => 'password',
+            'description' => __('Optional shared secret used to validate webhook signatures (HMAC SHA-256).', 'woocommerce-braspag'),
+            'default' => '',
+            'desc_tip' => true,
+        ),
         'antifraud' => array(
             'title' => "<hr>" . __('Anti Fraud', 'woocommerce-braspag'),
             'type' => 'title',

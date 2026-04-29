@@ -128,3 +128,33 @@
 * Fixed a critical bug where the quantity of items in the cart was accessed as an object property instead of an array element.
 * Enabled the execution of anti-fraud analysis simultaneously with 3DS authentication.
 * Validation logic with handling of 3DS failure and error cases.
+
+= 2.3.5.42 - 2026-04-13 =
+* Add BancodoBrasil3 provider in pix payment method
+
+= 2.3.5.43 - 2026-04-29 =
+Correções
+* Corrigida compatibilidade com HPOS (High Performance Order Storage) no lookup de pedido por PaymentId no PIX.
+  - Adicionado suporte ao método wc_get_orders para busca nas tabelas HPOS.
+  - Mantido fallback por meta_key _braspag_pix_payment_id.
+  - Mantido fallback legado por transaction_id para lojas sem HPOS.
+  - Busca SQL legada restrita ao tipo shop_order com LIMIT 1.
+* Corrigida a validação indevida no Checkout Blocks para Pessoa Jurídica, que exibia CNPJ obrigatório mesmo com o campo preenchido.
+* Corrigida a validação de Número do endereço no Checkout Blocks, evitando falsos erros em atualizações parciais do checkout.
+* Ajustada a validação de Razão Social no Checkout Blocks para considerar corretamente os dados enviados na requisição atual.
+
+Melhorias
+* Reaproveitado o campo padrão de Empresa como Razão Social no fluxo de Pessoa Jurídica no Checkout Blocks.
+* Campo Razão Social agora é exibido logo abaixo do CNPJ e apenas quando o cliente seleciona Pessoa Jurídica.
+* Melhor compatibilidade com o ciclo de validação do Store API no Checkout Blocks, reduzindo mensagens de erro prematuras.
+* Adicionado webhook com validação de JSON e ChangeType permitido.
+
+3DS
+* Adicionado caso padrão para tipos de falha não tratados no 3DS.
+* Alterada condição para provedores que não sejam da Cielo no fluxo 3DS.
+* Adicionado retorno antecipado quando appendMpi não está disponível.
+* Atualizada versão de autenticação 3DS de 2.0 para 2.2.
+* Nota: cartões Elo e Amex não são suportados no fluxo de autenticação 3DS 2.2 — esses cartões seguem o fluxo de pagamento sem autenticação 3DS.
+* Corrigido bug crítico em que a quantidade de itens no carrinho era acessada como propriedade de objeto em vez de elemento de array.
+* Habilitada execução da análise antifraude simultaneamente com a autenticação 3DS.
+* Adicionada lógica de validação com tratamento de casos de falha e erro do 3DS.
