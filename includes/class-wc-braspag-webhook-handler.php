@@ -127,7 +127,7 @@ class WC_Braspag_Webhook_Handler extends WC_Braspag_Payment_Gateway
      */
     public function process_change_type_status_update($paymentId)
     {
-        $order = WC_Braspag_Helper::get_order_by_charge_id($paymentId);
+        $order = WC_Braspag_Helper::get_order_by_charge_id($paymentId, ['_braspag_pix_payment_id']);
 
         if (!$order) {
             throw new WC_Braspag_Exception('Process Webhook Change Type Status Update Error: Order not found');
