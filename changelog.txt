@@ -128,3 +128,6 @@
 * Fixed a critical bug where the quantity of items in the cart was accessed as an object property instead of an array element.
 * Enabled the execution of anti-fraud analysis simultaneously with 3DS authentication.
 * Validation logic with handling of 3DS failure and error cases.
+
+= 2.3.5.42 - 2026-05-19 =
+* Fixed webhook handling for PIX orders when the WC HPOS was enabled. 
