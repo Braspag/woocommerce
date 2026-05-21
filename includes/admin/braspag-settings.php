@@ -218,6 +218,20 @@ return apply_filters(
             /* translators: post_notification URL */
             'description' => $this->display_admin_settings_webhook_description(),
         ),
+        'webhook_header_key' => array(
+            'title' => __('Webhook Header Key', 'woocommerce-braspag'),
+            'type' => 'text',
+            'description' => __('Header name configured in Braspag panel (KEY). Example: X-BRASPAG-SIGNATURE', 'woocommerce-braspag'),
+            'default' => 'X-BRASPAG-SIGNATURE',
+            'desc_tip' => true,
+        ),
+        'webhook_secret' => array(
+            'title' => __('Webhook Header Value', 'woocommerce-braspag'),
+            'type' => 'password',
+            'description' => __('Static value configured in Braspag panel (VALUE). The webhook will only be accepted if this header is present.', 'woocommerce-braspag'),
+            'default' => '',
+            'desc_tip' => true,
+        ),
         'antifraud' => array(
             'title' => "<hr>" . __('Anti Fraud', 'woocommerce-braspag'),
             'type' => 'title',
