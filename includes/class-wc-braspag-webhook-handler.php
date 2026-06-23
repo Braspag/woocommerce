@@ -100,7 +100,7 @@ class WC_Braspag_Webhook_Handler extends WC_Braspag_Payment_Gateway
         }
 
         $settings = get_option('woocommerce_braspag_settings', array());
-        $configured_key = !empty($settings['webhook_header_key']) ? trim($settings['webhook_header_key']) : 'X-BRASPAG-SIGNATURE';
+        $configured_key = ( true === !empty($settings['webhook_header_key']) ) ? trim($settings['webhook_header_key']) : 'X-BRASPAG-SIGNATURE';
         $signature_header = strtoupper((string) apply_filters('wc_braspag_webhook_signature_header', $configured_key));
         $signature = isset($request_headers[$signature_header]) ? (string) $request_headers[$signature_header] : '';
 
@@ -187,9 +187,9 @@ class WC_Braspag_Webhook_Handler extends WC_Braspag_Payment_Gateway
         // Make the request.
         $response = WC_Braspag_Pagador_API_Query::requestByPaymentId($paymentId);
 
-        if (empty($response->body) || !isset($response->body->Payment)) {
+        if ( true === empty($response->body) || false === isset($response->body->Payment) ) {
             throw new WC_Braspag_Exception(
-                sprintf('Process Webhook Change Type Status Update Error: API returned HTTP %s for PaymentId %s', $response->status ?? 'unknown', $paymentId)
+                sprintf('Process Webhook Change Type Status Update Error: API returned HTTP %s for PaymentId %s', sanitize_text_field( (string) ( $response->status ?? 'unknown' ) ), sanitize_text_field( $paymentId ))
             );
         }
 

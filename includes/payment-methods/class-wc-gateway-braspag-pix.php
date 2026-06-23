@@ -203,7 +203,7 @@ class WC_Gateway_Braspag_Pix extends WC_Gateway_Braspag
             "_braspag_pix_payment_id" => $response->body->Payment->PaymentId,
             "_braspag_pix_expiration_date" => $response->body->Payment->QrCodeExpiration,
             "_braspag_pix_received_date" => $response->body->Payment->ReceivedDate,
-            "_braspag_pix_transaction_id" => $response->body->Payment->AcquirerTransactionId,
+            "_braspag_pix_transaction_id" => $response->body->Payment->AcquirerTransactionId ?? null,
             "_braspag_pix_qr_code_image" => $response->body->Payment->QrCodeBase64Image,
             "_braspag_pix_digitable_line" => $response->body->Payment->QrCodeString
         ];
