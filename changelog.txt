@@ -133,4 +133,7 @@
 * Add BancodoBrasil3 provider in pix payment method
 
 = 2.3.5.43 - 2026-05-19 =
+* Fixed webhook handling for PIX orders when the WC HPOS was enabled.
+
+= 2.3.5.44 - 2026-06-23 =
 * Fixed webhook handling for PIX orders when the WC HPOS was enabled. 
