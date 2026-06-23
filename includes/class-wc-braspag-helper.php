@@ -154,34 +154,40 @@ class WC_Braspag_Helper
 		return self::extract_order(wc_get_orders([
 			'limit'      => 1,
 			'type'       => 'shop_order',
-			'meta_key'   => $meta_key,
-			'meta_value' => $charge_id,
+			'meta_query' => [[
+				'key'   => $meta_key,
+				'value' => $charge_id,
+			]],
 		]));
 	}
 
 	private static function find_order_by_legacy_sql(string $charge_id, array $extra_meta = [])
 	{
-		global $wpdb;
+		$order = self::extract_order(wc_get_orders([
+			'limit'      => 1,
+			'type'       => 'shop_order',
+			'meta_query' => [[
+				'key'   => '_transaction_id',
+				'value' => $charge_id,
+			]],
+		]));
 
-		$order_id = $wpdb->get_var($wpdb->prepare(
-			"SELECT post_id FROM $wpdb->postmeta WHERE meta_key = %s AND meta_value = %s LIMIT 1",
-			'_transaction_id',
-			$charge_id
-		));
-
-		if ($order_id) {
-			return wc_get_order($order_id);
+		if (FALSE !== $order) {
+			return $order;
 		}
 
 		foreach ($extra_meta as $meta_key) {
-			$order_id = $wpdb->get_var($wpdb->prepare(
-				"SELECT post_id FROM $wpdb->postmeta WHERE meta_key = %s AND meta_value = %s LIMIT 1",
-				$meta_key,
-				$charge_id
-			));
+			$order = self::extract_order(wc_get_orders([
+				'limit'      => 1,
+				'type'       => 'shop_order',
+				'meta_query' => [[
+					'key'   => $meta_key,
+					'value' => $charge_id,
+				]],
+			]));
 
-			if ($order_id) {
-				return wc_get_order($order_id);
+			if (FALSE !== $order) {
+				return $order;
 			}
 		}
 
