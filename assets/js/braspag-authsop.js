@@ -53,7 +53,7 @@ Sop.prototype = {
   bpInit: function (form) {
     if (this.creditCardMethod && this.creditCardMethod.checked) {
       this.cardType = 'creditCard';
-    } else if (debitCardMethod && debitCardMethod.checked) {
+    } else if (this.debitCardMethod && this.debitCardMethod.checked) {
       this.cardType = 'debitCard';
     } else {
       this.cardType = "creditCard";

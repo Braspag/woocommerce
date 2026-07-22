@@ -306,6 +306,7 @@ function wc_braspag_init()
 			include_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-payment-tokens.php';
 			include_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-pagador-api.php';
 			include_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-risk-api.php';
+			include_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-zero-auth-api.php';
 			include_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-oauth-api.php';
 			include_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-mpi-api.php';
 			include_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-pagador-api-query.php';
