@@ -88,7 +88,7 @@ class WC_Braspag_Pagador_API_Query
             $requestOptions
         );
 
-        if (is_wp_error($response) || empty($response['body'])) {
+        if (true === is_wp_error($response)) {
             WC_Braspag_Logger::log(
                 'Error Response: ' . print_r($response, true) . PHP_EOL . PHP_EOL . 'Failed request: ' . print_r(
                     array(
@@ -135,7 +135,7 @@ class WC_Braspag_Pagador_API_Query
             $response_data['message'] = $response['response']['message'];
         }
 
-        if ($response_data['status'] != '200' && $response_data['status'] != '201') {
+        if (!in_array((int) $response_data['status'], [200, 201], true)) {
             $response_data['errors'] = $response_data['body'];
             $response_data['body'] = null;
         }
