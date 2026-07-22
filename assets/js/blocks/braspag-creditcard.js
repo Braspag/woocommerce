@@ -1,4 +1,4 @@
-/* global wc, sop, bpmpi, verify, braspag, jQuery, bpSop_silentOrderPost */
+/* global wc, sop, bpmpi, braspag, jQuery, bpSop_silentOrderPost */
 (function () {
     const { registerPaymentMethod } = wc.wcBlocksRegistry;
     const { getSetting } = wc.wcSettings;
@@ -142,33 +142,6 @@
             bpmpi_auth_reference_id: getInputValue('bpmpi_auth_reference_id'),
             bpmpi_auth_failure_type: getInputValue('bpmpi_auth_failure_type', '0'),
         };
-    }
-
-    function buildVerifyPayload(cardDetails) {
-        return {
-            Card: {
-                CardNumber: cardDetails.cardNumber,
-                Holder: cardDetails.holderName,
-                ExpirationDate: cardDetails.expirationDate,
-                SecurityCode: cardDetails.securityCode,
-                Brand: cardDetails.brand,
-                Type: cardDetails.cardType,
-            },
-            Provider: 'Simulado',
-        };
-    }
-
-    async function runVerifyProcess(cardDetails) {
-        if (!settings.verify_enabled) {
-            return true;
-        }
-
-        if (typeof verify === 'undefined' || !verify.isVerifyEnabled()) {
-            return true;
-        }
-
-        await verify.verify(buildVerifyPayload(cardDetails));
-        return true;
     }
 
     async function run3dsProcess() {
@@ -383,12 +356,6 @@
                 }
 
                 try {
-                    const cardDetails = buildCardDetails();
-
-                    if (settings.verify_enabled) {
-                        await runVerifyProcess(cardDetails);
-                    }
-
                     if (settings.auth3ds20_enabled) {
                         await run3dsProcess();
                     }
