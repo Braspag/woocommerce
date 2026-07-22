@@ -218,17 +218,10 @@ return apply_filters(
             /* translators: post_notification URL */
             'description' => $this->display_admin_settings_webhook_description(),
         ),
-        'webhook_header_key' => array(
-            'title' => __('Webhook Header Key', 'woocommerce-braspag'),
-            'type' => 'text',
-            'description' => __('Header name configured in Braspag panel (KEY). Example: X-BRASPAG-SIGNATURE', 'woocommerce-braspag'),
-            'default' => 'X-BRASPAG-SIGNATURE',
-            'desc_tip' => true,
-        ),
         'webhook_secret' => array(
-            'title' => __('Webhook Header Value', 'woocommerce-braspag'),
+            'title' => __('Webhook Secret', 'woocommerce-braspag'),
             'type' => 'password',
-            'description' => __('Static value configured in Braspag panel (VALUE). The webhook will only be accepted if this header is present.', 'woocommerce-braspag'),
+            'description' => __('Optional shared secret used to validate webhook signatures (HMAC SHA-256).', 'woocommerce-braspag'),
             'default' => '',
             'desc_tip' => true,
         ),
@@ -252,6 +245,17 @@ return apply_filters(
             'default' => 'no',
             'desc_tip' => true,
         ),
+        'antifraud_provider' => array(
+            'title' => __('Antifraud Provider', 'woocommerce-braspag'),
+            'type' => 'select',
+            'description' => __('Choose which antifraud provider will be used in credit card transactions.', 'woocommerce-braspag'),
+            'default' => 'cybersource',
+            'options' => array(
+                'cybersource' => __('Cybersource', 'woocommerce-braspag'),
+                'clearsale' => __('ClearSale', 'woocommerce-braspag'),
+            ),
+            'desc_tip' => true,
+        ),
         'antifraud_finger_print_org_id' => array(
             'title' => __('Finger Print Org ID', 'woocommerce-braspag'),
             'type' => 'text',
@@ -272,6 +276,13 @@ return apply_filters(
             'type' => 'checkbox',
             'description' => __('Choose whether you wish to use Order ID to compose Finger Print ID or not', 'woocommerce-braspag'),
             'default' => 'no',
+            'desc_tip' => true,
+        ),
+        'antifraud_clearsale_app_key' => array(
+            'title' => __('ClearSale AppKey', 'woocommerce-braspag'),
+            'type' => 'text',
+            'description' => __('Get your ClearSale AppKey from Braspag Support.', 'woocommerce-braspag'),
+            'default' => '',
             'desc_tip' => true,
         ),
         'antifraud_options_sequence' => array(

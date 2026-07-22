@@ -132,8 +132,31 @@
 = 2.3.5.42 - 2026-04-13 =
 * Add BancodoBrasil3 provider in pix payment method
 
-= 2.3.5.43 - 2026-05-19 =
-* Fixed webhook handling for PIX orders when the WC HPOS was enabled.
+= 2.3.5.43 - 2026-04-29 =
+Correções
+* Fixed HPOS (High-Performance Order Storage) compatibility for PIX order lookups by PaymentId.
+  - Added support for the `wc_get_orders` method to search HPOS tables.
+  - Retained fallback using the `_braspag_pix_payment_id` meta key.
+  - Retained legacy fallback using `transaction_id` for stores without HPOS.
+  - Restricted legacy SQL search to the `shop_order` type with `LIMIT 1`.
+* Fixed an incorrect validation issue in Checkout Blocks for legal entities (B2B), where the CNPJ field was marked as required even when filled in.
+* Fixed address number validation in Checkout Blocks to prevent false errors during partial checkout updates.
+* Adjusted "Company Name" (Razão Social) validation in Checkout Blocks to correctly account for data sent in the current request.
 
-= 2.3.5.44 - 2026-06-23 =
-* Fixed webhook handling for PIX orders when the WC HPOS was enabled. 
+Improvements
+* Reused the standard "Company" field as the "Company Name" (Razão Social) in the legal entity flow within Checkout Blocks.
+* The "Company Name" field is now displayed directly below the CNPJ and only appears when the customer selects the legal entity option.
+* Improved compatibility with the Store API validation cycle in Checkout Blocks, reducing premature error messages.
+* Added a webhook with JSON validation and allowed `ChangeType` checks.
+
+3DS
+* Added a default case for unhandled 3DS failure types.
+* Modified the condition for providers that do not receive data from Cielo during the 3DS flow.
+* Added an early return for cases where `appendMpi` is unavailable.
+* Updated 3DS authentication version from 2.0 to 2.2.
+* Note: Elo and Amex cards are not supported in the 3DS 2.2 authentication flow; these cards follow the payment flow without 3DS authentication.
+* Fixed a critical bug where the cart item count was accessed as an object property instead of an array element.
+* Enabled anti-fraud analysis to run concurrently with 3DS authentication. * Added validation logic handling 3DS failure and error cases.
+
+= 2.3.6.1 (BETA) - 2026-07-22 =
+* Adicionar compatibilidade com Checkout Blocks
