@@ -325,7 +325,7 @@ class WC_Gateway_Braspag_DebitCard extends WC_Gateway_Braspag
                 break;
         }
 
-        $cardType = (string) $checkout->get_value('braspag_creditcard-card-type');
+        $cardType = (string) $checkout->get_value('braspag_debitcard-card-type');
         $provider = (string) $this->get_braspag_payment_provider($cardType, $this->test_mode);
 
         if (!$appendMpi && !$this->test_mode && $failureType !== '3' && !preg_match('#cielo#i', $provider)) {
@@ -334,10 +334,12 @@ class WC_Gateway_Braspag_DebitCard extends WC_Gateway_Braspag
 
         $message .= " #MPI{$failureType}";
 
-        throw new WC_Braspag_Exception(
-            print_r([], true),
-            $message
-        );
+        if ($appendMpi) {
+            throw new WC_Braspag_Exception(
+                print_r([], true),
+                $message
+            );
+        }
     }
 
     /**

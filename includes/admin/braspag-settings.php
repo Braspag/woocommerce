@@ -238,6 +238,17 @@ return apply_filters(
             'default' => 'no',
             'desc_tip' => true,
         ),
+        'antifraud_provider' => array(
+            'title' => __('Antifraud Provider', 'woocommerce-braspag'),
+            'type' => 'select',
+            'description' => __('Choose which antifraud provider will be used in credit card transactions.', 'woocommerce-braspag'),
+            'default' => 'cybersource',
+            'options' => array(
+                'cybersource' => __('Cybersource', 'woocommerce-braspag'),
+                'clearsale' => __('ClearSale', 'woocommerce-braspag'),
+            ),
+            'desc_tip' => true,
+        ),
         'antifraud_finger_print_org_id' => array(
             'title' => __('Finger Print Org ID', 'woocommerce-braspag'),
             'type' => 'text',
@@ -258,6 +269,13 @@ return apply_filters(
             'type' => 'checkbox',
             'description' => __('Choose whether you wish to use Order ID to compose Finger Print ID or not', 'woocommerce-braspag'),
             'default' => 'no',
+            'desc_tip' => true,
+        ),
+        'antifraud_clearsale_app_key' => array(
+            'title' => __('ClearSale AppKey', 'woocommerce-braspag'),
+            'type' => 'text',
+            'description' => __('Get your ClearSale AppKey from Braspag Support.', 'woocommerce-braspag'),
+            'default' => '',
             'desc_tip' => true,
         ),
         'antifraud_options_sequence' => array(
