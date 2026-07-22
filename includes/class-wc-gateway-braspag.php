@@ -484,10 +484,6 @@ JS;
             $this->payment_scripts_authsop();
         }
 
-        if ($this->verifycard_enabled == 'yes') {
-            $this->payment_scripts_verifycard();
-        }
-
         $this->enqueue_antifraud_fingerprint_script();
 
         $this->payment_scripts_auth3ds20();
@@ -533,50 +529,6 @@ JS;
         return false;
     }
 
-    /**
-     * @throws WC_Braspag_Exception
-     */
-    public function payment_scripts_verifycard()
-    {
-        $verifycard_params = apply_filters(
-            'wc_gateway_braspag_pagador_verifycard_params',
-            array(
-                'isTestEnvironment' => $this->test_mode
-            )
-        );
-
-        wp_register_script('wc-braspag-verifycard', plugins_url('assets/js/braspag-verifycard.js', WC_BRASPAG_MAIN_FILE), array(), WC_BRASPAG_VERSION, true);
-        wp_enqueue_script('wc-braspag-verifycard');
-
-        if ($this->test_mode == 'yes') {
-            $url = 'https://apisandbox.braspag.com.br/v2/verifycard';
-            $enviroment = 'sandbox';
-        } else {
-            $url = 'https://api.braspag.com.br/v2/verifycard';
-            $enviroment = 'production';
-        }
-
-        $merchant_id = $this->get_option('merchant_id');
-        $merchant_key = $this->get_option('merchant_key');
-        $uuid = wp_generate_uuid4();
-
-        wp_localize_script(
-            'wc-braspag-verifycard',
-            'braspag_verifycard_params',
-            apply_filters(
-                'wc_gateway_braspag_pagador_verifycard_params',
-                array(
-                    'bpMerchantId' => $merchant_id,
-                    'bpMerchantKey' => $merchant_key,
-                    'bpEnvironment' => $enviroment,
-                    'apiUrl' => $url,
-                    'testMode' => $this->test_mode,
-                    'uuid' => $uuid,
-                    'enable' => $this->get_option('verifycard_enabled', 'false'),
-                )
-            )
-        );
-    }
 
     /**
      * @throws WC_Braspag_Exception
