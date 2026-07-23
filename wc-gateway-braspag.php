@@ -14,13 +14,13 @@
  * Author: Braspag
  * Author URI: https://braspag.com.br/
  *
- * Version: 2.3.5.44
+ * Version: 2.3.5.45
  * Requires at least: 5.3.2
- * Tested up to: 6.8.2
+ * Tested up to: 6.9.5
  * Requires PHP: 7.4
  *
  * WC requires at least: 4.0.0
- * WC tested up to: 10.0.4
+ * WC tested up to: 10.9.4
  * License: GPL-3.0
  * License URI: https://opensource.org/license/gpl-3/
  * Text Domain: woocommerce-braspag
@@ -266,7 +266,7 @@ function wc_braspag_init()
 		 *
 		 * @return void
 		 */
-		private function __wakeup()
+		public function __wakeup()
 		{
 		}
 
