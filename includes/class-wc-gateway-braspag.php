@@ -800,6 +800,10 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
             return;
         }
 
+        if (is_admin() || ! function_exists('wc_add_notice')) {
+            return;
+        }
+
         /* translators: 1) Opening anchor tag 2) closing anchor tag */
         wc_add_notice(sprintf(__('If your billing address has been changed for saved payment methods, be sure to remove any %1$ssaved payment methods%2$s on file and re-add them.', 'woocommerce-braspag'), '<a href="' . esc_url(wc_get_endpoint_url('payment-methods')) . '" class="wc-braspag-update-card-notice" style="text-decoration:underline;">', '</a>'), 'notice');
     }
@@ -827,13 +831,15 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
      * @param string $localized_message
      * @throws WC_Braspag_Exception
      */
-    public function throw_localized_message($response, $order, $localized_message = '')
+    public function throw_localized_message($response, $order = null, $localized_message = '')
     {
         if (!empty($response)) {
             $localized_message = $this->get_localized_error_message_from_response($response);
         }
 
-        $order->add_order_note($localized_message);
+        if ($order) {
+            $order->add_order_note($localized_message);
+        }
 
         throw new WC_Braspag_Exception(print_r($response, true), $localized_message);
     }
