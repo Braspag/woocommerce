@@ -373,13 +373,12 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway
         $sop_request_builder['MerchantId'] = $merchant_id;
         $sop_request_builder['Authorization'] = 'Bearer ' . $auth_sop_token;
 
-        $sop_response = $this->braspag_sop_request($sop_request_builder, $enviroment, $endpoint, $method);
+        $sop_response = $this->braspag_sop_request($sop_request_builder, $enviroment, $endpoint);
 
         WC_Braspag_Logger::log("Info: SOP -> Data Access request: " . print_r($sop_response, true));
 
-        if (!is_object($sop_response) || empty($sop_response->AccessToken)) {
+        if (!empty($sop_response->errors)) {
             WC_Braspag_Logger::log("Info: SOP -> Error Access request: " . print_r($sop_response, true));
-            return null;
         }
 
         return $sop_response->AccessToken;
@@ -453,12 +452,6 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway
 
         if (!empty($oauth_response->errors)) {
             WC_Braspag_Logger::log("SOP -> Error OAuth request: " . print_r($oauth_response, true));
-            return null;
-        }
-
-        if (!isset($oauth_response->body) || !is_object($oauth_response->body) || empty($oauth_response->body->access_token)) {
-            WC_Braspag_Logger::log("SOP -> Invalid OAuth response to get token: " . print_r($oauth_response, true));
-            return null;
         }
 
         return $oauth_response->body->access_token;

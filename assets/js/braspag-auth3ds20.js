@@ -63,9 +63,7 @@ BraspagAuth3ds20.prototype = {
       'bpmpiAuthReferenceId': jQuery('.bpmpi_auth_reference_id').val()
     };
 
-    if (this.isTestEnvironment) {
-      console.log(returnData);
-    }
+    console.log(returnData);
 
     return returnData;
   },
