@@ -40,9 +40,6 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
     protected $auth3ds20_mpi_authorize_on_unsupported_brand;
     protected $sop_enabled;
     protected $sop_tokenize;
-    protected $verifycard_enabled;
-    protected $merchant_id;
-    protected $merchant_key;
 
     public function __construct()
     {
@@ -67,9 +64,6 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
         $braspag_main_settings = get_option('woocommerce_braspag_settings');
         $this->sop_enabled = isset($braspag_main_settings['silentpost_enabled']) ? $braspag_main_settings['silentpost_enabled'] : 'no';
         $this->sop_tokenize = isset($braspag_main_settings['silentpost_token_type']) ? $braspag_main_settings['silentpost_token_type'] : 'no';
-        $this->verifycard_enabled = isset($braspag_main_settings['verifycard_enabled']) ? $braspag_main_settings['verifycard_enabled'] : 'no';
-        $this->merchant_id = isset($braspag_main_settings['merchant_id']) ? $braspag_main_settings['merchant_id'] : '';
-        $this->merchant_key = isset($braspag_main_settings['merchant_key']) ? $braspag_main_settings['merchant_key'] : '';
 
         $braspag_enabled = isset($braspag_main_settings['enabled']) ? $braspag_main_settings['enabled'] : 'no';
         $test_mode = isset($braspag_main_settings['test_mode']) ? $braspag_main_settings['test_mode'] : 'no';
@@ -582,44 +576,6 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
      * @param $cart
      * @return mixed|void
      */
-    /**
-     * Validates a raw PAN against the Braspag ZeroAuth (VerifyCard) API before
-     * it is sent to /v2/sales. Only used when SOP is disabled, since with SOP
-     * the card is verified by the SOP widget itself (enableVerifyCard flag)
-     * and the merchant never sees the raw PAN.
-     *
-     * @param string $card_number
-     * @param string $card_holder
-     * @param string $card_expiration_date
-     * @param string $card_security_code
-     * @param string $brand
-     * @throws WC_Braspag_Exception
-     */
-    protected function validate_card_with_zero_auth($card_number, $card_holder, $card_expiration_date, $card_security_code, $brand)
-    {
-        if (!WC_Braspag_Zero_Auth_API::brand_supported($brand)) {
-            return;
-        }
-
-        $response = WC_Braspag_Zero_Auth_API::validate_pan([
-            'merchant_id' => $this->merchant_id,
-            'merchant_key' => $this->merchant_key,
-            'test_mode' => $this->test_mode ? 'yes' : 'no',
-            'card_number' => $card_number,
-            'card_holder' => $card_holder,
-            'card_expiration_date' => $card_expiration_date,
-            'card_security_code' => $card_security_code,
-            'brand' => $brand,
-        ]);
-
-        if (!WC_Braspag_Zero_Auth_API::is_valid($response)) {
-            throw new WC_Braspag_Exception(
-                'ZeroAuth validation failed: ' . print_r($response, true),
-                __('Não foi possível validar o cartão informado. Verifique os dados e tente novamente.', 'woocommerce-braspag')
-            );
-        }
-    }
-
     public function braspag_pagador_creditcard_payment_request_builder($payment_data, $order, $checkout, $cart)
     {
         $card_expiration_date = str_replace(" ", "", $checkout->get_value('braspag_creditcard-card-expiry'));
@@ -653,15 +609,9 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
                 ];
             }
         } else {
-            $card_number = str_replace(" ", "", $checkout->get_value('braspag_creditcard-card-number'));
-
             $cardnumber = [
-                "CardNumber" => $card_number
+                "CardNumber" => str_replace(" ", "", $checkout->get_value('braspag_creditcard-card-number'))
             ];
-
-            if ($this->verifycard_enabled === 'yes') {
-                $this->validate_card_with_zero_auth($card_number, $card_data['Holder'], $card_expiration_date, $card_data['SecurityCode'], $brandCard);
-            }
         }
 
         $card_data = array_merge($card_data, $cardnumber);
