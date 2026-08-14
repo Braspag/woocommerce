@@ -300,6 +300,7 @@ function wc_braspag_init()
 			require_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-exception.php';
 			require_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-logger.php';
 			require_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-helper.php';
+			require_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-client-logger.php';
 			include_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-payment-tokens.php';
 			include_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-pagador-api.php';
 			include_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-risk-api.php';

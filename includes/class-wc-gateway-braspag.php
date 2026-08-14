@@ -310,6 +310,8 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
 
         $suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
 
+        $this->maybe_enqueue_client_logger();
+
         if ($this->auth3DS_enabled == 'yes') {
             // Adiciona o jQuery BlockUI a partir da CDN
             wp_register_script('jquery-blockui', 'https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.70/jquery.blockUI.min.js', array('jquery'), '2.70', false);
@@ -342,6 +344,35 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
         wp_enqueue_script('wc-braspag-antifraud-fingerprint');
 
         $this->payment_scripts_auth3ds20();
+    }
+
+    /**
+     * Envia console.log/erros do navegador para o log do plugin, quando o
+     * logging estiver habilitado nas configurações.
+     */
+    public function maybe_enqueue_client_logger()
+    {
+        if (!is_checkout()) {
+            return;
+        }
+
+        $settings = get_option('woocommerce_braspag_settings');
+
+        if (empty($settings) || !isset($settings['logging']) || 'yes' !== $settings['logging']) {
+            return;
+        }
+
+        wp_register_script('wc-braspag-client-logger', plugins_url('assets/js/braspag-client-logger.js', WC_BRASPAG_MAIN_FILE), array(), WC_BRASPAG_VERSION, true);
+        wp_enqueue_script('wc-braspag-client-logger');
+
+        wp_localize_script(
+            'wc-braspag-client-logger',
+            'wc_braspag_client_log_params',
+            array(
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce(WC_Braspag_Client_Logger::NONCE_ACTION),
+            )
+        );
     }
 
     /**
