@@ -37,22 +37,23 @@ Para acessar a nossa documentação completa do Módulo WooCommerce, [clique aqu
 
 - Wordpress: versão 5.7.0 | WooCommerce: versão 5.1.0
 - Wordpress: versão 6.2.2 | WooCommerce: versão 7.9.0
+- Wordpress: versão 6.9.5 | WooCommerce: versão 10.8.0
 
 #### Beta (Em Homologação)
-- Wordpress: versão 6.7.2 | WooCommerce: versão 9.7.0
+- Wordpress: versão 7.0 | WooCommerce: versão 10.9
 
 #### Alfa (Em testes)
-- Wordpress: versão 6.8.2 | WooCommerce: versão 10.0.4
+- Wordpress: versão 7.0.2 | WooCommerce: versão 10.9.4
 
 ### RECURSOS PRINCIPAIS
 - Suporte nativo ao Checkout Legado.
-- Suporte nativo ao High-Performance Order Storage (HPOS).
+- Suporte nativo ao High-Performance Order Storage (HPOS) — desde a versão 2.3.4, com reforços de compatibilidade nas versões 2.3.5.33 e 2.3.5.43/2.3.5.44.
 - Suporte nativo a PHP 8.3.
 
 ### RECURSOS EM TESTES
-- Suporte ao checkout em Blocos do WooCommerce
+- Suporte ao checkout em Blocos do WooCommerce — em ajuste desde a versão 2.3.5.44, com suporte declarado a partir da versão 2.3.6.1 (Beta).
 - Suporte ao Fluid Checkout
-- Suporte a 3DS
+- Suporte a 3DS — habilitado a partir da versão 2.3.5.41, com autenticação 3DS 2.2 a partir da 2.3.5.42/2.3.6.1 (exceto cartões Elo e Amex)
 
 ### Pré-instalação
 
