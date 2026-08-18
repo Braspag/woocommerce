@@ -16,10 +16,6 @@ Take credit card payments on your store using Braspag.
 == Description ==
 Módulo para integração da plataforma WooCommerce com o Gateway da Braspag
 
-WooCommerce:
-- Compatibilidade com HPOS
-- COmpatibilidade com Checkout Blocks
-
 Métodos de pagamento disponíveis
 - Credit Card
 - Cielo: Visa, Master, Amex, Elo, Aura, JCB, Diners, Discover
