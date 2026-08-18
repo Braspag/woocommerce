@@ -35,7 +35,8 @@ class WC_Braspag_Mpi_API
         }
 
         $authorization = self::get_authorization(
-            $request['auth3ds20_oauth_authentication_client_id'], $request['auth3ds20_oauth_authentication_client_secret']
+            $request['auth3ds20_oauth_authentication_client_id'],
+            $request['auth3ds20_oauth_authentication_client_secret']
         );
 
         return apply_filters(
