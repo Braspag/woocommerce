@@ -136,4 +136,25 @@
 * Fixed webhook handling for PIX orders when the WC HPOS was enabled.
 
 = 2.3.5.44 - 2026-06-23 =
-* Fixed webhook handling for PIX orders when the WC HPOS was enabled. 
+* Fixed HPOS (High-Performance Order Storage) compatibility for PIX order lookups by PaymentId.
+* Added support for the `wc_get_orders` method to search HPOS tables. 
+- Retained fallback using the `_braspag_pix_payment_id` meta key. 
+- Retained legacy fallback using `transaction_id` for stores without HPOS. 
+- Restricted legacy SQL search to the `shop_order` type with `LIMIT 1`.
+* Fixed incorrect validation in Checkout Blocks for business customers (legal entities), which flagged the CNPJ as mandatory even when the field was filled in.
+* Fixed address number validation in Checkout Blocks, preventing false errors during partial checkout updates.
+* Adjusted Company Name validation in Checkout Blocks to correctly account for data sent in the current request.
+* Reused the standard "Company" field as the "Company Name" (Razão Social) in the business customer flow within Checkout Blocks.
+* The Company Name field is now displayed directly below the CNPJ and only appears when the customer selects the business customer option.
+* Improved compatibility with the Store API validation cycle in Checkout Blocks, reducing premature error messages.
+* Added a webhook with JSON validation and allowed `ChangeType` checks.
+
+= 2.3.5.45 - 2026-06-23 =
+* Fixed webhook get Acquire Transaction ID
+
+= 2.3.5.46 - 2026-07-24 =
+* Remove headers for validations in webhook
+* Update compatibility and resources
+
+= 2.3.5.47 - 2026-08-17 =
+* Add logs with more content to improve debugging by support.
