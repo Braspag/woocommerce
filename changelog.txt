@@ -165,6 +165,11 @@
 = 2.3.6.1 (BETA) - 2026-07-22 =
 * Adicionar compatibilidade com Checkout Blocks
 
-= 2.3.6.2 (BETA) - 2026-08-17 =
+= 2.3.6.2 (BETA) - 2026-07-24 =
+* Refactor: fix bugs found when testing
+* Fix: remove headers for validations in webhook
+* Update Braspag Plugin version and compatibility info
+
+= 2.3.6.3 (BETA) - 2026-08-17 =
 * Add logs with more content to improve debugging by support.
 
