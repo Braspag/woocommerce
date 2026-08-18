@@ -310,6 +310,8 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
 
         $suffix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
 
+        $this->maybe_enqueue_client_logger();
+
         if ($this->auth3DS_enabled == 'yes') {
             // Adiciona o jQuery BlockUI a partir da CDN
             wp_register_script('jquery-blockui', 'https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.70/jquery.blockUI.min.js', array('jquery'), '2.70', false);

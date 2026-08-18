@@ -34,11 +34,11 @@ class WC_Braspag_Logger
 				}
 			}
 
-			$settings = get_option('woocommerce_braspag_settings');
-
-			if (empty($settings) || isset($settings['logging']) && 'yes' !== $settings['logging']) {
+			if (!self::is_logging_enabled()) {
 				return;
 			}
+
+			$context_header = self::format_context_header();
 
 			if (!is_null($start_time)) {
 
@@ -47,12 +47,12 @@ class WC_Braspag_Logger
 				$formatted_end_time = date_i18n(get_option('date_format') . ' g:ia', $end_time);
 				$elapsed_time = round(abs($end_time - $start_time) / 60, 2);
 
-				$log_entry = "\n" . '====Braspag Version: ' . WC_BRASPAG_VERSION . '====' . "\n";
+				$log_entry = "\n" . $context_header;
 				$log_entry .= '====Start Log ' . $formatted_start_time . '====' . "\n" . $message . "\n";
 				$log_entry .= '====End Log ' . $formatted_end_time . ' (' . $elapsed_time . ')====' . "\n\n";
 
 			} else {
-				$log_entry = "\n" . '====Braspag Version: ' . WC_BRASPAG_VERSION . '====' . "\n";
+				$log_entry = "\n" . $context_header;
 				$log_entry .= '====Start Log====' . "\n" . $message . "\n" . '====End Log====' . "\n\n";
 
 			}
@@ -63,6 +63,61 @@ class WC_Braspag_Logger
 				self::$logger->debug($log_entry, array('source' => self::WC_LOG_FILENAME));
 			}
 		}
+	}
+
+	/**
+	 * Loga uma entrada enviada pelo navegador (console/erro JS) via AJAX.
+	 *
+	 * @param string $message
+	 */
+	public static function log_client($message)
+	{
+		self::log("Client Log:\n" . $message);
+	}
+
+	/**
+	 * Verifica se o logging do plugin está habilitado nas configurações.
+	 * Mesma regra usada tanto para o log em disco quanto para o captador
+	 * de logs do navegador: respeita o checkbox "Debug" ("Log debug
+	 * messages") das configurações do gateway.
+	 *
+	 * @return bool
+	 */
+	public static function is_logging_enabled()
+	{
+		$settings = get_option('woocommerce_braspag_settings');
+
+		if (empty($settings)) {
+			return false;
+		}
+
+		if (isset($settings['debug']) && 'yes' !== $settings['debug']) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Monta o bloco de contexto (versões e tipo de checkout) anexado a cada entrada de log.
+	 *
+	 * @return string
+	 */
+	private static function format_context_header()
+	{
+		$context = WC_Braspag_Helper::get_log_context();
+
+		$lines = array(
+			'====Braspag Version: ' . $context['module_version'] . '====',
+			'Checkout: ' . $context['checkout_type'],
+			'PHP: ' . $context['php_version'],
+			'WordPress: ' . $context['wp_version'],
+			'WooCommerce: ' . $context['wc_version'],
+			'Request: ' . $context['request_uri'],
+			'User-Agent: ' . $context['user_agent'],
+		);
+
+		return implode("\n", $lines) . "\n";
 	}
 
 	/**
