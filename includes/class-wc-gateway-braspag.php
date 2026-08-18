@@ -454,7 +454,7 @@ JS;
             return;
         }
 
-        if ($this->is_checkout_blocks()) {
+        if (method_exists($this, 'is_checkout_blocks') && $this->is_checkout_blocks()) {
             return;
         }
 
@@ -517,9 +517,7 @@ JS;
             return;
         }
 
-        $settings = get_option('woocommerce_braspag_settings');
-
-        if (empty($settings) || !isset($settings['logging']) || 'yes' !== $settings['logging']) {
+        if (!WC_Braspag_Logger::is_logging_enabled()) {
             return;
         }
 
