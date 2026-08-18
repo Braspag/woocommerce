@@ -14,7 +14,7 @@
  * Author: Braspag
  * Author URI: https://braspag.com.br/
  *
- * Version: 2.3.6.1
+ * Version: 2.3.6.2 (BETA)
  * Requires at least: 5.3.2
  * Tested up to: 6.9.5
  * Requires PHP: 7.4
@@ -114,7 +114,7 @@ function wc_braspag_init()
 	 * Required minimums and constants
 	 */
 	global $wp_version;
-	$bp_version = '2.3.6.1';
+	$bp_version = '2.3.6.2';
 	$min_php_ver = '5.6.0';
 	$min_wc_ver = '4.0.0';
 	$min_wp_ver = '5.3.2';
@@ -303,6 +303,7 @@ function wc_braspag_init()
 			require_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-exception.php';
 			require_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-logger.php';
 			require_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-helper.php';
+			require_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-client-logger.php';
 			include_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-payment-tokens.php';
 			include_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-pagador-api.php';
 			include_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-risk-api.php';
