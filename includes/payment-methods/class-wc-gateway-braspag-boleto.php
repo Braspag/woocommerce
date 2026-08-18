@@ -122,6 +122,9 @@ class WC_Gateway_Braspag_Boleto extends WC_Gateway_Braspag
 
             $order = wc_get_order($order_id);
 
+            // Validar documento obrigatório para Boleto
+            $this->validate_required_document($order);
+
             $default_request_params = $this->braspag_pagador_get_default_request_params(get_current_user_id());
 
             if (0 >= $order->get_total()) {
@@ -248,6 +251,116 @@ class WC_Gateway_Braspag_Boleto extends WC_Gateway_Braspag
     }
 
     /**
+     * Valida se documento (CPF/CNPJ) é obrigatório e válido para Boleto
+     * 
+     * @param WC_Order $order
+     * @throws WC_Braspag_Exception
+     */
+    private function validate_required_document($order)
+    {
+        $customer_identity_data = $this->get_customer_identity_data($order);
+        $document = isset($customer_identity_data['value']) ? $customer_identity_data['value'] : '';
+        $document_type = isset($customer_identity_data['type']) ? $customer_identity_data['type'] : '';
+
+        if (empty($document)) {
+            throw new WC_Braspag_Exception(
+                __('CPF ou CNPJ é obrigatório para pagamentos via Boleto.', 'woocommerce-braspag'),
+                __('CPF ou CNPJ é obrigatório para pagamentos via Boleto.', 'woocommerce-braspag')
+            );
+        }
+
+        // Validar CPF usando algoritmo de módulo 11
+        if ($document_type === 'CPF' && !$this->is_valid_cpf($document)) {
+            throw new WC_Braspag_Exception(
+                __('CPF informado é inválido.', 'woocommerce-braspag'),
+                __('CPF informado é inválido.', 'woocommerce-braspag')
+            );
+        }
+
+        // Validar CNPJ usando algoritmo de módulo 11
+        if ($document_type === 'CNPJ' && !$this->is_valid_cnpj($document)) {
+            throw new WC_Braspag_Exception(
+                __('CNPJ informado é inválido.', 'woocommerce-braspag'),
+                __('CNPJ informado é inválido.', 'woocommerce-braspag')
+            );
+        }
+    }
+
+    /**
+     * Valida CPF usando algoritmo de módulo 11
+     * 
+     * @param string $cpf
+     * @return bool
+     */
+    private function is_valid_cpf($cpf)
+    {
+        $cpf = preg_replace('/\D+/', '', $cpf);
+
+        if (strlen($cpf) !== 11 || preg_match('/^(\d)\1{10}$/', $cpf)) {
+            return false;
+        }
+
+        for ($t = 9; $t < 11; $t++) {
+            for ($d = 0, $c = 0; $c < $t; $c++) {
+                $d += (int) $cpf[$c] * (($t + 1) - $c);
+            }
+            $d = ((10 * $d) % 11) % 10;
+            if ((int) $cpf[$c] !== $d) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Valida CNPJ usando algoritmo de módulo 11
+     * 
+     * @param string $cnpj
+     * @return bool
+     */
+    private function is_valid_cnpj($cnpj)
+    {
+        $cnpj = preg_replace('/\D+/', '', $cnpj);
+
+        if (strlen($cnpj) !== 14 || preg_match('/^(\d)\1{13}$/', $cnpj)) {
+            return false;
+        }
+
+        $length = 12;
+        $numbers = substr($cnpj, 0, $length);
+        $digits = substr($cnpj, $length);
+
+        $sum = 0;
+        $pos = $length - 7;
+        for ($i = $length; $i >= 1; $i--) {
+            $sum += (int) $numbers[$length - $i] * $pos--;
+            if ($pos < 2) {
+                $pos = 9;
+            }
+        }
+
+        $result = $sum % 11 < 2 ? 0 : 11 - ($sum % 11);
+        if ((int) $digits[0] !== $result) {
+            return false;
+        }
+
+        $length = 13;
+        $numbers = substr($cnpj, 0, $length);
+        $sum = 0;
+        $pos = $length - 7;
+        for ($i = $length; $i >= 1; $i--) {
+            $sum += (int) $numbers[$length - $i] * $pos--;
+            if ($pos < 2) {
+                $pos = 9;
+            }
+        }
+
+        $result = $sum % 11 < 2 ? 0 : 11 - ($sum % 11);
+        return (int) $digits[1] === $result;
+    }
+
+    /**
      * @param $order
      * @return |null
      */
@@ -263,39 +376,39 @@ class WC_Gateway_Braspag_Boleto extends WC_Gateway_Braspag
 
         do_action('wc_gateway_braspag_pagador_boleto_display_order_data_before', $order);
 
-?>
-                <table class="woocommerce-table woocommerce-table--order-details shop_table order_details">
+        ?>
+                        <table class="woocommerce-table woocommerce-table--order-details shop_table order_details">
 
-                    <tbody>
-                        <tr class="woocommerce-table__line-item order_item">
-                            <td class="woocommerce-table__product-name product-name">
-                                <b>Boleto Bar Code</b>
-                            </td>
-                            <td class="woocommerce-table__product-total product-total">
-                                <?php echo $order->get_meta('_braspag_boleto_digitable_line'); ?>
-                            </td>
-                        </tr>
+                            <tbody>
+                                <tr class="woocommerce-table__line-item order_item">
+                                    <td class="woocommerce-table__product-name product-name">
+                                        <b>Boleto Bar Code</b>
+                                    </td>
+                                    <td class="woocommerce-table__product-total product-total">
+                                        <?php echo $order->get_meta('_braspag_boleto_digitable_line'); ?>
+                                    </td>
+                                </tr>
 
-                        <tr class="woocommerce-table__line-item order_item">
-                            <td class="woocommerce-table__product-name product-name">
-                                <b>Boleto Expiration Date</b>
-                            </td>
-                            <td class="woocommerce-table__product-total product-total">
-                                <?php echo $expirationDate; ?>
-                            </td>
-                        </tr>
+                                <tr class="woocommerce-table__line-item order_item">
+                                    <td class="woocommerce-table__product-name product-name">
+                                        <b>Boleto Expiration Date</b>
+                                    </td>
+                                    <td class="woocommerce-table__product-total product-total">
+                                        <?php echo $expirationDate; ?>
+                                    </td>
+                                </tr>
 
-                        <tr class="woocommerce-table__line-item order_item">
-                            <td class="woocommerce-table__product-total product-total text-center" colspan="2">
-                                <a href="<?php echo $order->get_meta('_braspag_boleto_url'); ?>" target="_blank">
-                                    <b><?php echo $this->label_print_button ?></b>
-                                </a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <?php
+                                <tr class="woocommerce-table__line-item order_item">
+                                    <td class="woocommerce-table__product-total product-total text-center" colspan="2">
+                                        <a href="<?php echo $order->get_meta('_braspag_boleto_url'); ?>" target="_blank">
+                                            <b><?php echo $this->label_print_button ?></b>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <?php
 
-                do_action('wc_gateway_braspag_pagador_boleto_display_order_data_after', $order);
+                        do_action('wc_gateway_braspag_pagador_boleto_display_order_data_after', $order);
     }
 }
