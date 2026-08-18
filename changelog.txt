@@ -179,8 +179,9 @@ Improvements
 * Remove headers for validations in webhook
 * Update compatibility and resources
 
-= 2.3.5.47 - 2026-08-17 =
-* Add logs with more content to improve debugging by support.
-
 = 2.3.6.1 (BETA) - 2026-07-22 =
 * Adicionar compatibilidade com Checkout Blocks
+
+= 2.3.6.2 (BETA) - 2026-08-17 =
+* Add logs with more content to improve debugging by support.
+
