@@ -34,9 +34,7 @@ class WC_Braspag_Logger
 				}
 			}
 
-			$settings = get_option('woocommerce_braspag_settings');
-
-			if (empty($settings) || isset($settings['logging']) && 'yes' !== $settings['logging']) {
+			if (!self::is_logging_enabled()) {
 				return;
 			}
 
@@ -75,6 +73,29 @@ class WC_Braspag_Logger
 	public static function log_client($message)
 	{
 		self::log("Client Log:\n" . $message);
+	}
+
+	/**
+	 * Verifica se o logging do plugin está habilitado nas configurações.
+	 * Mesma regra usada tanto para o log em disco quanto para o captador
+	 * de logs do navegador: respeita o checkbox "Debug" ("Log debug
+	 * messages") das configurações do gateway.
+	 *
+	 * @return bool
+	 */
+	public static function is_logging_enabled()
+	{
+		$settings = get_option('woocommerce_braspag_settings');
+
+		if (empty($settings)) {
+			return false;
+		}
+
+		if (isset($settings['debug']) && 'yes' !== $settings['debug']) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
