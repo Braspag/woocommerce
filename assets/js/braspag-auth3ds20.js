@@ -234,8 +234,13 @@ BraspagAuth3ds20.prototype = {
       creditcardExpirationYear = creditcardExpiration[1].replace(/\s/g, '');
     }
 
-    if (creditcardExpirationYear.length === 2) {
-      creditcardExpirationYear = '20' + creditcardExpirationYear;
+    // Sempre normaliza pra 4 dígitos: além do caso comum de 2 dígitos, cobre
+    // glitches de máscara/input que produzem tamanhos quebrados (ex.: "330"),
+    // pegando os últimos 2 dígitos como o ano de 2 dígitos real. Sem isso, a
+    // Cielo rejeita o enroll com "Invalid enrollment request" (400) sem
+    // apontar o campo culpado.
+    if (creditcardExpirationYear.length !== 4) {
+      creditcardExpirationYear = '20' + creditcardExpirationYear.slice(-2);
     }
 
     this.bpmpiRenderer.renderBpmpiData('bpmpi_cardnumber', false, jQuery('#braspag_creditcard-card-number').val().replace(/\s/g, ''));
@@ -261,8 +266,8 @@ BraspagAuth3ds20.prototype = {
       debitcardExpirationYear = debitcardExpiration[1].replace(/\s/g, '');
     }
 
-    if (debitcardExpirationYear.length === 2) {
-      debitcardExpirationYear = '20' + debitcardExpirationYear;
+    if (debitcardExpirationYear.length !== 4) {
+      debitcardExpirationYear = '20' + debitcardExpirationYear.slice(-2);
     }
 
     this.bpmpiRenderer.renderBpmpiData('bpmpi_cardnumber', false, jQuery('#braspag_debitcard-card-number').val().replace(/\s/g, ''));

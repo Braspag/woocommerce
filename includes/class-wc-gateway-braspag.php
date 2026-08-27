@@ -114,6 +114,22 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
      */
     public function get_braspag_auth3ds20_elements($fields)
     {
+        // O token precisa vir pronto AQUI, embutido no HTML de forma síncrona.
+        // O campo era renderizado sempre vazio, contando com braspag-auth3ds20.js
+        // para preenchê-lo via jQuery — mas esse driver é enfileirado como
+        // dependente da própria lib vendor (carrega DEPOIS dela), então a lib
+        // sempre lia o campo antes de ele ser populado, mandando
+        // "Authorization: Bearer " (vazio) para /v2/3ds/init, independente de
+        // head/footer. Gerar o valor aqui, na renderização PHP, elimina essa
+        // corrida de vez (mesmo padrão usado em payment_scripts_auth3ds20()).
+        $auth3ds_params = apply_filters(
+            'wc_gateway_braspag_pagador_auth3ds20_params',
+            array('isTestEnvironment' => $this->test_mode)
+        );
+
+        $bpmpi_token = (empty($auth3ds_params['isBpmpiEnabledCC']) === FALSE || empty($auth3ds_params['isBpmpiEnabledDC']) === FALSE)
+            ? $this->get_mpi_auth_token()
+            : '';
 
         $cart = WC()->cart;
 
@@ -134,7 +150,7 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
 
                 <div id="bpmpi_data_auth">
                     <input type="hidden" name="test_environment" class="test_environment" value="1"/>
-                    <input type="hidden" name="bpmpi_accesstoken" class="bpmpi_accesstoken"/>
+                    <input type="hidden" name="bpmpi_accesstoken" class="bpmpi_accesstoken" value="' . esc_attr($bpmpi_token) . '"/>
                     <input type="hidden" name="bpmpi_auth" class="bpmpi_auth" value="true"/>
                     <input type="hidden" name="bpmpi_auth_notifyonly" class="bpmpi_auth_notifyonly" value=""/>
                     <input type="hidden" name="bpmpi_auth_suppresschallenge" class="bpmpi_auth_suppresschallenge" value="false"/>
@@ -342,6 +358,7 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
         wp_enqueue_script('wc-braspag-antifraud-fingerprint');
 
         $this->payment_scripts_auth3ds20();
+        $this->maybe_enqueue_client_logger();
     }
 
     /**
@@ -469,7 +486,19 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
                 $auth3ds_params
             );
 
-            wp_register_script('wc-braspag-auth3ds20-lib', plugins_url('assets/js/vendor/auth3ds20/BP.Mpi.3ds20.lib.js', WC_BRASPAG_MAIN_FILE), array('wc-braspag-auth3ds20-conf'), WC_BRASPAG_VERSION, false);
+            // Carrega a biblioteca MPI diretamente do CDN da Cielo (não de um arquivo
+            // vendorizado local) e no footer, conforme a documentação oficial
+            // (docs.cielo.com.br/gateway/docs/3-implementando-o-script): scripts
+            // baixados/hospedados localmente pararam de funcionar em 31/07/2026,
+            // pois as URLs de autenticação antigas foram descontinuadas. Carregar
+            // no footer garante que o campo de token (.bpmpi_accesstoken) já
+            // exista no DOM quando a lib se auto-inicializa (renderizado por
+            // get_braspag_auth3ds20_elements()).
+            $auth3ds20_lib_url = $this->test_mode === TRUE
+                ? 'https://mpisandbox.braspag.com.br/Scripts/BP.Mpi.3ds20.min.js'
+                : 'https://mpi.braspag.com.br/Scripts/BP.Mpi.3ds20.min.js';
+
+            wp_register_script('wc-braspag-auth3ds20-lib', $auth3ds20_lib_url, array('wc-braspag-auth3ds20-conf'), '', true);
             wp_enqueue_script('wc-braspag-auth3ds20-lib');
 
             wp_register_script('wc-braspag-auth3ds20-renderer', plugins_url('assets/js/braspag-auth3ds20-renderer.js', WC_BRASPAG_MAIN_FILE), array(), WC_BRASPAG_VERSION, true);
@@ -477,6 +506,15 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
 
             wp_register_script('wc-braspag-auth3ds20', plugins_url('assets/js/braspag-auth3ds20.js', WC_BRASPAG_MAIN_FILE), array('wc-braspag-auth3ds20-conf', 'wc-braspag-auth3ds20-lib', 'wc-braspag-auth3ds20-renderer', 'wc-braspag'), WC_BRASPAG_VERSION, true);
             wp_enqueue_script('wc-braspag-auth3ds20');
+
+            // Otimizadores como o Cloudflare Rocket Loader convertem scripts para
+            // execução assíncrona própria (type="text/rocketscript"), o que não
+            // preserva a ordem de dependências declarada acima nem garante que o
+            // DOM (campo .bpmpi_accesstoken) já esteja pronto quando a lib MPI se
+            // auto-inicializa — causando "Bearer null" / 401 mesmo com o script no
+            // rodapé. `data-cfasync="false"` (convenção do próprio Rocket Loader)
+            // faz esses handles serem ignorados por ele e carregados normalmente.
+            add_filter('script_loader_tag', array($this, 'disable_cfasync_for_auth3ds20_scripts'), 10, 2);
 
             wp_localize_script(
                 'wc-braspag-auth3ds20',
@@ -490,6 +528,52 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
                 )
             );
         }
+    }
+
+    /**
+     * @param string $tag
+     * @param string $handle
+     * @return string
+     */
+    public function disable_cfasync_for_auth3ds20_scripts($tag, $handle)
+    {
+        $handles = array(
+            'wc-braspag-auth3ds20-conf',
+            'wc-braspag-auth3ds20-lib',
+            'wc-braspag-auth3ds20-renderer',
+            'wc-braspag-auth3ds20',
+        );
+
+        if (in_array($handle, $handles, TRUE) === FALSE) {
+            return $tag;
+        }
+
+        return str_replace(' src=', ' data-cfasync="false" src=', $tag);
+    }
+
+    /**
+     * Carrega o logger cliente no checkout se logging estiver habilitado.
+     * Captura eventos console.log/error/warn relacionados a MPI/3DS e os envia ao log do servidor.
+     *
+     * @return void
+     */
+    public function maybe_enqueue_client_logger()
+    {
+        if (is_checkout() === FALSE) {
+            return;
+        }
+
+        if (WC_Braspag_Logger::is_logging_enabled() === FALSE) {
+            return;
+        }
+
+        wp_register_script('wc-braspag-client-logger', plugins_url('assets/js/braspag-client-logger.js', WC_BRASPAG_MAIN_FILE), array(), WC_BRASPAG_VERSION, true);
+        wp_enqueue_script('wc-braspag-client-logger');
+
+        wp_localize_script('wc-braspag-client-logger', 'wc_braspag_client_log_params', array(
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce(WC_Braspag_Client_Logger::NONCE_ACTION),
+        ));
     }
 
     /**
@@ -720,9 +804,29 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
             } elseif (in_array($response->body->Payment->Status, ['0', '3', '13'])) {
                 /* translators: transaction id */
                 $order->update_status('antifraud_reject_order_status', sprintf(__('Braspag charge pending (Charge ID: %s).', 'woocommerce-braspag'), $response->body->Payment->PaymentId));
-                $velocityStatus = $response->body->Payment->VelocityAnalysis->ResultMessage ?? '';
-                $velocity = ($velocityStatus == 'Reject') ? 'VelocityAnalysis' : '';
-                $localized_message = __('Payment processing failed. | (%s) -', 'woocommerce-braspag', $velocity) . " " . $response->body->Payment->ProviderReturnMessage . " (Cod. " . $response->body->Payment->ProviderReturnCode . ").";
+
+                $reason_message = $response->body->Payment->ReasonMessage ?? '';
+                $fraud_status_description = $response->body->Payment->FraudAnalysis->StatusDescription ?? '';
+
+                // Status 0/3/13 cobre tanto recusa do provedor quanto aborto pela
+                // antifraude (Cybersource etc.) — casos distintos, sem ProviderReturnCode/
+                // Message quando é a antifraude que aborta (ReasonMessage=AbortedByFraud).
+                // Mostrar o motivo real evita "Payment processing failed. | () -  (Cod. )."
+                // vazio e sem sentido para o cliente.
+                if (empty($fraud_status_description) === FALSE || strpos($reason_message, 'Fraud') !== FALSE) {
+                    $localized_message = sprintf(
+                        __('Payment blocked by fraud analysis. | %s (%s).', 'woocommerce-braspag'),
+                        $fraud_status_description,
+                        $reason_message
+                    );
+                } else {
+                    $velocityStatus = $response->body->Payment->VelocityAnalysis->ResultMessage ?? '';
+                    $velocity = ($velocityStatus == 'Reject') ? 'VelocityAnalysis' : '';
+                    $provider_return_message = $response->body->Payment->ProviderReturnMessage ?? '';
+                    $provider_return_code = $response->body->Payment->ProviderReturnCode ?? '';
+                    $localized_message = sprintf(__('Payment processing failed. | (%s) -', 'woocommerce-braspag'), $velocity) . " " . $provider_return_message . " (Cod. " . $provider_return_code . ").";
+                }
+
                 $order->add_order_note($localized_message);
                 throw new WC_Braspag_Exception(print_r($response, true), $localized_message);
             }

@@ -482,6 +482,14 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway
      */
     public function get_mpi_auth_token()
     {
+        // Verifica cache da sessão para evitar gerar novo token em cada refresh do checkout (update_order_review)
+        if (function_exists('WC') === TRUE && WC()->session !== NULL) {
+            $cached_token = WC()->session->get('braspag_mpi_auth_token');
+            if (empty($cached_token) === FALSE) {
+                return $cached_token;
+            }
+        }
+
         WC_Braspag_Logger::log("Info: Begin processing Mpi Auth request.");
 
         $mpi_auth_token_request_builder = get_option('woocommerce_braspag_settings');
@@ -502,7 +510,35 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway
 
         WC_Braspag_Logger::log("Info: Begin processing Mpi Auth request:" . print_r($mpi_auth_token_response, true));
 
-        return $mpi_auth_token_response->body->access_token;
+        $mpi_auth_token = $mpi_auth_token_response->body->access_token;
+
+        // Armazena token em cache da sessão para evitar múltiplas requisições na mesma sessão de checkout.
+        // Só cacheia se o token vier realmente preenchido: cachear um valor vazio/inválido (ex.: numa
+        // falha transitória da API da Cielo) travaria a sessão inteira do checkout com um token vazio,
+        // já que a leitura do cache nunca tenta gerar um novo enquanto houver algo "cacheado".
+        if (empty($mpi_auth_token) === FALSE && function_exists('WC') === TRUE && WC()->session !== NULL) {
+            WC()->session->set('braspag_mpi_auth_token', $mpi_auth_token);
+        }
+
+        return $mpi_auth_token;
+    }
+
+    /**
+     * Limpa o token MPI cacheado na sessão. Deve ser chamado no início de cada
+     * tentativa de pagamento (process_payment): a documentação da Cielo exige um
+     * token novo para CADA autenticação 3DS ("For each 3DS authentication, it is
+     * necessary to obtain and provide a new access token") — reaproveitar entre
+     * tentativas distintas (ex.: reenvio após falha no mesmo checkout) não é
+     * permitido, mesmo com o cache de sessão evitando gerar tokens duplicados
+     * durante o carregamento/refresh da mesma página.
+     *
+     * @return void
+     */
+    public function invalidate_mpi_auth_token_cache()
+    {
+        if (function_exists('WC') === TRUE && WC()->session !== NULL) {
+            WC()->session->set('braspag_mpi_auth_token', NULL);
+        }
     }
 
     /**

@@ -15,6 +15,32 @@ class WC_Braspag_Logger
 	const WC_LOG_FILENAME = 'woocommerce-braspag';
 
 	/**
+	 * Verifica se logging está habilitado nas configurações do plugin.
+	 *
+	 * @return bool
+	 */
+	public static function is_logging_enabled()
+	{
+		$settings = get_option('woocommerce_braspag_settings');
+
+		// Mesmo campo checado por log() logo abaixo — o setting real gravado pelo
+		// admin é 'debug' ("Log debug messages"); 'logging' nunca existe no
+		// array salvo, então checar essa chave sempre retornava false e o
+		// client-logger.js nunca era enfileirado.
+		return empty($settings) === FALSE && isset($settings['debug']) === TRUE && 'yes' === $settings['debug'];
+	}
+
+	/**
+	 * Loga uma entrada enviada pelo navegador (console/erro JS) via AJAX.
+	 *
+	 * @param string $message
+	 */
+	public static function log_client($message)
+	{
+		self::log("Client Log:\n" . $message);
+	}
+
+	/**
 	 * @param $message
 	 * @param null $start_time
 	 * @param null $end_time
@@ -40,6 +66,8 @@ class WC_Braspag_Logger
 				return;
 			}
 
+			$env_line = self::get_env_debug_line($settings);
+
 			if (!is_null($start_time)) {
 
 				$formatted_start_time = date_i18n(get_option('date_format') . ' g:ia', $start_time);
@@ -47,12 +75,12 @@ class WC_Braspag_Logger
 				$formatted_end_time = date_i18n(get_option('date_format') . ' g:ia', $end_time);
 				$elapsed_time = round(abs($end_time - $start_time) / 60, 2);
 
-				$log_entry = "\n" . '====Braspag Version: ' . WC_BRASPAG_VERSION . '====' . "\n";
+				$log_entry = "\n" . '====Braspag Version: ' . WC_BRASPAG_VERSION . '====' . "\n" . $env_line;
 				$log_entry .= '====Start Log ' . $formatted_start_time . '====' . "\n" . $message . "\n";
 				$log_entry .= '====End Log ' . $formatted_end_time . ' (' . $elapsed_time . ')====' . "\n\n";
 
 			} else {
-				$log_entry = "\n" . '====Braspag Version: ' . WC_BRASPAG_VERSION . '====' . "\n";
+				$log_entry = "\n" . '====Braspag Version: ' . WC_BRASPAG_VERSION . '====' . "\n" . $env_line;
 				$log_entry .= '====Start Log====' . "\n" . $message . "\n" . '====End Log====' . "\n\n";
 
 			}
@@ -75,6 +103,73 @@ class WC_Braspag_Logger
         $sources[] = self::WC_LOG_FILENAME;
         return $sources;
     }
+
+	/**
+	 * Monta uma linha de diagnóstico de ambiente/config para o topo de cada
+	 * entrada de log — versões (PHP/WP/WC) e toggles principais do gateway,
+	 * pra não precisar pedir print de tela do admin toda vez que dá suporte.
+	 *
+	 * @param array|false $settings
+	 * @return string
+	 */
+	public static function get_env_debug_line($settings)
+	{
+		$settings = is_array($settings) === TRUE ? $settings : array();
+		$cc_settings = get_option('woocommerce_braspag_creditcard_settings');
+		$dc_settings = get_option('woocommerce_braspag_debitcard_settings');
+		$cc_settings = is_array($cc_settings) === TRUE ? $cc_settings : array();
+		$dc_settings = is_array($dc_settings) === TRUE ? $dc_settings : array();
+
+		$yn = function ($value) {
+			return 'yes' === $value ? 'yes' : 'no';
+		};
+
+		$auth3ds20_enabled = $yn($cc_settings['auth3ds20_mpi_is_active'] ?? '') === 'yes'
+			|| $yn($dc_settings['auth3ds20_mpi_is_active'] ?? '') === 'yes'
+			? 'yes' : 'no';
+
+		global $wp_version;
+
+		$wc_version = defined('WC_VERSION') === TRUE ? WC_VERSION : 'desconhecida';
+		$line = 'PHP: ' . PHP_VERSION . ' | WordPress: ' . $wp_version . ' | WooCommerce: ' . $wc_version . ' | Checkout: ' . self::get_checkout_type() . "\n";
+		$line .= 'SOP: ' . $yn($settings['silentpost_enabled'] ?? '')
+			. ' | Antifraude: ' . $yn($settings['antifraud_enabled'] ?? '')
+			. ' | VerifyCard: ' . $yn($settings['verifycard_enabled'] ?? '')
+			. ' | 3DS: ' . $auth3ds20_enabled
+			. ' | BinQuery: ' . $yn($settings['silentpost_binquery_enable'] ?? '')
+			. ' | Card+CardToken: ' . $yn($settings['silentpost_token_type'] ?? '')
+			. "\n";
+
+		return $line;
+	}
+
+	/**
+	 * Detecta se a página de checkout atual usa o bloco "Checkout" (Gutenberg,
+	 * renderização React/JS) ou o shortcode/formulário clássico — os dois
+	 * fluxos divergem bastante (hooks PHP clássicos não disparam do mesmo
+	 * jeito no Blocks), então saber qual está em uso evita diagnóstico às
+	 * cegas quando o suporte não sabe informar.
+	 *
+	 * @return string
+	 */
+	public static function get_checkout_type()
+	{
+		if (function_exists('has_block') === FALSE || function_exists('is_checkout') === FALSE) {
+			return 'desconhecido';
+		}
+
+		if (is_checkout() === FALSE) {
+			return 'n/a';
+		}
+
+		$checkout_page_id = function_exists('wc_get_page_id') === TRUE ? wc_get_page_id('checkout') : 0;
+
+		if ($checkout_page_id > 0 && has_block('woocommerce/checkout', $checkout_page_id) === TRUE) {
+			return 'blocks';
+		}
+
+		return 'classic';
+	}
 
 	/**
      * Ensure logs are eligible for remote logging.

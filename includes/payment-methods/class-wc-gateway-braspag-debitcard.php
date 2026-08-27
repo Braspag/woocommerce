@@ -209,6 +209,11 @@ class WC_Gateway_Braspag_DebitCard extends WC_Gateway_Braspag
      */
     public function process_payment($order_id, $retry = true, $previous_error = false, $use_order_source = false)
     {
+        // Garante um token MPI novo para esta tentativa de autenticação 3DS
+        // (a Cielo exige token novo por autenticação; o cache de sessão só
+        // evita duplicidade dentro do mesmo carregamento de página).
+        $this->invalidate_mpi_auth_token_cache();
+
         try {
             do_action('wc_gateway_braspag_pagador_debitcard_process_payment_before', $order_id, $retry, $previous_error, $use_order_source);
 
