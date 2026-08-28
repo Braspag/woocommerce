@@ -11,6 +11,27 @@
 	var FLUSH_DELAY = 3000;
 	var MAX_QUEUE = 25;
 
+	function stringifyArg(arg) {
+		if (typeof arg === 'string') {
+			return arg;
+		}
+		if (arg instanceof Error) {
+			return arg.message + (arg.stack ? '\n' + arg.stack : '');
+		}
+		if (typeof arg === 'object' && arg !== null) {
+			try {
+				return JSON.stringify(arg);
+			} catch (e) {
+				return String(arg);
+			}
+		}
+		return String(arg);
+	}
+
+	function formatArgs(args) {
+		return Array.prototype.map.call(args, stringifyArg).join(' ');
+	}
+
 	function enqueue(level, message) {
 		if (queue.length >= MAX_QUEUE) {
 			return;
@@ -50,16 +71,40 @@
 		}).catch(function () {});
 	}
 
+	// Prefixos usados pelo próprio vendor lib da Cielo ("[MPI] ...") e pelo
+	// nosso driver ("[BP-DEBUG] ..."). console.log é ruidoso demais para
+	// capturar por completo (jQuery, Cardinal/Forter fingerprinting, etc.),
+	// então só encaminhamos linhas que claramente pertencem ao fluxo MPI/3DS.
+	var MPI_LOG_PREFIXES = ['[MPI]', '[MPI-EVENT]', '[BP-DEBUG]'];
+
+	function isMpiLogMessage(message) {
+		for (var i = 0; i < MPI_LOG_PREFIXES.length; i++) {
+			if (message.indexOf(MPI_LOG_PREFIXES[i]) === 0) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	var originalLog = window.console.log;
 	var originalError = window.console.error;
 	var originalWarn = window.console.warn;
 
+	window.console.log = function () {
+		var message = formatArgs(arguments);
+		if (isMpiLogMessage(message)) {
+			enqueue('log', message);
+		}
+		return originalLog.apply(window.console, arguments);
+	};
+
 	window.console.error = function () {
-		enqueue('error', Array.prototype.slice.call(arguments).join(' '));
+		enqueue('error', formatArgs(arguments));
 		return originalError.apply(window.console, arguments);
 	};
 
 	window.console.warn = function () {
-		enqueue('warn', Array.prototype.slice.call(arguments).join(' '));
+		enqueue('warn', formatArgs(arguments));
 		return originalWarn.apply(window.console, arguments);
 	};
 

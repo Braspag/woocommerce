@@ -176,6 +176,17 @@ class WC_Braspag_Admin_Notices
 				/* translators: %1$s Payment method, %2$s List of supported currencies */
 				$this->add_admin_notice($method, 'notice notice-error', sprintf(__('%1$s is enabled - it requires store currency to be set to %2$s', 'woocommerce-braspag'), $method, implode(', ', $gateway->get_supported_currency())), true);
 			}
+
+			// A Cielo exige autenticação 3DS para transações de débito
+			// (docs.cielo.com.br/gateway/reference/debito-api: "A autenticação
+			// 3DS é obrigatória para as transações de débito."). Avisar quando
+			// o débito está habilitado sem o 3DS 2.2 ativo evita recusas em
+			// produção sem explicação aparente.
+			if ('DebitCard' === $method && 'yes' !== $gateway->get_option('auth3ds20_mpi_is_active', 'no')) {
+				$message = __('Braspag: o método de Débito está habilitado sem Authentication 3DS 2.2. A Cielo exige autenticação 3DS para transações de débito — habilite o 3DS 2.2 nas configurações de Débito para evitar recusas.', 'woocommerce-braspag');
+
+				$this->add_admin_notice('debitcard_missing_auth3ds20', 'notice notice-error', $message, true);
+			}
 		}
 	}
 

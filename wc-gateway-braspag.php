@@ -44,6 +44,24 @@ add_action('init', function () {
 });
 
 /**
+ * Alguns fluxos (ex.: integração com WooCommerce Blocks) instanciam as
+ * classes de gateway antes do hook 'init', o que faz o WordPress (6.7+)
+ * emitir o aviso `_load_textdomain_just_in_time` ao primeiro __()/_e() com o
+ * domínio 'woocommerce-braspag'. Em endpoints JSON (ex.: admin-ajax.php) esse
+ * aviso, quando ecoado (display_errors/WP_DEBUG_DISPLAY ligados), corrompe a
+ * resposta. Silenciar especificamente esse aviso para este domínio é o
+ * mecanismo oficial do WordPress para esse cenário (ainda fica registrado via
+ * a action 'doing_it_wrong_run' para quem depurar via debug.log).
+ */
+add_filter('doing_it_wrong_trigger_error', function ($trigger, $function_name, $message) {
+	if ('_load_textdomain_just_in_time' === $function_name && false !== strpos($message, 'woocommerce-braspag')) {
+		return false;
+	}
+
+	return $trigger;
+}, 10, 3);
+
+/**
  * Unschedule Token Cleanup on deactivation
  *
  * @return void
@@ -303,7 +321,9 @@ function wc_braspag_init()
 			require_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-exception.php';
 			require_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-logger.php';
 			require_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-helper.php';
+			require_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-3ds-return-codes.php';
 			require_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-client-logger.php';
+			require_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-auth-tokens-ajax.php';
 			include_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-payment-tokens.php';
 			include_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-pagador-api.php';
 			include_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-risk-api.php';

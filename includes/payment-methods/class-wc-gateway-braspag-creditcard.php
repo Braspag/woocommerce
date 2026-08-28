@@ -288,8 +288,8 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
 			</p>',
             'creditcard-type-field' => '<input type="hidden" id="' . esc_attr($this->id) . '-card-type" class="wc-credit-card-form-card-type " ' . $this->field_name('card-type') . ' />',
             'creditcard-type-card' => '<input type="hidden" id="' . esc_attr($this->id) . '-card-type-card" class="wc-credit-card-form-card-type-card ' . $sop_type_class . '" ' . $this->field_name('card-type-card') . ' value="creditCard" />',
-            'creditcard-card-token' => '<input type="hidden" id="' . esc_attr($this->id) . '-card-cardtoken" class="wc-credit-card-form-card-cardtoken" ' . $this->field_name('card-cardtoken') . '" />',
-            'creditcard-payment-token' => '<input type="hidden" id="' . esc_attr($this->id) . '-card-paymenttoken" class="wc-credit-card-form-card-paymenttoken" ' . $this->field_name('card-paymenttoken') . '" />'
+            'creditcard-card-token' => '<input type="hidden" id="' . esc_attr($this->id) . '-card-cardtoken" class="wc-credit-card-form-card-cardtoken" ' . $this->field_name('card-cardtoken') . ' />',
+            'creditcard-payment-token' => '<input type="hidden" id="' . esc_attr($this->id) . '-card-paymenttoken" class="wc-credit-card-form-card-paymenttoken" ' . $this->field_name('card-paymenttoken') . ' />'
         );
 
         $fields = apply_filters('wc_gateway_braspag_pagador_creditcard_elements_form_filter', $fields);
@@ -313,6 +313,41 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
                 <?php
 
                 do_action('wc_gateway_braspag_pagador_creditcard_elements_form_after', $this->id);
+    }
+
+    /**
+     * Registra no log quais funcionalidades do meio de pagamento estao ligadas/desligadas.
+     *
+     * @param int $order_id
+     * @return void
+     */
+    protected function log_feature_flags($order_id)
+    {
+        $braspag_main_settings = get_option('woocommerce_braspag_settings', array());
+
+        $on_off = static function ($value) {
+            return ('yes' === $value || true === $value || '1' === $value || 1 === $value) ? 'enabled' : 'disabled';
+        };
+
+        $card_token_enabled = ('yes' === $this->save_card) || ('yes' === $this->sop_tokenize);
+
+        $flags = array(
+            'SOP'             => $on_off($this->sop_enabled),
+            'Antifraude'      => $on_off($this->antifraud_enabled),
+            'VerifyCard'      => $on_off($this->verifycard_enabled),
+            '3DS'             => $on_off($this->auth3ds20_mpi_is_active),
+            'BinQuery'        => $on_off(isset($braspag_main_settings['silentpost_binquery_enable']) ? $braspag_main_settings['silentpost_binquery_enable'] : 'no'),
+            'Card+CardToken'  => $on_off($card_token_enabled ? 'yes' : 'no'),
+        );
+
+        $parts = array();
+        foreach ($flags as $feature => $state) {
+            $parts[] = "$feature: $state";
+        }
+
+        WC_Braspag_Logger::log(
+            "Info: Feature flags for order $order_id -> " . implode(' | ', $parts)
+        );
     }
 
     /**
@@ -346,6 +381,8 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
             WC_Braspag_Logger::log(
                 "Info: Begin processing payment for order $order_id for the amount of {$order->get_total()}"
             );
+
+            $this->log_feature_flags($order_id);
 
             $request_builder = $this->braspag_pagador_request_builder($this->id, $order, $default_request_params);
 
@@ -1016,8 +1053,13 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
             "Xid" => $checkout->get_value('bpmpi_auth_xid'),
             "Eci" => $checkout->get_value('bpmpi_auth_eci'),
             "Version" => $checkout->get_value('bpmpi_auth_version'),
-            "ReferenceID" => $checkout->get_value('bpmpi_auth_reference_id')
+            "ReferenceId" => $checkout->get_value('bpmpi_auth_reference_id'),
+            "DataOnly" => 'true' === (string) $checkout->get_value('bpmpi_auth_notifyonly')
         ];
+
+        // TEMP DEBUG (remover apos investigacao do caso ExternalAuthentication nulo): captura o que
+        // realmente chegou no POST do checkout para os campos MPI, para comparar com o console do navegador.
+        WC_Braspag_Logger::log('DEBUG MPI CreditCard - order ' . $order->get_id() . ' - failure_type=' . $failureType . ' - raw=' . wp_json_encode($payment_data_auth3ds20_data));
 
         $payment_data_external_authentication_data = apply_filters(
             'wc_gateway_braspag_pagador_request_creditcard_payment_auth3ds20_builder',

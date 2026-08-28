@@ -11,17 +11,54 @@ BraspagAuth3ds20.prototype = {
     }
 
     this.bpmpiRenderer = new BpmpiRenderer();
+    // O script MPI vendorizado lê a classe/campo `bpmpi_accesstoken` de
+    // forma síncrona assim que carrega (ele é impresso no <head>, antes do
+    // nosso próprio driver rodar) — por isso o token vem embutido no HTML
+    // via wp_localize_script, e não buscado por AJAX (buscar de forma
+    // assíncrona causa corrida: o script tenta inicializar com o campo
+    // ainda vazio e falha com 401/MPI900 "Invalid Access Token").
     this.bpmpiToken = braspag_auth3ds20_params.bpmpiToken;
     this.isBpmpiEnabledCC = braspag_auth3ds20_params.isBpmpiEnabledCC;
     this.isBpmpiEnabledDC = braspag_auth3ds20_params.isBpmpiEnabledDC;
     this.isBpmpiMasterCardNotifyOnlyEnabledCC = braspag_auth3ds20_params.isBpmpiMasterCardNotifyOnlyEnabledCC;
     this.isBpmpiMasterCardNotifyOnlyEnabledDC = braspag_auth3ds20_params.isBpmpiMasterCardNotifyOnlyEnabledDC;
     this.isTestEnvironment = braspag_auth3ds20_params.isTestEnvironment;
+    this.isSopEnabled = !!braspag_auth3ds20_params.isSopEnabled;
     this.paymentType = '';
     this.transactionStarted = false;
-    jQuery('.bpmpi_accesstoken').val(this.bpmpiToken);
 
     this.registerPaymentMethodEvents();
+  },
+
+  // Busca sob demanda o token de autenticação MPI/3DS via AJAX, em vez de
+  // recebê-lo embutido no HTML (evita exposição do token em texto puro).
+  fetchAuthTokens: function () {
+    if (this._authTokensPromise) {
+      return this._authTokensPromise;
+    }
+
+    var self = this;
+
+    this._authTokensPromise = fetch(braspag_auth3ds20_params.authTokensAjaxUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        action: braspag_auth3ds20_params.authTokensAction,
+        nonce: braspag_auth3ds20_params.authTokensNonce,
+      }),
+    })
+      .then(function (response) { return response.json(); })
+      .then(function (json) {
+        if (json && json.success && json.data) {
+          self.bpmpiToken = json.data.bpmpiToken || null;
+        }
+        return json;
+      })
+      .catch(function (error) {
+        console.error('Erro ao obter token de autenticação 3DS:', error);
+      });
+
+    return this._authTokensPromise;
   },
 
   startTransaction: async function () {
@@ -37,10 +74,12 @@ BraspagAuth3ds20.prototype = {
 
     braspag.blockElement(checkout_payment_element);
 
-    self.bpmpiRenderer.renderBpmpiData('bpmpi_auth', false, self.isBpmpiEnabled());
-    self.bpmpiRenderer.renderBpmpiData('bpmpi_accesstoken', false, self.bpmpiToken);
-
     try {
+      await self.fetchAuthTokens();
+
+      self.bpmpiRenderer.renderBpmpiData('bpmpi_auth', false, self.isBpmpiEnabled());
+      self.bpmpiRenderer.renderBpmpiData('bpmpi_accesstoken', false, self.bpmpiToken);
+
       await bpmpi_load();
     } finally {
       braspag.unBlockElement(checkout_payment_element);
@@ -52,7 +91,13 @@ BraspagAuth3ds20.prototype = {
 
   getAuthenticateData: async function () {
 
+    // TEMP DEBUG (remover apos investigacao do caso ExternalAuthentication nulo)
+    console.log('[BP-DEBUG] getAuthenticateData: antes de bpmpi_authenticate()', Date.now());
+
     await bpmpi_authenticate();
+
+    // TEMP DEBUG (remover apos investigacao do caso ExternalAuthentication nulo)
+    console.log('[BP-DEBUG] getAuthenticateData: depois de bpmpi_authenticate()', Date.now());
 
     var returnData = {
       'bpmpiAuthFailureType': jQuery('.bpmpi_auth_failure_type').val(),
@@ -64,7 +109,7 @@ BraspagAuth3ds20.prototype = {
     };
 
     if (this.isTestEnvironment) {
-      console.log(returnData);
+      console.log('[BP-DEBUG] getAuthenticateData: returnData', returnData);
     }
 
     return returnData;
@@ -79,7 +124,7 @@ BraspagAuth3ds20.prototype = {
     this.isBpmpiEnabledDC = false;
 
     if (this.isTestEnvironment) {
-      console.log("'Bpmpi' disabled.");
+      console.log("[BP-DEBUG] 'Bpmpi' disabled.");
     }
 
     return;
@@ -113,6 +158,19 @@ BraspagAuth3ds20.prototype = {
       let paymentForm = jQuery(form);
 
       jQuery('.bpmpi_auth_failure_type').change(function () {
+        // TEMP DEBUG (remover apos investigacao do caso ExternalAuthentication nulo): este e o
+        // handler que efetivamente dispara o submit do checkout assim que bpmpi_auth_failure_type
+        // recebe valor. Registramos aqui o estado de TODOS os campos bpmpi_auth_* nesse instante,
+        // para confirmar se cavv/xid/eci/version/reference_id ja estao preenchidos quando o submit ocorre.
+        console.log('[BP-DEBUG] change:bpmpi_auth_failure_type disparado', Date.now(), {
+          failureType: jQuery('.bpmpi_auth_failure_type').val(),
+          cavv: jQuery('.bpmpi_auth_cavv').val(),
+          xid: jQuery('.bpmpi_auth_xid').val(),
+          eci: jQuery('.bpmpi_auth_eci').val(),
+          version: jQuery('.bpmpi_auth_version').val(),
+          referenceId: jQuery('.bpmpi_auth_reference_id').val()
+        });
+
         if (self.isBpmpiEnabled()) {
           self.bpmpiRenderer.createInputHiddenElement(
             paymentForm, 'payment_authentication_failure_type', 'authentication_failure_type', ''
@@ -146,6 +204,38 @@ BraspagAuth3ds20.prototype = {
           jQuery('.authentication_reference_id').val(jQuery('.bpmpi_auth_reference_id').val());
         }
 
+        // Ordem documentada pela Cielo: 3DS autentica primeiro (dados acima já
+        // preenchidos em ExternalAuthentication), SOP tokeniza o cartão depois
+        // e só então o form é enviado — com os dois conjuntos de dados juntos.
+        if (self.isSopEnabled) {
+          // SOP está habilitado nas configurações: o cartão SÓ pode ser enviado
+          // como PaymentToken/CardToken tokenizado pelo SOP. Se o objeto `sop`
+          // não estiver disponível (ex.: braspag-authsop.js não carregou porque
+          // Prototype.js veio depois dele), submeter agora mandaria a transação
+          // sem dado de cartão e a Braspag responderia 127. Aborta o submit e
+          // deixa o erro visível em vez de falhar silenciosamente.
+          if (typeof sop === 'undefined' || typeof sop.isSopEnabled !== 'function' || !sop.isSopEnabled()) {
+            console.error('[BP-DEBUG] SOP habilitado mas indisponível — submit abortado para evitar transação sem cartão (Braspag 127).', Date.now());
+            paymentForm.removeClass('processing').unblock();
+            jQuery(document.body).trigger('checkout_error');
+            jQuery('.woocommerce-notices-wrapper:first').html(
+              '<ul class="woocommerce-error" role="alert"><li>' +
+              'Não foi possível preparar os dados do cartão. Recarregue a página e tente novamente.' +
+              '</li></ul>'
+            );
+            return false;
+          }
+
+          // TEMP DEBUG (remover apos investigacao do caso ExternalAuthentication nulo)
+          console.log('[BP-DEBUG] 3DS concluido, acionando SOP antes do submit', Date.now());
+
+          sop.processSop(paymentForm);
+          return true;
+        }
+
+        // TEMP DEBUG (remover apos investigacao do caso ExternalAuthentication nulo)
+        console.log('[BP-DEBUG] paymentForm.submit() chamado', Date.now());
+
         paymentForm.submit();
         return true;
       });
@@ -161,13 +251,22 @@ BraspagAuth3ds20.prototype = {
         return true;
       }
 
+      // TEMP DEBUG (remover apos investigacao do caso ExternalAuthentication nulo)
+      console.log('[BP-DEBUG] placeOrder: inicio da cadeia MPI', Date.now(), self.paymentType);
+
       await self.startTransaction();
       await self.renderData();
       await self.getAuthenticateData();
 
+      // TEMP DEBUG (remover apos investigacao do caso ExternalAuthentication nulo): se este log
+      // aparecer DEPOIS do "paymentForm.submit() chamado" acima, o submit disparou antes do fim
+      // da cadeia MPI (confirma a hipotese de corrida). Se aparecer ANTES, o submit ja aguardou
+      // a cadeia completa e o problema esta na propria gravacao dos campos pelo SDK bpmpi.
+      console.log('[BP-DEBUG] placeOrder: fim da cadeia MPI (getAuthenticateData resolvido)', Date.now());
+
     } catch (e) {
       if (self.isTestEnvironment) {
-        console.log(e);
+        console.log('[BP-DEBUG] placeOrder: erro na cadeia MPI', e);
       }
 
       self.disableBpmpi();

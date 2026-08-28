@@ -1,0 +1,22 @@
+includes:
+    - vendor/szepeviktor/phpstan-wordpress/extension.neon
+
+parameters:
+    level: 4
+
+    paths:
+        - includes
+        - src
+        - woocommerce-braspag.php
+
+    excludePaths:
+        - vendor
+        - node_modules
+        - tests
+        - assets
+
+    treatPhpDocTypesAsCertain: false
+    checkMissingIterableValueType: false
+
+    bootstrapFiles:
+        - phpstan-bootstrap.php

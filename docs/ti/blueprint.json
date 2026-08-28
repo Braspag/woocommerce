@@ -1,0 +1,39 @@
+{
+  "$schema": "https://playground.wordpress.net/blueprint-schema.json",
+  "meta": {
+    "title": "Braspag for WooCommerce — Ambiente Dev",
+    "author": "Equipe Braspag",
+    "description": "Sobe WordPress + WooCommerce + ECFB e ativa o plugin Braspag for WooCommerce em modo sandbox para desenvolvimento/demonstração."
+  },
+  "landingPage": "/wp-admin/admin.php?page=wc-settings&tab=checkout",
+  "preferredVersions": { "php": "7.4", "wp": "6.8" },
+  "features": { "networking": true },
+  "login": true,
+  "plugins": [
+    "woocommerce",
+    "woocommerce-extra-checkout-fields-for-brazil"
+  ],
+  "steps": [
+    {
+      "step": "installPlugin",
+      "pluginData": {
+        "resource": "url",
+        "url": "REPLACE_WITH_URL_OR_USE_BUNDLED_ZIP_OF_woocommerce-braspag-dev"
+      },
+      "options": { "activate": true },
+      "ifAlreadyInstalled": "overwrite"
+    },
+    {
+      "step": "setSiteOptions",
+      "options": {
+        "blogname": "Loja Demo Braspag",
+        "woocommerce_currency": "BRL",
+        "woocommerce_default_country": "BR"
+      }
+    },
+    {
+      "step": "runPHP",
+      "code": "<?php require '/wordpress/wp-load.php'; update_option('woocommerce_braspag_settings', array( 'environment' => 'sandbox', 'merchant_id' => '00000000-0000-0000-0000-000000000000', 'merchant_key' => 'REPLACE_WITH_SANDBOX_KEY', 'sop_enabled' => 'yes' ));"
+    }
+  ]
+}

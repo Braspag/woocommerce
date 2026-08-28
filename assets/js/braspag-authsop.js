@@ -1,3 +1,12 @@
+// Prototype.js precisa estar carregado antes deste arquivo (dependência
+// declarada em wp_register_script('wc-braspag-authsop', ...)). Se por algum
+// motivo não estiver, falha de forma visível em vez de estourar um
+// ReferenceError silencioso que deixaria o global `sop` indefinido e faria
+// o checkout enviar a transação sem dado de cartão (Braspag 127).
+if (typeof Class === 'undefined' || typeof Class.create !== 'function') {
+  console.error('[SOP] Prototype.js não carregado — SOP indisponível nesta página.');
+}
+
 var Sop = Class.create();
 
 Sop.prototype = {
@@ -7,10 +16,11 @@ Sop.prototype = {
     }
 
     this.bpEnvironment = braspag_authsop_params.bpEnvironment;
-    this.bpOauthToken = braspag_authsop_params.bpOauthToken;
+    this.bpOauthToken = null;
     this.bpMerchantId = braspag_authsop_params.bpMerchantId;
     this.bpMerchantIdSOP = braspag_authsop_params.bpMerchantIdSOP;
-    this.bpAccessToken = braspag_authsop_params.bpAccessToken;
+    this.bpAccessToken = null;
+    this._authTokensPromise = null;
 
     if (["yes", true].includes(braspag_authsop_params.verifyCard)) {
       this.enableVerifyCardCheck = true;
@@ -35,12 +45,14 @@ Sop.prototype = {
     this.debitCardMethod = document.querySelector("#payment_method_braspag_debitcard");
     this.sop_enable = braspag_authsop_params.enable || false;
   },
-  processSop: function (form) {
+  processSop: async function (form) {
     try {
       if (this.testMode) {
         console.log('Modo Test Habilitado');
         this.logger();
       }
+
+      await this.fetchAuthTokens();
 
       this.registerCardNumberSync();
       this.registerCardExpirySync();
@@ -49,6 +61,37 @@ Sop.prototype = {
     } catch (error) {
       console.error('Erro ao processar SOP:', error);
     }
+  },
+  // Busca sob demanda os tokens de OAuth/acesso do SOP via AJAX, em vez de
+  // recebê-los embutidos no HTML (evita exposição do token em texto puro).
+  fetchAuthTokens: function () {
+    if (this._authTokensPromise) {
+      return this._authTokensPromise;
+    }
+
+    var self = this;
+
+    this._authTokensPromise = fetch(braspag_authsop_params.authTokensAjaxUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        action: braspag_authsop_params.authTokensAction,
+        nonce: braspag_authsop_params.authTokensNonce,
+      }),
+    })
+      .then(function (response) { return response.json(); })
+      .then(function (json) {
+        if (json && json.success && json.data) {
+          self.bpOauthToken = json.data.bpOauthToken || null;
+          self.bpAccessToken = json.data.bpAccessToken || null;
+        }
+        return json;
+      })
+      .catch(function (error) {
+        console.error('Erro ao obter tokens de autenticação SOP:', error);
+      });
+
+    return this._authTokensPromise;
   },
   bpInit: function (form) {
     if (this.creditCardMethod && this.creditCardMethod.checked) {

@@ -225,12 +225,43 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway
         $response = WC_Braspag_Pagador_API::request($request_data, $api);
 
         if (!empty($response->errors)) {
+            $this->log_classified_3ds_errors($response->errors, $request_data);
+
             return $response;
         }
 
         WC_Braspag_Logger::log("Braspag Pagador Payment Requested for order {$request_data['body']['MerchantOrderId']}");
 
         return $response;
+    }
+
+    /**
+     * Loga cada erro retornado pela API classificado segundo a taxonomia de
+     * return codes 3DS da Cielo (docs.cielo.com.br/gateway/docs/return-codes-3ds),
+     * para que o suporte não precise adivinhar se o caso é de retry, validação,
+     * configuração de merchant ou autenticação obrigatória.
+     *
+     * @param mixed $errors
+     * @param array $request_data
+     */
+    protected function log_classified_3ds_errors($errors, $request_data)
+    {
+        $order_id = isset($request_data['body']['MerchantOrderId']) ? $request_data['body']['MerchantOrderId'] : 'desconhecido';
+
+        foreach ((array) $errors as $error) {
+            $code = is_object($error) && isset($error->Code) ? $error->Code : (is_array($error) && isset($error['Code']) ? $error['Code'] : null);
+            $message = is_object($error) && isset($error->Message) ? $error->Message : (is_array($error) && isset($error['Message']) ? $error['Message'] : '');
+
+            if (null === $code) {
+                continue;
+            }
+
+            $category = WC_Braspag_3ds_Return_Codes::classify($code);
+
+            WC_Braspag_Logger::log(
+                "Braspag Pagador Payment error for order {$order_id} - code={$code} category={$category} message={$message}"
+            );
+        }
     }
 
     /**
@@ -489,6 +520,24 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway
      */
     public function get_mpi_auth_token()
     {
+        // Memoizado na sessão do checkout: tanto payment_scripts_auth3ds20()
+        // quanto get_braspag_auth3ds20_elements() precisam do MESMO token, e
+        // ambos podem ser chamados em requisições PHP diferentes (a segunda
+        // roda de novo a cada refresh de update_order_review do WooCommerce).
+        // Sem esse cache, cada refresh gera um novo token na Cielo, e o token
+        // mais antigo (já entregue ao script vendor) é invalidado antes de
+        // ser usado, causando "Invalid Access Token" (401) em /v2/3ds/init.
+        // TTL curto: só precisa sobreviver à duração de um checkout.
+        $session_key = 'braspag_mpi_auth_token';
+
+        if (function_exists('WC') && WC()->session) {
+            $cached_token = WC()->session->get($session_key);
+
+            if (!empty($cached_token)) {
+                return $cached_token;
+            }
+        }
+
         WC_Braspag_Logger::log("Info: Begin processing Mpi Auth request.");
 
         $mpi_auth_token_request_builder = get_option('woocommerce_braspag_settings');
@@ -509,7 +558,16 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway
 
         WC_Braspag_Logger::log("Info: Begin processing Mpi Auth request:" . print_r($mpi_auth_token_response, true));
 
-        return $mpi_auth_token_response->body->access_token;
+        $cached_token = $mpi_auth_token_response->body->access_token;
+
+        if (function_exists('WC') && WC()->session) {
+            // Expira bem antes do token na Cielo (86399s) — só precisa cobrir
+            // o tempo de um checkout; evita reusar um token velho em sessões
+            // de carrinho longas/abandonadas.
+            WC()->session->set($session_key, $cached_token);
+        }
+
+        return $cached_token;
     }
 
     /**

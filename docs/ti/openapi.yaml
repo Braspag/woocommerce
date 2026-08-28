@@ -1,0 +1,166 @@
+openapi: 3.0.3
+info:
+  title: Braspag for WooCommerce — API exposta pelo plugin
+  version: "2.3.6.3"
+  description: >
+    Este contrato documenta os endpoints HTTP que o próprio plugin EXPÕE (inbound),
+    principalmente o webhook de notificação assíncrona da Braspag e o endpoint AJAX
+    de merchant validation do Apple Pay (E-Wallets, spec aprovada).
+    As chamadas de SAÍDA do plugin para a Braspag (Pagador/MPI/Risk/OAuth) são
+    integrações com uma API de terceiros e não são de propriedade deste plugin;
+    seus contratos resumidos aparecem na seção "APIs externas consumidas" abaixo,
+    apenas como referência — a documentação oficial é da Braspag/Cielo.
+servers:
+  - url: https://SUA-LOJA.com.br/wc-api
+    description: Produção (endpoint legado WooCommerce wc-api)
+  - url: https://SUA-LOJA.com.br/wp-json
+    description: WordPress REST API (endpoints AJAX/REST auxiliares)
+
+tags:
+  - name: Webhook
+    description: Notificações assíncronas enviadas pela Braspag
+  - name: EWallet
+    description: Endpoints auxiliares para E-Wallets (spec aprovada, implementação pendente)
+
+paths:
+  /braspag_webhook:
+    post:
+      tags: [Webhook]
+      summary: Recebe notificação de mudança de status de uma transação Braspag
+      description: >
+        Handler: `WC_Braspag_Webhook_Handler`. Registrado via hook
+        `woocommerce_api_braspag_webhook`. Usado para confirmar PIX e Boleto
+        (pagamentos assíncronos) e para propagar chargebacks, reversões parciais
+        (ChangeType 25) e alertas de fraude.
+      security:
+        - webhookHmac: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookNotification'
+            examples:
+              statusChange:
+                summary: Confirmação de pagamento PIX (ChangeType 1)
+                value:
+                  PaymentId: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+                  ChangeType: 1
+              partialRefund:
+                summary: Reversão parcial (ChangeType 25)
+                value:
+                  PaymentId: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+                  ChangeType: 25
+      responses:
+        '200':
+          description: Notificação processada (ou ignorada por idempotência — pedido já em status final)
+        '400':
+          description: Corpo inválido — `PaymentId` ou `ChangeType` ausentes/malformados
+        '401':
+          description: Assinatura HMAC inválida (quando `webhook_secret` está configurado)
+
+  /braspag/v1/ewallet/apple-pay/validate-merchant:
+    post:
+      tags: [EWallet]
+      summary: Valida a sessão de merchant do Apple Pay (proxy seguro)
+      description: >
+        **Spec aprovada, endpoint ainda não implementado no código atual.**
+        Deve existir para que o browser do comprador não precise conhecer
+        credenciais de merchant validation da Apple diretamente — o plugin
+        atua como proxy autenticado. Ver `ewallet-sdd.md` (RA-EW-03 em
+        `02-ARD.md`).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [validationURL]
+              properties:
+                validationURL:
+                  type: string
+                  format: uri
+                  description: URL de validação fornecida pelo `ApplePaySession` no browser
+      responses:
+        '200':
+          description: Sessão de merchant validada, payload repassado ao browser
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Merchant session opaca retornada pela Apple, repassada sem modificação
+        '400':
+          description: validationURL ausente ou inválida
+        '502':
+          description: Falha ao validar junto à Apple/Braspag
+
+components:
+  securitySchemes:
+    webhookHmac:
+      type: apiKey
+      in: header
+      name: X-Braspag-Signature
+      description: >
+        HMAC-SHA256 do corpo da requisição, calculado com `webhook_secret`
+        configurado no admin. Se `webhook_secret` não estiver configurado,
+        o handler opera em modo permissivo (loga aviso, não bloqueia) — ver
+        RA-SEG-05 em `02-ARD.md`.
+
+  schemas:
+    WebhookNotification:
+      type: object
+      required: [PaymentId, ChangeType]
+      properties:
+        PaymentId:
+          type: string
+          format: uuid
+          description: Identificador da transação na Braspag
+        ChangeType:
+          type: integer
+          description: Tipo de evento notificado
+          enum: [1, 2, 3, 4, 5, 7, 8, 25]
+      example:
+        PaymentId: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+        ChangeType: 1
+
+  x-changeTypeReference:
+    "1": Mudança de status da transação
+    "2": Recorrência criada
+    "3": Resultado de antifraude
+    "4": Recorrência
+    "5": Cancelamento negado
+    "7": Chargeback
+    "8": Alerta de fraude
+    "25": Reversão parcial
+
+x-external-apis-consumed:
+  description: >
+    Resumo de referência das APIs Braspag consumidas pelo plugin (outbound).
+    Consulte a documentação oficial da Braspag/Cielo para o contrato completo.
+  Pagador:
+    baseUrlSandbox: https://apisandbox.braspag.com.br
+    baseUrlProd: https://api.braspag.com.br
+    operations:
+      - method: POST
+        path: /v2/sales
+        purpose: Criar venda (create_sale)
+      - method: PUT
+        path: /v2/sales/{paymentId}/capture
+        purpose: Capturar venda autorizada
+      - method: PUT
+        path: /v2/sales/{paymentId}/void
+        purpose: Cancelar/estornar venda
+      - method: GET
+        path: /v2/sales/{paymentId}
+        purpose: Consultar transação
+  MPI:
+    baseUrlSandbox: https://authsandbox.braspag.com.br
+    purpose: Autenticação 3DS 2.2 (bpmpi.js)
+    auth: Bearer (OAuth 2.0)
+  Risk:
+    baseUrlSandbox: https://risksandbox.braspag.com.br
+    purpose: Antifraude via CyberSource/ClearSale
+    auth: Bearer (OAuth 2.0)
+  OAuth:
+    baseUrlSandbox: https://authsandbox.braspag.com.br/oauth2/token
+    grantType: client_credentials
