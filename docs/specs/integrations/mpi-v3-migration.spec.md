@@ -271,6 +271,25 @@ sequenceDiagram
   browser só conhece o `ReferenceId`, que já recebia para o `MPI.init()`, e o devolve
   no `enroll` e no `validate` para identificar a sessão.
 
+### Regras de configuração impostas no save (server-side)
+
+- **SOP × 3DS são mutuamente exclusivos** (regra de negócio confirmada com o cliente):
+  ver `enforce_sop_3ds_mutual_exclusivity()`.
+- **Débito exige 3DS.** "Todas as transações de débito devem ser autenticadas por
+  exigência dos bancos emissores e bandeiras"
+  (docs.cielo.com.br/ecommerce-cielo/docs/cartão-de-debito). Habilitar o gateway de
+  débito com o 3DS desligado é configuração inválida: `enforce_3ds_required_on_debit()`
+  recusa o save, devolve `enabled` para `no` e explica o motivo no admin. Sem isso, o
+  débito transacionava com `Authenticate = false` e sem `ExternalAuthentication` — foi
+  o que aconteceu no pedido 240 do log de 26/09. Roda **depois** da regra SOP×3DS: se
+  aquela desligou o 3DS do débito, esta desliga o débito.
+- **O 3DS roda apenas no método em que está ativo.** `isBpmpiEnabled()` (OU dos dois
+  métodos) decide o que é de página — enfileirar o SDK e imprimir os campos
+  `.bpmpi_v3_*`; quem decide se a autenticação roda é
+  `isBpmpiEnabledForSelectedMethod()`. Usar o OU para as duas coisas fazia o débito
+  disparar `init`/`enroll` só porque o crédito estava habilitado, e o builder do
+  Pagador descartava o resultado.
+
 ## 🔒 Considerações de Segurança
 
 - `access_token` nunca exposto ao frontend; só o `token` (JWT) retornado por `init` é seguro para expor.

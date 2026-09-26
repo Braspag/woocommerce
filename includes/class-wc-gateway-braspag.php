@@ -510,6 +510,48 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
         // débito), então a regra correta depende de qual delas está sendo
         // salva no momento ($this->id).
         $this->enforce_sop_3ds_mutual_exclusivity();
+
+        // Roda DEPOIS da regra SOP×3DS: se aquela desligou o 3DS do débito
+        // (porque o SOP está ativo), esta desliga o próprio débito, já que
+        // débito sem 3DS não é uma configuração válida.
+        $this->enforce_3ds_required_on_debit();
+    }
+
+    /**
+     * Débito exige autenticação: "Todas as transações de débito devem ser
+     * autenticadas por exigência dos bancos emissores e bandeiras"
+     * (docs.cielo.com.br/ecommerce-cielo/docs/cartão-de-debito).
+     *
+     * Sem esta regra era possível manter o gateway de débito habilitado com
+     * o 3DS desligado, e as transações seguiam sem autenticação — com
+     * `Authenticate = false` e sem `ExternalAuthentication`, exatamente o
+     * que o log de 26/09 mostrou no pedido 240. Como a configuração é
+     * inválida na origem, o save é recusado: o débito volta para
+     * desabilitado e o admin recebe o motivo.
+     *
+     * @return void
+     */
+    protected function enforce_3ds_required_on_debit()
+    {
+        if ('braspag_debitcard' !== $this->id) {
+            return;
+        }
+
+        if ('yes' !== $this->get_option('enabled')) {
+            return;
+        }
+
+        if ('yes' === $this->get_option('auth3ds20_mpi_is_active')) {
+            return;
+        }
+
+        $this->update_option('enabled', 'no');
+
+        if (class_exists('WC_Admin_Settings')) {
+            WC_Admin_Settings::add_error(
+                __('O Cartão de Débito não pôde ser habilitado porque a autenticação 3DS está desativada. Todas as transações de débito devem ser autenticadas, por exigência dos bancos emissores e das bandeiras — habilite o 3DS nesta mesma tela antes de habilitar o Cartão de Débito.', 'woocommerce-braspag')
+            );
+        }
     }
 
     /**
