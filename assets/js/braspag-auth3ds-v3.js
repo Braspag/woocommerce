@@ -548,7 +548,11 @@ BraspagAuth3dsV3.prototype = {
       return Promise.resolve(true);
     }
 
-    if (typeof MPI === 'undefined' || !MPI.challenge || !challengeData || !challengeData.acsUrl) {
+    // acsUrl e transactionId são ambos obrigatórios para o Cardinal; sem
+    // qualquer um deles não há challenge possível.
+    if (typeof MPI === 'undefined' || !MPI.challenge || !challengeData ||
+      !challengeData.acsUrl || !challengeData.transactionId) {
+      this.log('challenge sem acsUrl/transactionId', challengeData);
       this.setFailureType('1');
 
       return Promise.resolve(true);
@@ -571,7 +575,7 @@ BraspagAuth3dsV3.prototype = {
           Payload: challengeData.payload,
           TransactionId: challengeData.transactionId,
         },
-        this.buildChallengeOrder()
+        this.buildChallengeOrder(challengeData.transactionId)
       );
     } catch (error) {
       this.failPending('pendingValidation', error);
@@ -597,11 +601,19 @@ BraspagAuth3dsV3.prototype = {
   /**
    * Objeto `order` exigido pelo 2º parâmetro de `MPI.challenge()`.
    *
+   * O `transactionId` é obrigatório aqui, em `OrderDetails.TransactionId`
+   * (via `withTransaction()`): o Cardinal monta a Authenticate Request a
+   * partir do order, e sem esse campo rejeita com "Error Validating
+   * Message, Transaction Id is Empty" (ErrorNumber 91003) — passar o
+   * TransactionId apenas no challengeData não basta.
+   *
    * Não usar `withCartItem()`: `MPIHelpers.getOrderBuilder()` devolve um
    * singleton compartilhado cujo array `Cart` acumula a cada push, então
    * chamadas repetidas contaminariam o pedido seguinte.
+   *
+   * @param {string} transactionId TransactionId devolvido pelo Challenge do enroll.
    */
-  buildChallengeOrder: function () {
+  buildChallengeOrder: function (transactionId) {
     if (typeof MPIHelpers === 'undefined') {
       return {};
     }
@@ -614,6 +626,7 @@ BraspagAuth3dsV3.prototype = {
         MPIHelpers.Constants.getCurrencyISO().BRL,
         MPIHelpers.Constants.getOrderChannels().ECOMMERCE
       )
+      .withTransaction(transactionId)
       .withCard(card.cardNumber, card.cardExpirationMonth, card.cardExpirationYear)
       .build();
   },
