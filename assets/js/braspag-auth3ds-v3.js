@@ -58,6 +58,7 @@ BraspagAuth3dsV3.prototype = {
     this.orderNumber = '';
     this.mpiLoaded = false;
     this.dataOnly = false;
+    this.sdkErrored = false;
 
     // Deferreds dos callbacks do SDK: o MPI v3 não aceita callbacks por
     // chamada -- os eventos chegam pelos handlers registrados no config de
@@ -158,6 +159,7 @@ BraspagAuth3dsV3.prototype = {
 
       onError: function (error) {
         self.log('MPI onError', error);
+        self.sdkErrored = true;
         self.reportSdkError(error);
 
         var pendingError = new Error('MPI onError');
@@ -230,12 +232,19 @@ BraspagAuth3dsV3.prototype = {
         return;
       }
 
+      var paymentType = method === debit ? 'debitcard' : 'creditcard';
+
       if (method.checked) {
+        // Define o paymentType já na seleção (e não só no submit): o
+        // `cardNumberReader` do SDK monta o seletor do campo de cartão a
+        // partir dele, e sem isso lia `#braspag_-card-number` (nulo).
+        self.paymentType = paymentType;
         self.startSession();
       }
 
       method.addEventListener('change', function () {
         if (method.checked) {
+          self.paymentType = paymentType;
           self.startSession();
         }
       });
@@ -457,6 +466,15 @@ BraspagAuth3dsV3.prototype = {
 
     return this.startSession()
       .then(function () {
+        // Na abertura da sessão o comprador ainda não digitou o cartão, então
+        // o `updateCard()` daquele momento não tinha nada para enviar
+        // ("Card number is empty. Skipping update."). Aqui, no submit, o PAN
+        // já existe -- o SDK orienta reexecutar o updateCard antes do enroll
+        // sempre que o cartão mudar.
+        if (typeof MPI !== 'undefined' && MPI.updateCard) {
+          MPI.updateCard();
+        }
+
         var browserInfo = (typeof MPIHelpers !== 'undefined') ? MPIHelpers.getBrowserInfo() : {};
         return self.ajaxEnroll(browserInfo);
       })
@@ -536,10 +554,25 @@ BraspagAuth3dsV3.prototype = {
       return Promise.resolve(true);
     }
 
-    this.pendingValidation = this.createDeferred(this.CHALLENGE_TIMEOUT_MS, 'MPI.onValidationRequired');
+    // Guarda a referência local: o `MPI.challenge()` abaixo pode disparar
+    // `onError` de forma sincrona, e o handler zera `this.pendingValidation`
+    // — acessar `this.pendingValidation.promise` depois disso estouraria.
+    var deferred = this.createDeferred(this.CHALLENGE_TIMEOUT_MS, 'MPI.onValidationRequired');
+    this.pendingValidation = deferred;
+    this.sdkErrored = false;
 
     try {
-      MPI.challenge(challengeData, this.buildChallengeOrder());
+      // O Cardinal exige as chaves em PascalCase — com `acsUrl` minúsculo ele
+      // rejeita com "AcsUrl is a required field" (ErrorNumber 10004). Os
+      // exemplos em minúsculo da documentação da Cielo não funcionam.
+      MPI.challenge(
+        {
+          AcsUrl: challengeData.acsUrl,
+          Payload: challengeData.payload,
+          TransactionId: challengeData.transactionId,
+        },
+        this.buildChallengeOrder()
+      );
     } catch (error) {
       this.failPending('pendingValidation', error);
       this.log('MPI.challenge falhou', error);
@@ -548,14 +581,14 @@ BraspagAuth3dsV3.prototype = {
       return Promise.resolve(true);
     }
 
-    return this.pendingValidation.promise
+    return deferred.promise
       .then(function (transactionId) {
         return self.runValidate(transactionId || challengeData.transactionId);
       })
       .catch(function (error) {
-        // Timeout (comprador abandonou) ou onError do SDK.
+        // Erro do SDK (onError) => '4'; timeout/abandono do comprador => '1'.
         self.log('challenge não concluído', error);
-        self.setFailureType('1');
+        self.setFailureType(self.sdkErrored ? '4' : '1');
 
         return true;
       });
