@@ -212,8 +212,36 @@ BraspagAuth3dsV3.prototype = {
     );
   },
 
+  /**
+   * O 3DS está habilitado em ALGUM dos dois métodos? Usado por braspag.js
+   * para decidir se o placeOrder passa pelo fluxo de autenticação, e pelo
+   * PHP para decidir se enfileira o SDK e imprime os campos `.bpmpi_v3_*`
+   * (ambos são decisões de página, não do método selecionado).
+   */
   isBpmpiEnabled: function () {
     return this.isBpmpiEnabledCC || this.isBpmpiEnabledDC;
+  },
+
+  /**
+   * O 3DS está habilitado para o método que o comprador selecionou?
+   *
+   * `isBpmpiEnabled()` é um OU dos dois métodos, então usá-lo para decidir
+   * se roda a autenticação fazia o 3DS rodar no débito só porque o crédito
+   * estava habilitado (e vice-versa): o log de 26/09 mostra init + enroll
+   * disparados num débito com `auth3ds20_mpi_is_active = no`. Como o builder
+   * do Pagador respeita a configuração do método, o resultado era descartado
+   * de todo jeito — chamadas à Cielo e latência no checkout sem nenhum efeito.
+   */
+  isBpmpiEnabledForSelectedMethod: function () {
+    if ('debitcard' === this.paymentType) {
+      return this.isBpmpiEnabledDC;
+    }
+
+    if ('creditcard' === this.paymentType) {
+      return this.isBpmpiEnabledCC;
+    }
+
+    return false;
   },
 
   log: function () {
@@ -270,7 +298,7 @@ BraspagAuth3dsV3.prototype = {
       return Promise.resolve(true);
     }
 
-    if (!this.isBpmpiEnabled() || typeof MPI === 'undefined') {
+    if (!this.isBpmpiEnabledForSelectedMethod() || typeof MPI === 'undefined') {
       return Promise.resolve(false);
     }
 
@@ -463,7 +491,7 @@ BraspagAuth3dsV3.prototype = {
       return Promise.resolve(true);
     }
 
-    if (!this.isBpmpiEnabled()) {
+    if (!this.isBpmpiEnabledForSelectedMethod()) {
       return Promise.resolve(true);
     }
 
