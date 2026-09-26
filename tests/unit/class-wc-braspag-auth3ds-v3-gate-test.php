@@ -75,24 +75,6 @@ class WC_Braspag_Auth3ds_V3_Gate_Test extends TestCase
         $this->assertTrue(WC_Braspag_Auth3ds_V3_Gate::should_block('9', $settings));
     }
 
-    /**
-     * failure_type '3' (DataOnly) não tem case dedicado no switch (mesmo
-     * comportamento do v2 original) e cai no `default` fail-closed — o
-     * override de "produção + provedor não-Cielo" explicitamente NÃO se
-     * aplica a ele (`$failure_type !== '3'`), mas isso é irrelevante aqui
-     * porque o `default` já bloqueia antes de chegar no override.
-     */
-    public function test_failure_type_3_sem_case_dedicado_cai_no_default_fail_closed()
-    {
-        $settings = $this->base_settings(array(
-            'authorize_on_failure' => 'yes',
-            'test_mode' => false,
-            'is_cielo' => false,
-        ));
-
-        $this->assertTrue(WC_Braspag_Auth3ds_V3_Gate::should_block('3', $settings));
-    }
-
     public function test_producao_nao_cielo_forca_bloqueio_em_outros_failure_types()
     {
         $settings = $this->base_settings(array(
@@ -102,5 +84,89 @@ class WC_Braspag_Auth3ds_V3_Gate_Test extends TestCase
         ));
 
         $this->assertTrue(WC_Braspag_Auth3ds_V3_Gate::should_block('1', $settings));
+    }
+
+    /**
+     * Data Only (failure_type '3') não é falha: antes caía no `default`
+     * fail-closed e bloqueava toda transação Data Only.
+     */
+    public function test_data_only_nunca_bloqueia()
+    {
+        $settings = $this->base_settings(array(
+            'authorize_on_error' => 'no',
+            'authorize_on_failure' => 'no',
+            'authorize_on_unenrolled' => 'no',
+            'authorize_on_unsupported_brand' => 'no',
+        ));
+
+        $this->assertFalse(WC_Braspag_Auth3ds_V3_Gate::should_block('3', $settings));
+    }
+
+    public function test_data_only_nao_bloqueia_nem_em_producao_fora_da_cielo()
+    {
+        $settings = $this->base_settings(array(
+            'test_mode' => false,
+            'is_cielo' => false,
+        ));
+
+        $this->assertFalse(WC_Braspag_Auth3ds_V3_Gate::should_block('3', $settings));
+    }
+
+    /** ---------------------------------------------------------------
+     * build_external_authentication() — nó enviado ao Pagador
+     * --------------------------------------------------------------- */
+
+    protected function auth_values($overrides = array())
+    {
+        return array_merge(
+            array(
+                'cavv' => 'AJkBBkhgQQAAAE4gSEJydQAAAAA=',
+                'xid' => 'XID-123',
+                'eci' => '05',
+                'version' => '2.2.0',
+                'reference_id' => 'ref-abc',
+                'data_only' => false,
+            ),
+            $overrides
+        );
+    }
+
+    public function test_autenticado_envia_cavv_xid_eci_version_e_reference_id()
+    {
+        $node = WC_Braspag_Auth3ds_V3_Gate::build_external_authentication($this->auth_values(), true);
+
+        $this->assertSame('AJkBBkhgQQAAAE4gSEJydQAAAAA=', $node['Cavv']);
+        $this->assertSame('XID-123', $node['Xid']);
+        $this->assertSame('05', $node['Eci']);
+        $this->assertSame('2.2.0', $node['Version']);
+        // "ID" maiúsculo: é o nome documentado pela Cielo para o Pagador.
+        $this->assertSame('ref-abc', $node['ReferenceID']);
+        $this->assertArrayNotHasKey('DataOnly', $node);
+    }
+
+    /**
+     * BDD-3DS-013 / INV-007: prosseguir sem autenticação não pode afirmar
+     * autenticação — o Cavv (criptograma que comunica liability shift) fica
+     * de fora, mas o Eci é preservado (RN-3DS-008/BDD-3DS-012).
+     */
+    public function test_nao_autenticado_preserva_eci_mas_omite_cavv_e_xid()
+    {
+        $node = WC_Braspag_Auth3ds_V3_Gate::build_external_authentication($this->auth_values(), false);
+
+        $this->assertSame('05', $node['Eci']);
+        $this->assertSame('2.2.0', $node['Version']);
+        $this->assertSame('ref-abc', $node['ReferenceID']);
+        $this->assertArrayNotHasKey('Cavv', $node);
+        $this->assertArrayNotHasKey('Xid', $node);
+    }
+
+    public function test_data_only_adiciona_flag_booleana()
+    {
+        $node = WC_Braspag_Auth3ds_V3_Gate::build_external_authentication(
+            $this->auth_values(array('data_only' => true)),
+            true
+        );
+
+        $this->assertTrue($node['DataOnly']);
     }
 }

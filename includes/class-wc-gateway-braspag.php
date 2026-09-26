@@ -137,6 +137,7 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
                 <input type="hidden" name="bpmpi_v3_eci" class="bpmpi_v3_eci" value=""/>
                 <input type="hidden" name="bpmpi_v3_version" class="bpmpi_v3_version" value=""/>
                 <input type="hidden" name="bpmpi_v3_reference_id" class="bpmpi_v3_reference_id" value=""/>
+                <input type="hidden" name="bpmpi_v3_data_only" class="bpmpi_v3_data_only" value=""/>
             </div>
             ';
     }

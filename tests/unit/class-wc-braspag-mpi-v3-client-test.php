@@ -301,6 +301,53 @@ class WC_Braspag_Mpi_V3_Client_Test extends TestCase
     }
 
     /** ---------------------------------------------------------------
+     * Classificação de códigos de retorno (BDD-3DS-028 a 034)
+     * --------------------------------------------------------------- */
+
+    /**
+     * @dataProvider provider_codigos_de_retorno
+     */
+    public function test_classify_error_mapeia_codigos_documentados($code, $expected)
+    {
+        $this->assertSame($expected, WC_Braspag_Mpi_V3_Client::classify_error($code));
+    }
+
+    public function provider_codigos_de_retorno()
+    {
+        return array(
+            'campo obrigatorio ausente' => array('101', 'invalid_request'),
+            'campo invalido' => array('102', 'invalid_field'),
+            'falha tecnica 150' => array('150', 'technical'),
+            'falha tecnica 151' => array('151', 'technical'),
+            'timeout 152' => array('152', 'technical'),
+            'merchant invalido' => array('234', 'configuration'),
+            'bandeira sem autenticacao' => array('MPI600', 'not_supported'),
+            'challenge obrigatorio nao executado' => array('MPI601', 'not_authenticated'),
+            'erro inesperado 900' => array('MPI900', 'unexpected'),
+            'erro inesperado 901' => array('MPI901', 'unexpected'),
+            'erro inesperado 902' => array('MPI902', 'unexpected'),
+            'codigo desconhecido cai em unexpected' => array('9999', 'unexpected'),
+            'case-insensitive' => array('mpi601', 'not_authenticated'),
+        );
+    }
+
+    public function test_classify_error_body_extrai_e_classifica_a_lista_de_erros()
+    {
+        $body = json_decode(json_encode(array(
+            array('Code' => '101', 'Message' => 'orderNumber is required'),
+            array('Code' => 'MPI600', 'Message' => 'brand not supported'),
+        )));
+
+        $classified = WC_Braspag_Mpi_V3_Client::classify_error_body($body);
+
+        $this->assertCount(2, $classified);
+        $this->assertSame('101', $classified[0]['code']);
+        $this->assertSame('invalid_request', $classified[0]['classification']);
+        $this->assertSame('MPI600', $classified[1]['code']);
+        $this->assertSame('not_supported', $classified[1]['classification']);
+    }
+
+    /** ---------------------------------------------------------------
      * Story 1.2 — logging seguro (3DS-10/3DS-11)
      * --------------------------------------------------------------- */
 

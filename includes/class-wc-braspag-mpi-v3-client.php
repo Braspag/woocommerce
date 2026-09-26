@@ -317,7 +317,11 @@ class WC_Braspag_Mpi_V3_Client
         $decoded_body = !empty($raw_body) ? json_decode($raw_body) : null;
 
         if ($status === 400) {
-            self::log_redacted("{$api}: erro 400", array('status' => $status, 'body' => $decoded_body));
+            self::log_redacted("{$api}: erro 400", array(
+                'status' => $status,
+                'body' => $decoded_body,
+                'classification' => self::classify_error_body($decoded_body),
+            ));
 
             throw new WC_Braspag_Exception(
                 "MPI v3 {$api}: HTTP 400 - requisição inválida.",
@@ -383,6 +387,67 @@ class WC_Braspag_Mpi_V3_Client
         }
 
         return __('The 3DS authentication request is invalid. Please review the order and card data.', 'woocommerce-braspag');
+    }
+
+    /**
+     * Classifica os códigos de retorno documentados pela Cielo em categorias
+     * (BDD-3DS-028 a 034). Usado apenas para enriquecer o log técnico e a
+     * decisão de tratamento — a mensagem ao comprador continua genérica
+     * (BDD-3DS-039).
+     *
+     * `configuration` nunca deve ser objeto de retentativa automática com a
+     * mesma configuração (BDD-3DS-031). Retentativa em geral está fora de
+     * escopo enquanto DF-008 do BDD não for decidido: um retry no `init`
+     * criaria uma nova sessão 3DS (novo access_token).
+     *
+     * @param string|int $code
+     * @return string invalid_request|invalid_field|technical|configuration|not_supported|not_authenticated|unexpected
+     */
+    public static function classify_error($code)
+    {
+        $map = array(
+            '101' => 'invalid_request',
+            '102' => 'invalid_field',
+            '150' => 'technical',
+            '151' => 'technical',
+            '152' => 'technical',
+            '234' => 'configuration',
+            'MPI600' => 'not_supported',
+            'MPI601' => 'not_authenticated',
+            'MPI900' => 'unexpected',
+            'MPI901' => 'unexpected',
+            'MPI902' => 'unexpected',
+        );
+
+        $key = strtoupper(trim((string) $code));
+
+        return isset($map[$key]) ? $map[$key] : 'unexpected';
+    }
+
+    /**
+     * Extrai os códigos de retorno de um corpo de erro da API para
+     * classificá-los (o corpo vem como lista de `{Code, Message}`).
+     *
+     * @param mixed $decoded_body
+     * @return array<int, array{code:string, classification:string}>
+     */
+    public static function classify_error_body($decoded_body)
+    {
+        $errors = array();
+        $items = is_array($decoded_body) ? $decoded_body : array($decoded_body);
+
+        foreach ($items as $error) {
+            if (!is_object($error) || !isset($error->Code)) {
+                continue;
+            }
+
+            $errors[] = array(
+                'code' => (string) $error->Code,
+                'classification' => self::classify_error($error->Code),
+            );
+        }
+
+        return $errors;
     }
 
     /**

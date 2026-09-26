@@ -161,9 +161,12 @@ class WC_Braspag_Mpi_V3_Ajax
 
             // A resposta real do init usa PascalCase (ReferenceId/Token) —
             // ler em camelCase devolvia valores vazios para o MPI.init().
+            // O orderNumber vai junto porque o JS precisa dele para montar o
+            // objeto `order` de MPI.challenge().
             wp_send_json_success(array(
                 'referenceId' => isset($response->ReferenceId) ? $response->ReferenceId : '',
                 'token' => isset($response->Token) ? $response->Token : '',
+                'orderNumber' => $order_number,
             ));
         } catch (WC_Braspag_Exception $e) {
             WC_Braspag_Logger::log('MPI v3 init (ajax): ' . $e->getMessage());
@@ -210,6 +213,7 @@ class WC_Braspag_Mpi_V3_Ajax
             $card_expiration_month = isset($_POST['cardExpirationMonth']) ? preg_replace('/\D+/', '', wp_unslash($_POST['cardExpirationMonth'])) : '';
             $card_expiration_year = isset($_POST['cardExpirationYear']) ? preg_replace('/\D+/', '', wp_unslash($_POST['cardExpirationYear'])) : '';
             $card_payment_method = isset($_POST['cardPaymentMethod']) ? sanitize_text_field(wp_unslash($_POST['cardPaymentMethod'])) : '';
+            $card_brand = isset($_POST['cardBrand']) ? sanitize_text_field(wp_unslash($_POST['cardBrand'])) : '';
 
             if ('' === $card_number) {
                 wp_send_json_error(array('message' => __('Missing card data.', 'woocommerce-braspag')), 400);
@@ -244,11 +248,31 @@ class WC_Braspag_Mpi_V3_Ajax
                 $payload['card']['paymentMethod'] = $card_payment_method;
             }
 
+            // Data Only: modo "somente notificação" — frictionless, sem
+            // challenge e sem liability shift. Só se aplica a Mastercard e
+            // Visa; nas demais bandeiras faz fallback silencioso para o 3DS
+            // normal, sem bloquear a venda.
+            $data_only = self::should_use_data_only($card_brand, $card_payment_method);
+
+            if ($data_only) {
+                $payload['authNotifyOnly'] = true;
+            }
+
             $payload = apply_filters('wc_gateway_braspag_mpi_v3_enroll_payload', $payload);
 
             $response = WC_Braspag_Mpi_V3_Client::enroll($payload, $settings, $access_token);
 
-            wp_send_json_success(self::extract_authentication_data($response));
+            $data = self::extract_authentication_data($response);
+            $data['dataOnly'] = $data_only;
+
+            if ($data_only && '2' === $data['status']) {
+                // INV-003/BDD-3DS-018: Data Only nunca deveria abrir
+                // challenge. O driver JS também não exibe o desafio nesse
+                // caso; registramos para diagnóstico.
+                WC_Braspag_Logger::log('MPI v3 enroll (ajax): challenge retornado em transação Data Only (anomalia).');
+            }
+
+            wp_send_json_success($data);
         } catch (WC_Braspag_Exception $e) {
             WC_Braspag_Logger::log('MPI v3 enroll (ajax): ' . $e->getMessage());
             wp_send_json_error(array('message' => $e->getLocalizedMessage()), 400);
@@ -319,6 +343,43 @@ class WC_Braspag_Mpi_V3_Ajax
     }
 
     /**
+     * Bandeiras que suportam Data Only, conforme a documentação da Cielo
+     * (docs.cielo.com.br/ecommerce-cielo/docs/data-only): apenas Mastercard
+     * e Visa. Os valores batem com o que `assets/js/braspag.js` grava no
+     * campo de card-type.
+     *
+     * @var string[]
+     */
+    protected static $data_only_brands = array('master', 'visa');
+
+    /**
+     * Data Only só é aplicado quando a configuração está ativa E a bandeira
+     * suporta o modo. Em bandeira não suportada (Elo, Amex, etc.) faz
+     * fallback para o 3DS normal em vez de bloquear a venda.
+     *
+     * @param string $card_brand Bandeira detectada no checkout ('Visa', 'Master', 'Elo'...).
+     * @param string $payment_method 'debit' para débito; qualquer outro valor usa crédito.
+     * @return bool
+     */
+    protected static function should_use_data_only($card_brand, $payment_method = 'credit')
+    {
+        $option = 'debit' === $payment_method
+            ? 'woocommerce_braspag_debitcard_settings'
+            : 'woocommerce_braspag_creditcard_settings';
+
+        $gateway_settings = get_option($option, array());
+        $enabled = isset($gateway_settings['auth3ds20_mpi_mastercard_notify_only'])
+            ? $gateway_settings['auth3ds20_mpi_mastercard_notify_only']
+            : 'no';
+
+        if ('yes' !== $enabled) {
+            return false;
+        }
+
+        return in_array(strtolower(trim((string) $card_brand)), self::$data_only_brands, true);
+    }
+
+    /**
      * Normaliza a resposta de `3ds/enroll` ou `3ds/validate` para o formato
      * que o JS consome. O corpo real da Cielo usa chaves PascalCase e
      * objetos aninhados (`Status`, `Authentication.{Cavv,Xid,Eci,Version}`,
@@ -336,12 +397,18 @@ class WC_Braspag_Mpi_V3_Ajax
         $status = isset($response->Status) ? (string) $response->Status : '';
         $auth = isset($response->Authentication) ? $response->Authentication : null;
 
+        $reason = isset($response->Reason) ? $response->Reason : null;
+
         $data = array(
             'status' => $status,
             'cavv' => $auth && isset($auth->Cavv) ? $auth->Cavv : '',
             'xid' => $auth && isset($auth->Xid) ? $auth->Xid : '',
             'eci' => $auth && isset($auth->Eci) ? $auth->Eci : '',
             'version' => $auth && isset($auth->Version) ? $auth->Version : '',
+            // Código de retorno ('100' = Success) — usado pelo JS para
+            // distinguir um Data Only concluído com sucesso (que também vem
+            // com Status=0) de um Status=0 de fato não autenticado.
+            'reasonCode' => $reason && isset($reason->Code) ? (string) $reason->Code : '',
         );
 
         if ('2' === $status && isset($response->Challenge)) {

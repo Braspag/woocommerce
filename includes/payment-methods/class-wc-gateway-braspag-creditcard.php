@@ -926,6 +926,7 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
         }
 
         $failureType = (string) $checkout->get_value('bpmpi_v3_failure_type');
+        $authenticated = true;
 
         if ($failureType !== '' && $failureType !== '0') {
             $cardType = (string) $checkout->get_value('braspag_creditcard-card-type');
@@ -944,17 +945,28 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
             ));
 
             if ($block === false) {
-                return $payment_data;
+                // Prossegue sem autenticação: preserva o Eci devolvido pela
+                // Cielo (RN-3DS-008/BDD-3DS-012), mas sem Cavv/Xid. Se não há
+                // nem Eci, não há nada de útil para enviar.
+                if ('' === (string) $checkout->get_value('bpmpi_v3_eci')) {
+                    return $payment_data;
+                }
+
+                $authenticated = false;
             }
         }
 
-        $payment_data_auth3ds20_data = [
-            "Cavv" => $checkout->get_value('bpmpi_v3_cavv'),
-            "Xid" => $checkout->get_value('bpmpi_v3_xid'),
-            "Eci" => $checkout->get_value('bpmpi_v3_eci'),
-            "Version" => $checkout->get_value('bpmpi_v3_version'),
-            "ReferenceID" => $checkout->get_value('bpmpi_v3_reference_id')
-        ];
+        $payment_data_auth3ds20_data = WC_Braspag_Auth3ds_V3_Gate::build_external_authentication(
+            [
+                'cavv' => $checkout->get_value('bpmpi_v3_cavv'),
+                'xid' => $checkout->get_value('bpmpi_v3_xid'),
+                'eci' => $checkout->get_value('bpmpi_v3_eci'),
+                'version' => $checkout->get_value('bpmpi_v3_version'),
+                'reference_id' => $checkout->get_value('bpmpi_v3_reference_id'),
+                'data_only' => '' !== (string) $checkout->get_value('bpmpi_v3_data_only'),
+            ],
+            $authenticated
+        );
 
         $payment_data_external_authentication_data = apply_filters(
             'wc_gateway_braspag_pagador_request_creditcard_payment_auth3ds20_builder',

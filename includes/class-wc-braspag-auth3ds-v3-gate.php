@@ -35,6 +35,52 @@ if (!defined('ABSPATH')) {
 class WC_Braspag_Auth3ds_V3_Gate
 {
     /**
+     * Monta o nó `Payment.ExternalAuthentication` enviado ao Pagador,
+     * compartilhado entre crédito e débito.
+     *
+     * Nomes de campo conforme a documentação da Cielo (`ReferenceID` com "ID"
+     * maiúsculo, `DataOnly` booleano) — ver
+     * docs.cielo.com.br/ecommerce-cielo/docs/{autorizacao-autenticacao,data-only}.
+     *
+     * Quando a transação NÃO foi autenticada (a loja optou por prosseguir via
+     * `auth3ds20_mpi_authorize_on_*`), o `Eci` continua sendo enviado — a
+     * Cielo o devolve mesmo com `Status=0` e o adquirente usa esse indicador
+     * (RN-3DS-008 / BDD-3DS-012) —, mas `Cavv` e `Xid` são omitidos: o Cavv é
+     * o criptograma que comunica autenticação/liability shift, e enviá-lo numa
+     * transação não autenticada afirmaria algo falso (BDD-3DS-013 / INV-007).
+     *
+     * @param array $values {
+     *     @type string $cavv
+     *     @type string $xid
+     *     @type string $eci
+     *     @type string $version
+     *     @type string $reference_id
+     *     @type bool   $data_only
+     * }
+     * @param bool $authenticated
+     * @return array
+     */
+    public static function build_external_authentication(array $values, $authenticated)
+    {
+        $node = array(
+            'Eci' => isset($values['eci']) ? $values['eci'] : '',
+            'Version' => isset($values['version']) ? $values['version'] : '',
+            'ReferenceID' => isset($values['reference_id']) ? $values['reference_id'] : '',
+        );
+
+        if ($authenticated) {
+            $node['Cavv'] = isset($values['cavv']) ? $values['cavv'] : '';
+            $node['Xid'] = isset($values['xid']) ? $values['xid'] : '';
+        }
+
+        if (!empty($values['data_only'])) {
+            $node['DataOnly'] = true;
+        }
+
+        return $node;
+    }
+
+    /**
      * Decide se o pedido deve ser bloqueado (impedido de prosseguir sem
      * `ExternalAuthentication`/com falha) para um dado `failure_type`.
      *
@@ -85,6 +131,13 @@ class WC_Braspag_Auth3ds_V3_Gate
                 break;
             case '5':
                 $block = ('no' === $settings['authorize_on_unsupported_brand']);
+                break;
+            case '3':
+                // Data Only não é falha: é um fluxo frictionless concluído
+                // com sucesso, só sem liability shift (RN-3DS-012). Sem este
+                // case o código caía no `default` fail-closed e bloqueava
+                // toda transação Data Only.
+                $block = false;
                 break;
             default:
                 // 3DS-08: código de falha desconhecido/não mapeado — bloqueia

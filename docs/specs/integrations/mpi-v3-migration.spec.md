@@ -67,6 +67,42 @@ Como efeito colateral, o `orderNumber` não precisa ser único para a API aceita
 
 **Fluxo validado end-to-end no sandbox:** cartão `4000000000002701` → `enroll` devolve `Status=1` com `Authentication.{Cavv,Eci=05,Xid,Version}` completo (sem necessidade de `validate`); cartão `4000000000002503` → `enroll` devolve `Status=2` com `Challenge.{AcsUrl,Pareq,TransactionId}` e o `validate` (mesmo token + `transactionId`) é aceito com 200. No `Status=0` a Cielo ainda devolve o `Eci`, que o driver JS agora preenche antes de deixar o gate decidir sobre autorizar ou não.
 
+**Contrato REAL do SDK client-side (`Scripts/V3/mpi.js`) — baixado e lido (8 KB, não minificado), 2026-09-26:**
+
+```js
+MPI.load(config)                      // 1 argumento; TODOS os callbacks vão no config
+MPI.init(referenceId, initToken)      // sem callback
+MPI.updateCard()                      // sem callback; lê o PAN via config.cardNumberReader()
+MPI.challenge(challengeData, order)   // 2º parâmetro é o ORDER, não callbacks
+```
+
+Chaves do config: `Environment` (`"SDB"`/`"PRD"` — qualquer outra coisa cai no default `"PRD"`), `Debug`, `cardNumberReader`, `onLoadComplete`, `onReady`, `onValidationRequired`, `onError`.
+
+A primeira versão do driver chamava `MPI.load(config, callback)` e aninhava `MPI.init(..., cb)`/`MPI.updateCard(cb)` dentro desse callback. O SDK **ignora silenciosamente** o 2º argumento de `load`, então a cadeia inteira nunca executava: `startSession()` nunca resolvia e o `3ds/enroll` nunca era chamado (sintoma observado em staging: log com `init` e nada depois, terminando em `#MPI4`). Detalhes que o SDK impõe:
+
+- `onLoadComplete` só dispara na **primeira** carga (`MPI.load()` faz early-return no flag interno `_loaded`), então numa retentativa não se pode esperar o evento de novo.
+- `onValidationRequired({TransactionId})` dispara para `SUCCESS`, `NOACTION` **e** `FAILURE` — receber o evento não significa autenticado, então sempre se chama o `validate` e o backend decide (BDD-3DS-026/027).
+- `onError` entrega `{ReturnCode, ReturnMessage, ...}` com códigos `MPI901`/`MPI902`.
+- `MPIHelpers.getOrderBuilder()` devolve um **singleton compartilhado** cujo array `Cart` acumula a cada `push` — não usar `withCartItem()` no fluxo do challenge.
+- Timeout de challenge: 5 minutos (DF-005 do BDD, decidido nesta rodada).
+
+**Data Only — comportamento confirmado no sandbox (2026-09-26):**
+
+| Cartão | Bandeira | Resultado |
+|---|---|---|
+| `5200000000002805` | Mastercard | `Status=0`, `Reason.Code=100`, `Challenge=null`, `Eci=04`, Cavv presente |
+| `4000000000002024` | Visa | `Status=0`, `Reason.Code=100`, `Challenge=null`, `Eci=07`, Cavv presente |
+
+Pontos não óbvios:
+- Data Only responde **`Status=0`**, não 1 — mas com `Reason.Code=100` (Success) e sem challenge. É um fluxo frictionless concluído, apenas sem liability shift (RN-3DS-012). Tratá-lo pelo ramo de "não autenticado" faria o gate bloquear a venda, então o driver distingue os dois casos pelo `reasonCode`.
+- `failure_type '3'` (DataOnly) não tinha `case` no switch de `WC_Braspag_Auth3ds_V3_Gate::should_block()` e caía no `default` fail-closed — **bloqueava toda transação Data Only**. Corrigido com um case explícito não-bloqueante.
+- O `Cavv` **é** enviado em autorizações Data Only (a doc do Pagador o exige justamente "para transações autenticadas pelo emissor/bandeira ou autorizações Data Only"); quem comunica a ausência de liability shift é o `DataOnly: true`.
+- Ativação: `authNotifyOnly: true` no `3ds/enroll`, e `ExternalAuthentication.DataOnly: true` na autorização. Só Mastercard e Visa suportam; em outras bandeiras o plugin faz fallback silencioso para o 3DS normal, sem bloquear a venda.
+
+**`ReferenceID` (com "ID" maiúsculo) é o nome correto** — confirmado em duas fontes independentes da Cielo (`autorizacao-autenticacao` e `data-only`). O BDD (RN-3DS-007) lista `ReferenceId`, o que está impreciso; alterar quebraria a autorização.
+
+**`V2_2` vs `V3` (RN-3DS-014A/DF-004/INV-009 do BDD) mistura dois eixos distintos:** `V2_2` é versão do **protocolo 3DS**, `V3` é versão do **plugin MPI**. A migração MPI v2→v3 não altera o protocolo — as respostas do MPI v3 retornam `Authentication.Version: "2.2.0"`. Não há seleção de versão a implementar; o plugin é V3-only.
+
 - Casing dos nomes de campo é tolerado como case-insensitive pela API (confirmado empiricamente: `orderNumber`/`currency` em camelCase foram aceitos onde a doc mostra exemplos em outro casing) — os bugs reais eram nomes de campo **diferentes** (`amount` vs `totalAmount`, `firstName`/`lastName` vs `name`) ou valores ausentes/no formato errado, não apenas diferença de maiúscula/minúscula.
 
 ### RF002 - Fluxo frontend do checkout clássico
