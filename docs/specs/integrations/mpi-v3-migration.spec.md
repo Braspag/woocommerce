@@ -290,6 +290,27 @@ sequenceDiagram
   disparar `init`/`enroll` só porque o crédito estava habilitado, e o builder do
   Pagador descartava o resultado.
 
+### Tratamento de erro da autorização (Pagador)
+
+O 3DS pode concluir com sucesso e o pedido ainda falhar na autorização. Esse caminho
+estava quebrado e escondia a causa:
+
+- `WC_Braspag_Pagador_API::prepare_response()` move o corpo para `errors` e **anula
+  `body`** em resposta não-2xx. O corpo de erro do Pagador é uma lista de
+  `{Code, Message}`.
+- `WC_Gateway_Braspag::get_localized_error_message_from_response()` lia
+  `$response->error->type` — objeto singular que o Pagador nunca devolve. No PHP 8 isso
+  emitia `Undefined property stdClass::$error` e `Attempt to read property on null`, que
+  **vazavam como HTML na resposta JSON do checkout**, com a mensagem saindo vazia
+  (`{"result":"failure","messages":""}`). O `braspag-client-logger.js` tinha que
+  "consertar JSON malformado".
+- O corpo de erro não era logado em lugar algum, então a recusa era invisível.
+
+Agora: `extract_error_messages()` (função pura, testada) lê o formato real — lista,
+objeto único, array associativo ou texto — e a forma legada `error->{type,code,message}`
+continua aceita para quem dependia dela via filtro. `prepare_response()` loga
+`Pagador respondeu HTTP <status>` com o corpo.
+
 ## 🔒 Considerações de Segurança
 
 - `access_token` nunca exposto ao frontend; só o `token` (JWT) retornado por `init` é seguro para expor.

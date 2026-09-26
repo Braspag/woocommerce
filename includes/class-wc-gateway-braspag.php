@@ -964,13 +964,35 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
     {
         $localized_messages = WC_Braspag_Helper::get_localized_messages();
 
-        if ('card_error' === $response->error->type) {
-            $localized_message = isset($localized_messages[$response->error->code]) ? $localized_messages[$response->error->code] : $response->error->message;
-        } else {
-            $localized_message = isset($localized_messages[$response->error->type]) ? $localized_messages[$response->error->type] : $response->error->message;
+        // Forma legada: objeto `error` com type/code/message. O Pagador nunca
+        // devolveu isso — só chega aqui via filtro de terceiros —, mas era a
+        // ÚNICA forma que este método lia. Com o formato real, `$response->error`
+        // é inexistente e o PHP 8 emitia warnings ("Undefined property
+        // stdClass::$error", "Attempt to read property on null") que vazavam
+        // como HTML na resposta JSON do checkout, com a mensagem saindo vazia
+        // (`{"result":"failure","messages":""}`).
+        if (is_object($response) && isset($response->error) && is_object($response->error)) {
+            $type = isset($response->error->type) ? $response->error->type : '';
+            $code = isset($response->error->code) ? $response->error->code : '';
+            $message = isset($response->error->message) ? $response->error->message : '';
+
+            if ('card_error' === $type) {
+                return isset($localized_messages[$code]) ? $localized_messages[$code] : $message;
+            }
+
+            return isset($localized_messages[$type]) ? $localized_messages[$type] : $message;
         }
 
-        return $localized_message;
+        // Forma real do Pagador: em resposta não-2xx, prepare_response() move
+        // o corpo decodificado para `errors` — uma lista de {Code, Message}.
+        $errors = is_object($response) && isset($response->errors) ? $response->errors : null;
+        $messages = WC_Braspag_Pagador_API::extract_error_messages($errors);
+
+        if (!empty($messages)) {
+            return implode(' ', $messages);
+        }
+
+        return $localized_messages['invalid_request_error'];
     }
 
     /**
