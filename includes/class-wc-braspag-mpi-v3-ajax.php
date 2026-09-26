@@ -31,19 +31,35 @@ class WC_Braspag_Mpi_V3_Ajax
     const NONCE_ACTION = 'braspag_mpi_v3_nonce';
 
     /**
-     * Chave de sessão WC usada para persistir o orderNumber único da
-     * tentativa de checkout atual (ver `get_or_create_order_number()`).
+     * Prefixo do transient que guarda o estado server-side de uma sessão
+     * 3DS (orderNumber + access_token), indexado pelo `ReferenceId` que a
+     * Cielo devolve no `3ds/init`.
+     *
+     * Antes isso ficava em `WC()->session`, e o estado era perdido de forma
+     * intermitente: o WooCommerce carrega o array inteiro da sessão no
+     * início de cada request e o reescreve por completo no shutdown, então
+     * um `?wc-ajax=update_order_review` disparado em paralelo ao nosso
+     * `init` (ambos acontecem no carregamento do checkout) sobrescrevia o
+     * orderNumber/token novos pelo snapshot antigo que aquele request havia
+     * lido. O `enroll` seguinte então ia com o token/orderNumber da
+     * tentativa ANTERIOR e a Cielo respondia HTTP 409 — foi exatamente o
+     * que o log de 26/09 mostrou no débito (init gerou o orderNumber
+     * `944e1b79…`, mas o enroll foi com `5fee8426…`, da tentativa de
+     * crédito 3 minutos antes).
+     *
+     * Transient é escrito por chave (não é um array compartilhado), então
+     * não há essa corrida. O `access_token` continua exclusivamente no
+     * servidor (RN-3DS-013 / INV-004): o browser só conhece o
+     * `ReferenceId`, que ele já recebia para o `MPI.init()`.
      */
-    const SESSION_ORDER_NUMBER_KEY = 'braspag_mpi_v3_order_number';
+    const SESSION_TRANSIENT_PREFIX = 'braspag_mpi_v3_session_';
 
     /**
-     * Chave de sessão WC do access_token da sessão 3DS atual. No MPI v3 o
-     * token é vinculado a uma única sessão (o JWT carrega o `ReferenceId`),
-     * então init/enroll/validate de uma tentativa precisam usar exatamente
-     * o mesmo token — e ele nunca pode ser reaproveitado em outra tentativa
-     * (retorna HTTP 409). Fica só no servidor, nunca vai para o browser.
+     * Validade do estado da sessão 3DS. Cobre com folga o tempo de
+     * challenge (5 min de timeout no driver JS) sem manter o token vivo
+     * mais do que o necessário.
      */
-    const SESSION_ACCESS_TOKEN_KEY = 'braspag_mpi_v3_access_token';
+    const SESSION_TTL = 1800;
 
     public static function init()
     {
@@ -78,52 +94,67 @@ class WC_Braspag_Mpi_V3_Ajax
 
     /**
      * A Cielo bloqueia chamadas repetidas de `3ds/init` com o mesmo
-     * `orderNumber` (HTTP 409 "sessão já existe para esse pedido") — usar
-     * `WC()->cart->get_cart_hash()` (estável entre recarregamentos de
-     * página enquanto o carrinho não muda) causava 409 a cada nova
-     * tentativa/reload do checkout.
-     *
-     * Gera um UUID novo (usado por `handle_init()`, que só deveria rodar
-     * uma vez por carregamento de página — ver `startSession()` no JS) e
-     * persiste na sessão do WC.
+     * `orderNumber` (HTTP 409), então cada tentativa de checkout usa um
+     * `orderNumber` novo.
      *
      * @return string
      */
     protected static function generate_order_number()
     {
-        $order_number = wp_generate_uuid4();
+        return wp_generate_uuid4();
+    }
 
-        if (WC()->session) {
-            WC()->session->set(self::SESSION_ORDER_NUMBER_KEY, $order_number);
+    /**
+     * Persiste o estado server-side da sessão 3DS criada pelo `3ds/init`,
+     * indexado pelo `ReferenceId`. Ver SESSION_TRANSIENT_PREFIX para o
+     * motivo de não usar `WC()->session`.
+     *
+     * @param string $reference_id
+     * @param string $order_number
+     * @param string $access_token
+     * @return void
+     */
+    protected static function store_3ds_session($reference_id, $order_number, $access_token)
+    {
+        if ('' === (string) $reference_id) {
+            return;
         }
 
-        return $order_number;
+        set_transient(
+            self::SESSION_TRANSIENT_PREFIX . $reference_id,
+            array(
+                'order_number' => (string) $order_number,
+                'access_token' => (string) $access_token,
+            ),
+            self::SESSION_TTL
+        );
     }
 
     /**
-     * Lê o `orderNumber` gerado por `handle_init()` para esta tentativa de
-     * checkout — `handle_enroll()`/`handle_validate()` precisam usar
-     * exatamente o mesmo valor (a Cielo correlaciona as chamadas por
-     * `orderNumber`, não pelo `referenceId`).
+     * Lê o `orderNumber` e o `access_token` da sessão 3DS que o browser
+     * está usando (identificada pelo `referenceId` que ele devolve). A
+     * Cielo correlaciona init/enroll/validate por `orderNumber` e vincula o
+     * token à sessão, então os três precisam bater — usar os de outra
+     * tentativa resulta em HTTP 409.
      *
-     * @return string
+     * @param string $reference_id
+     * @return array{order_number: string, access_token: string}
      */
-    protected static function get_order_number()
+    protected static function get_3ds_session($reference_id)
     {
-        return WC()->session ? (string) WC()->session->get(self::SESSION_ORDER_NUMBER_KEY) : '';
-    }
+        $empty = array('order_number' => '', 'access_token' => '');
 
-    /**
-     * Lê o access_token da sessão 3DS criada por `handle_init()`.
-     * `handle_enroll()`/`handle_validate()` precisam reusar exatamente esse
-     * token — criar um novo faria a Cielo responder 409, porque o token é
-     * vinculado à sessão (ver `WC_Braspag_Mpi_V3_Client::create_access_token()`).
-     *
-     * @return string
-     */
-    protected static function get_session_access_token()
-    {
-        return WC()->session ? (string) WC()->session->get(self::SESSION_ACCESS_TOKEN_KEY) : '';
+        if ('' === (string) $reference_id) {
+            return $empty;
+        }
+
+        $data = get_transient(self::SESSION_TRANSIENT_PREFIX . $reference_id);
+
+        if (!is_array($data)) {
+            return $empty;
+        }
+
+        return array_merge($empty, $data);
     }
 
     /**
@@ -150,10 +181,6 @@ class WC_Braspag_Mpi_V3_Ajax
             // outro init faz a Cielo responder 409.
             $access_token = WC_Braspag_Mpi_V3_Client::create_access_token($settings);
 
-            if (WC()->session) {
-                WC()->session->set(self::SESSION_ACCESS_TOKEN_KEY, $access_token);
-            }
-
             $response = WC_Braspag_Mpi_V3_Client::init($order_number, $settings, $access_token, array(
                 'currency' => WC_Braspag_Mpi_V3_Client::CURRENCY_BRL_ISO,
                 'amount' => (int) round(WC()->cart->get_total('edit') * 100),
@@ -163,8 +190,15 @@ class WC_Braspag_Mpi_V3_Ajax
             // ler em camelCase devolvia valores vazios para o MPI.init().
             // O orderNumber vai junto porque o JS precisa dele para montar o
             // objeto `order` de MPI.challenge().
+            $reference_id = isset($response->ReferenceId) ? $response->ReferenceId : '';
+
+            // orderNumber e access_token ficam no servidor, indexados pelo
+            // ReferenceId que o browser passa a conhecer (o token nunca vai
+            // para o browser — RN-3DS-013 / INV-004).
+            self::store_3ds_session($reference_id, $order_number, $access_token);
+
             wp_send_json_success(array(
-                'referenceId' => isset($response->ReferenceId) ? $response->ReferenceId : '',
+                'referenceId' => $reference_id,
                 'token' => isset($response->Token) ? $response->Token : '',
                 'orderNumber' => $order_number,
             ));
@@ -219,8 +253,9 @@ class WC_Braspag_Mpi_V3_Ajax
                 wp_send_json_error(array('message' => __('Missing card data.', 'woocommerce-braspag')), 400);
             }
 
-            $order_number = self::get_order_number();
-            $access_token = self::get_session_access_token();
+            $session = self::get_3ds_session($reference_id);
+            $order_number = $session['order_number'];
+            $access_token = $session['access_token'];
 
             if ('' === $order_number || '' === $access_token) {
                 wp_send_json_error(array('message' => __('3DS session expired, please try again.', 'woocommerce-braspag')), 400);
@@ -299,6 +334,7 @@ class WC_Braspag_Mpi_V3_Ajax
             wp_send_json_error(array('message' => __('Cart unavailable.', 'woocommerce-braspag')), 400);
         }
 
+        $reference_id = isset($_POST['referenceId']) ? sanitize_text_field(wp_unslash($_POST['referenceId'])) : '';
         $transaction_id = isset($_POST['transactionId']) ? sanitize_text_field(wp_unslash($_POST['transactionId'])) : '';
         $card_number = isset($_POST['cardNumber']) ? preg_replace('/\D+/', '', wp_unslash($_POST['cardNumber'])) : '';
         $card_expiration_month = isset($_POST['cardExpirationMonth']) ? preg_replace('/\D+/', '', wp_unslash($_POST['cardExpirationMonth'])) : '';
@@ -308,8 +344,9 @@ class WC_Braspag_Mpi_V3_Ajax
             wp_send_json_error(array('message' => __('Missing validation data.', 'woocommerce-braspag')), 400);
         }
 
-        $order_number = self::get_order_number();
-        $access_token = self::get_session_access_token();
+        $session = self::get_3ds_session($reference_id);
+        $order_number = $session['order_number'];
+        $access_token = $session['access_token'];
 
         if ('' === $order_number || '' === $access_token) {
             wp_send_json_error(array('message' => __('3DS session expired, please try again.', 'woocommerce-braspag')), 400);

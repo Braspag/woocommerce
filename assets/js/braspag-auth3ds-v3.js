@@ -426,6 +426,9 @@ BraspagAuth3dsV3.prototype = {
       jQuery.post(self.params.ajaxUrl, {
         action: 'braspag_mpi_v3_validate',
         nonce: self.params.validateNonce,
+        // Identifica no servidor qual sessão 3DS é esta (o orderNumber e o
+        // access_token ficam lá, indexados pelo referenceId).
+        referenceId: self.referenceId,
         transactionId: transactionId,
         cardNumber: cardData.cardNumber,
         cardExpirationMonth: cardData.cardExpirationMonth,
