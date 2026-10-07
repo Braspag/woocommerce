@@ -14,7 +14,7 @@
  * Author: Braspag
  * Author URI: https://braspag.com.br/
  *
- * Version: 2.3.5.47
+ * Version: 2.3.5.48
  * Requires at least: 5.3.2
  * Tested up to: 6.9.5
  * Requires PHP: 7.4
@@ -114,7 +114,7 @@ function wc_braspag_init()
 	 * Required minimums and constants
 	 */
 	global $wp_version;
-	$bp_version = '2.3.5.47';
+	$bp_version = '2.3.5.48';
 	$min_php_ver = '5.6.0';
 	$min_wc_ver = '4.0.0';
 	$min_wp_ver = '5.3.2';
@@ -305,7 +305,9 @@ function wc_braspag_init()
 			include_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-pagador-api.php';
 			include_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-risk-api.php';
 			include_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-oauth-api.php';
-			include_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-mpi-api.php';
+			include_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-mpi-v3-client.php';
+			include_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-mpi-v3-ajax.php';
+			include_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-auth3ds-v3-gate.php';
 			include_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-pagador-api-query.php';
 			require_once WC_BRASPAG_PLUGIN_PATH . '/includes/abstracts/abstract-wc-braspag-payment-gateway.php';
 			require_once WC_BRASPAG_PLUGIN_PATH . '/includes/class-wc-braspag-webhook-handler.php';
@@ -324,6 +326,64 @@ function wc_braspag_init()
 			if (version_compare(WC_VERSION, '3.4', '<')) {
 				add_filter('woocommerce_get_sections_checkout', array($this, 'filter_gateway_order_admin'));
 			}
+
+			add_action('admin_enqueue_scripts', array($this, 'admin_settings_scripts'));
+		}
+
+		/**
+		 * Enfileira o JS que avisa/bloqueia (na UI) a incompatibilidade entre
+		 * SilentOrderPost (SOP) e 3DS nas 3 telas de settings envolvidas
+		 * (braspag, braspag_creditcard, braspag_debitcard). A garantia real
+		 * do bloqueio é feita no save (server-side), em
+		 * WC_Gateway_Braspag::process_admin_options() — este script é só UX.
+		 *
+		 * @param string $hook
+		 * @return void
+		 */
+		public function admin_settings_scripts($hook)
+		{
+			if ('woocommerce_page_wc-settings' !== $hook) {
+				return;
+			}
+
+			// phpcs:disable WordPress.Security.NonceVerification.Recommended
+			$tab = isset($_GET['tab']) ? sanitize_key(wp_unslash($_GET['tab'])) : '';
+			$section = isset($_GET['section']) ? sanitize_key(wp_unslash($_GET['section'])) : '';
+			// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+			$braspag_sections = array('braspag', 'braspag_creditcard', 'braspag_debitcard');
+
+			if ('checkout' !== $tab || !in_array($section, $braspag_sections, true)) {
+				return;
+			}
+
+			$general_settings = get_option('woocommerce_braspag_settings', array());
+			$credit_settings = get_option('woocommerce_braspag_creditcard_settings', array());
+			$debit_settings = get_option('woocommerce_braspag_debitcard_settings', array());
+
+			$sop_enabled = isset($general_settings['silentpost_enabled']) && 'yes' === $general_settings['silentpost_enabled'];
+			$auth3ds_credit_active = isset($credit_settings['auth3ds20_mpi_is_active']) && 'yes' === $credit_settings['auth3ds20_mpi_is_active'];
+			$auth3ds_debit_active = isset($debit_settings['auth3ds20_mpi_is_active']) && 'yes' === $debit_settings['auth3ds20_mpi_is_active'];
+
+			wp_register_script(
+				'wc-braspag-admin-settings',
+				plugins_url('assets/js/braspag-admin-settings.js', WC_BRASPAG_MAIN_FILE),
+				array('jquery'),
+				WC_BRASPAG_VERSION,
+				true
+			);
+
+			wp_localize_script('wc-braspag-admin-settings', 'wc_braspag_admin_settings_params', array(
+				'section' => $section,
+				'sop_enabled' => $sop_enabled,
+				'auth3ds_active' => $auth3ds_credit_active || $auth3ds_debit_active,
+				'i18n' => array(
+					'sop_disables_3ds' => __('Ao habilitar o SilentOrderPost, o 3DS de Cartão de Crédito e de Débito será desativado (o MPI v3 não é compatível com o SOP) e o Cartão de Débito, que exige 3DS, também será desabilitado.', 'woocommerce-braspag'),
+					'auth3ds_blocked_by_sop' => __('O SilentOrderPost está ativo e prevalece sobre o 3DS (o MPI v3 não é compatível com o SOP). Desative o SilentOrderPost para habilitar o 3DS.', 'woocommerce-braspag'),
+				),
+			));
+
+			wp_enqueue_script('wc-braspag-admin-settings');
 		}
 
 		/**

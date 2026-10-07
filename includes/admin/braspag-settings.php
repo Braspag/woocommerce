@@ -82,6 +82,11 @@ return apply_filters(
             'type' => 'title',
             'description' => '',
         ),
+        'silentpost_sop_3ds_notice' => array(
+            'title' => '',
+            'type' => 'title',
+            'description' => __('O 3DS não pode ser usado em conjunto com o SilentOrderPost. Desative o 3DS (nas configurações de Cartão de Crédito/Débito) antes de habilitar o SilentOrderPost, ou desative o SilentOrderPost antes de habilitar o 3DS.', 'woocommerce-braspag'),
+        ),
         'silentpost_enabled' => array(
             'title' => __('Enable/Disable', 'woocommerce-braspag'),
             'label' => __('Enable Silent Order Post', 'woocommerce-braspag'),

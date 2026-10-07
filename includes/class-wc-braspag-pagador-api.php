@@ -176,8 +176,81 @@ class WC_Braspag_Pagador_API
         if ($response_data['status'] != '200' && $response_data['status'] != '201') {
             $response_data['errors'] = $response_data['body'];
             $response_data['body'] = null;
+
+            // Sem este log a causa da recusa do Pagador nunca aparecia em
+            // lugar algum: `body` é anulado aqui e o caminho de erro só
+            // registrava a mensagem amigável (que vinha vazia — ver
+            // WC_Gateway_Braspag::get_localized_error_message_from_response()).
+            WC_Braspag_Logger::log(
+                'Pagador respondeu HTTP ' . $response_data['status'] . ': '
+                . print_r($response_data['errors'], true)
+            );
         }
 
         return (object) $response_data;
+    }
+
+    /**
+     * Extrai as mensagens de erro do corpo que o Pagador devolve numa
+     * resposta não-2xx. O formato real é uma lista de objetos
+     * `{Code, Message}` (ex.: `[{"Code":126,"Message":"Card Number length
+     * exceeded"}]`), mas respostas de erro de outros endpoints aparecem como
+     * objeto único ou string — todas são aceitas aqui.
+     *
+     * Função pura, sem dependência de WordPress: é o ponto testável do
+     * tratamento de erro do Pagador.
+     *
+     * @param mixed $errors Conteúdo de `$response->errors`.
+     * @return string[] Mensagens no formato "[Code] Message" (ou só a
+     *                  mensagem, quando não há código).
+     */
+    public static function extract_error_messages($errors)
+    {
+        if (empty($errors)) {
+            return array();
+        }
+
+        if (is_string($errors)) {
+            return array(trim($errors));
+        }
+
+        if (is_object($errors) || (is_array($errors) && !isset($errors[0]))) {
+            $errors = array($errors);
+        }
+
+        if (!is_array($errors)) {
+            return array();
+        }
+
+        $messages = array();
+
+        foreach ($errors as $error) {
+            $error = is_array($error) ? (object) $error : $error;
+
+            if (is_string($error)) {
+                $messages[] = trim($error);
+                continue;
+            }
+
+            if (!is_object($error)) {
+                continue;
+            }
+
+            $message = isset($error->Message) ? (string) $error->Message : '';
+            $code = isset($error->Code) ? (string) $error->Code : '';
+
+            if ('' === $message && '' === $code) {
+                continue;
+            }
+
+            if ('' === $message) {
+                $messages[] = sprintf('[%s]', $code);
+                continue;
+            }
+
+            $messages[] = '' !== $code ? sprintf('[%s] %s', $code, $message) : $message;
+        }
+
+        return $messages;
     }
 }
