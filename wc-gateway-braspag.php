@@ -14,7 +14,7 @@
  * Author: Braspag
  * Author URI: https://braspag.com.br/
  *
- * Version: 2.3.5.47
+ * Version: 2.3.5.48
  * Requires at least: 5.3.2
  * Tested up to: 6.9.5
  * Requires PHP: 7.4
@@ -114,7 +114,7 @@ function wc_braspag_init()
 	 * Required minimums and constants
 	 */
 	global $wp_version;
-	$bp_version = '2.3.5.47';
+	$bp_version = '2.3.5.48';
 	$min_php_ver = '5.6.0';
 	$min_wc_ver = '4.0.0';
 	$min_wp_ver = '5.3.2';
@@ -378,8 +378,8 @@ function wc_braspag_init()
 				'sop_enabled' => $sop_enabled,
 				'auth3ds_active' => $auth3ds_credit_active || $auth3ds_debit_active,
 				'i18n' => array(
-					'sop_blocked_by_3ds' => __('O 3DS não pode ser usado em conjunto com o SilentOrderPost. Desative o 3DS (nas configurações de Cartão de Crédito/Débito) antes de habilitar o SilentOrderPost, ou desative o SilentOrderPost antes de habilitar o 3DS.', 'woocommerce-braspag'),
-					'auth3ds_blocked_by_sop' => __('O 3DS não pode ser usado em conjunto com o SilentOrderPost. Desative o SilentOrderPost antes de habilitar o 3DS, ou desative o 3DS antes de habilitar o SilentOrderPost.', 'woocommerce-braspag'),
+					'sop_disables_3ds' => __('Ao habilitar o SilentOrderPost, o 3DS de Cartão de Crédito e de Débito será desativado (o MPI v3 não é compatível com o SOP) e o Cartão de Débito, que exige 3DS, também será desabilitado.', 'woocommerce-braspag'),
+					'auth3ds_blocked_by_sop' => __('O SilentOrderPost está ativo e prevalece sobre o 3DS (o MPI v3 não é compatível com o SOP). Desative o SilentOrderPost para habilitar o 3DS.', 'woocommerce-braspag'),
 				),
 			));
 

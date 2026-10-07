@@ -166,3 +166,14 @@
 * Fix "Invalid Access Token" (401) on 3DS init/enroll: load MPI vendor script in footer instead of head, ensuring the access-token DOM field exists before the library self-initializes
 * Cache MPI auth token per checkout session (WC session) instead of per PHP request, avoiding duplicate token generation on order-review refresh
 * Add client-side logger capturing MPI/3DS console events (console.log/error/warn) into the plugin's internal debug log
+
+= 2.3.5.48 - 2026-10-06 =
+* Migrate 3DS authentication from MPI v2 (client-side) to MPI v3 (server-to-server: auth/token, 3ds/init, 3ds/enroll, 3ds/validate) in credit and debit card checkout
+* Add shared 3DS failure gate for credit and debit (fail-closed on unknown failure types; fixes debit always sending Authenticate=true and missing block gate)
+* 3DS now runs only on the payment method where it is enabled
+* Debit card now requires 3DS to be enabled (all debit transactions must be authenticated)
+* MPI v3 is not compatible with SilentOrderPost (confirmed by Braspag): SilentOrderPost now takes precedence, turning off 3DS for credit/debit (and the debit card, which requires 3DS) with an admin notice
+* Add upgrade migration and runtime guard for stores that had SilentOrderPost and 3DS enabled together
+* Fix 409 on 3ds/init (token tied to the 3DS session, stable orderNumber, session stored in transient)
+* Fix 415 on auth/token and #MPI4 on 3ds/init and 3ds/enroll (payload aligned with the MPI v3 docs)
+* Read the real Pagador error on authorization failure
