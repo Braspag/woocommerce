@@ -457,80 +457,19 @@ abstract class WC_Braspag_Payment_Gateway extends WC_Payment_Gateway
         return $oauth_response->body->access_token;
     }
 
-    /**
-     * @param $request
-     * @param $api
-     * @return array|object
-     * @throws WC_Braspag_Exception
-     */
-    public function braspag_mpi_request($request, $api)
-    {
-        $response = WC_Braspag_Mpi_API::request($request, $api);
-
-        if (!empty($response->errors)) {
-            return $response;
-        }
-
-        WC_Braspag_Logger::log("Braspag Mpi Requested");
-
-        return $response;
-    }
+    // braspag_mpi_request()/get_mpi_auth_token() (MPI v2, endpoint `v2/auth/token`
+    // via WC_Braspag_Mpi_API) foram removidos na migração para MPI v3 — o
+    // fluxo agora é server-to-server via WC_Braspag_Mpi_V3_Client::init(),
+    // chamado a partir de WC_Braspag_Mpi_V3_Ajax::handle_init() (ver
+    // includes/class-wc-braspag-mpi-v3-ajax.php e
+    // includes/class-wc-braspag-mpi-v3-client.php).
 
     /**
-     * @return mixed
-     * @throws WC_Braspag_Exception
-     */
-    public function get_mpi_auth_token()
-    {
-        // Verifica cache da sessão para evitar gerar novo token em cada refresh do checkout (update_order_review)
-        if (function_exists('WC') === TRUE && WC()->session !== NULL) {
-            $cached_token = WC()->session->get('braspag_mpi_auth_token');
-            if (empty($cached_token) === FALSE) {
-                return $cached_token;
-            }
-        }
-
-        WC_Braspag_Logger::log("Info: Begin processing Mpi Auth request.");
-
-        $mpi_auth_token_request_builder = get_option('woocommerce_braspag_settings');
-        $mpi_auth_token_request_builder['body'] = [
-            'EstablishmentCode' => $mpi_auth_token_request_builder['establishment_code'],
-            'MerchantName' => $mpi_auth_token_request_builder['merchant_name'],
-            'MCC' => $mpi_auth_token_request_builder['mcc']
-        ];
-        WC_Braspag_Logger::log("Info: Begin processing Mpi Auth request." . print_r($mpi_auth_token_request_builder['body'], true));
-
-
-        $mpi_auth_token_response = $this->braspag_mpi_request($mpi_auth_token_request_builder, 'v2/auth/token');
-
-        if (!empty($mpi_auth_token_response->errors)) {
-            $this->throw_localized_message($mpi_auth_token_response);
-            WC_Braspag_Logger::log("ERROR: Begin processing Mpi Auth request:" . print_r($mpi_auth_token_response, true));
-        }
-
-        WC_Braspag_Logger::log("Info: Begin processing Mpi Auth request:" . print_r($mpi_auth_token_response, true));
-
-        $mpi_auth_token = $mpi_auth_token_response->body->access_token;
-
-        // Armazena token em cache da sessão para evitar múltiplas requisições na mesma sessão de checkout.
-        // Só cacheia se o token vier realmente preenchido: cachear um valor vazio/inválido (ex.: numa
-        // falha transitória da API da Cielo) travaria a sessão inteira do checkout com um token vazio,
-        // já que a leitura do cache nunca tenta gerar um novo enquanto houver algo "cacheado".
-        if (empty($mpi_auth_token) === FALSE && function_exists('WC') === TRUE && WC()->session !== NULL) {
-            WC()->session->set('braspag_mpi_auth_token', $mpi_auth_token);
-        }
-
-        return $mpi_auth_token;
-    }
-
-    /**
-     * Limpa o token MPI cacheado na sessão. Deve ser chamado no início de cada
-     * tentativa de pagamento (process_payment): a documentação da Cielo exige um
-     * token novo para CADA autenticação 3DS ("For each 3DS authentication, it is
-     * necessary to obtain and provide a new access token") — reaproveitar entre
-     * tentativas distintas (ex.: reenvio após falha no mesmo checkout) não é
-     * permitido, mesmo com o cache de sessão evitando gerar tokens duplicados
-     * durante o carregamento/refresh da mesma página.
+     * Limpa o cache de sessão do antigo token MPI v2. Mantido como no-op
+     * seguro (chamado no início de cada process_payment de crédito/débito)
+     * porque o cache de token do v3 é gerido por
+     * `WC_Braspag_Mpi_V3_Client` via transient com TTL real — não há mais
+     * nada para invalidar aqui além da chave de sessão legada.
      *
      * @return void
      */

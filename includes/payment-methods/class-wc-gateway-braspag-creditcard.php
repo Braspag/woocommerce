@@ -463,40 +463,28 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
         }
 
         $checkout = WC()->checkout();
-        $failureType = (string) $checkout->get_value('bpmpi_auth_failure_type');
+        $failureType = (string) $checkout->get_value('bpmpi_v3_failure_type');
 
         if ($failureType === '' || $failureType === '0') {
             return;
         }
 
         $message = __('Credit Card Payment Failure.', 'woocommerce-braspag');
-        $appendMpi = false;
-
-        switch ($failureType) {
-            case '4':
-                $appendMpi = ($this->auth3ds20_mpi_authorize_on_error === 'no');
-                break;
-            case '1':
-                $appendMpi = ($this->auth3ds20_mpi_authorize_on_failure === 'no');
-                break;
-            case '2':
-                $appendMpi = ($this->auth3ds20_mpi_authorize_on_unenrolled === 'no');
-                break;
-            case '5':
-                $appendMpi = ($this->auth3ds20_mpi_authorize_on_unsupported_brand === 'no');
-                break;
-            default:
-                $appendMpi = true;
-                break;
-        }
 
         $cardType = (string) $checkout->get_value('braspag_creditcard-card-type');
         $provider = (string) $this->get_braspag_payment_provider($cardType, $this->test_mode);
         $isCielo = (bool) preg_match('#cielo#i', $provider);
 
-        if (!$this->test_mode && $failureType !== '3' && !$isCielo) {
-            $appendMpi = true;
-        }
+        // Gate compartilhado com o débito (fecha 3DS-08: código de falha
+        // desconhecido agora bloqueia de forma consistente nos dois métodos).
+        $appendMpi = WC_Braspag_Auth3ds_V3_Gate::should_block($failureType, array(
+            'authorize_on_error' => $this->auth3ds20_mpi_authorize_on_error,
+            'authorize_on_failure' => $this->auth3ds20_mpi_authorize_on_failure,
+            'authorize_on_unenrolled' => $this->auth3ds20_mpi_authorize_on_unenrolled,
+            'authorize_on_unsupported_brand' => $this->auth3ds20_mpi_authorize_on_unsupported_brand,
+            'test_mode' => (bool) $this->test_mode,
+            'is_cielo' => $isCielo,
+        ));
 
         if (!$appendMpi) {
             return;
@@ -937,38 +925,48 @@ class WC_Gateway_Braspag_CreditCard extends WC_Gateway_Braspag
             return $payment_data;
         }
 
-        $failureType = (string) $checkout->get_value('bpmpi_auth_failure_type');
+        $failureType = (string) $checkout->get_value('bpmpi_v3_failure_type');
+        $authenticated = true;
 
         if ($failureType !== '' && $failureType !== '0') {
-            $block = true;
+            $cardType = (string) $checkout->get_value('braspag_creditcard-card-type');
+            $provider = (string) $this->get_braspag_payment_provider($cardType, $this->test_mode);
+            $isCielo = (bool) preg_match('#cielo#i', $provider);
 
-            switch ($failureType) {
-                case '4':
-                    $block = ($this->auth3ds20_mpi_authorize_on_error === 'no');
-                    break;
-                case '1':
-                    $block = ($this->auth3ds20_mpi_authorize_on_failure === 'no');
-                    break;
-                case '2':
-                    $block = ($this->auth3ds20_mpi_authorize_on_unenrolled === 'no');
-                    break;
-                case '5':
-                    $block = ($this->auth3ds20_mpi_authorize_on_unsupported_brand === 'no');
-                    break;
-            }
+            // Gate compartilhado com o débito (fecha 3DS-09: o débito não
+            // tinha esse gate; ambos os builders agora usam a mesma lógica).
+            $block = WC_Braspag_Auth3ds_V3_Gate::should_block($failureType, array(
+                'authorize_on_error' => $this->auth3ds20_mpi_authorize_on_error,
+                'authorize_on_failure' => $this->auth3ds20_mpi_authorize_on_failure,
+                'authorize_on_unenrolled' => $this->auth3ds20_mpi_authorize_on_unenrolled,
+                'authorize_on_unsupported_brand' => $this->auth3ds20_mpi_authorize_on_unsupported_brand,
+                'test_mode' => (bool) $this->test_mode,
+                'is_cielo' => $isCielo,
+            ));
 
             if ($block === false) {
-                return $payment_data;
+                // Prossegue sem autenticação: preserva o Eci devolvido pela
+                // Cielo (RN-3DS-008/BDD-3DS-012), mas sem Cavv/Xid. Se não há
+                // nem Eci, não há nada de útil para enviar.
+                if ('' === (string) $checkout->get_value('bpmpi_v3_eci')) {
+                    return $payment_data;
+                }
+
+                $authenticated = false;
             }
         }
 
-        $payment_data_auth3ds20_data = [
-            "Cavv" => $checkout->get_value('bpmpi_auth_cavv'),
-            "Xid" => $checkout->get_value('bpmpi_auth_xid'),
-            "Eci" => $checkout->get_value('bpmpi_auth_eci'),
-            "Version" => $checkout->get_value('bpmpi_auth_version'),
-            "ReferenceID" => $checkout->get_value('bpmpi_auth_reference_id')
-        ];
+        $payment_data_auth3ds20_data = WC_Braspag_Auth3ds_V3_Gate::build_external_authentication(
+            [
+                'cavv' => $checkout->get_value('bpmpi_v3_cavv'),
+                'xid' => $checkout->get_value('bpmpi_v3_xid'),
+                'eci' => $checkout->get_value('bpmpi_v3_eci'),
+                'version' => $checkout->get_value('bpmpi_v3_version'),
+                'reference_id' => $checkout->get_value('bpmpi_v3_reference_id'),
+                'data_only' => '' !== (string) $checkout->get_value('bpmpi_v3_data_only'),
+            ],
+            $authenticated
+        );
 
         $payment_data_external_authentication_data = apply_filters(
             'wc_gateway_braspag_pagador_request_creditcard_payment_auth3ds20_builder',

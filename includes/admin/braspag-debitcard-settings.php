@@ -74,6 +74,11 @@ return apply_filters(
             'type' => 'title',
             'description' => '',
         ),
+        'auth3ds20_sop_notice' => array(
+            'title' => '',
+            'type' => 'title',
+            'description' => __('O 3DS não pode ser usado em conjunto com o SilentOrderPost. Desative o SilentOrderPost (nas configurações gerais da Braspag) antes de habilitar o 3DS, ou desative o 3DS antes de habilitar o SilentOrderPost.', 'woocommerce-braspag'),
+        ),
         'auth3ds20_mpi_is_active' => array(
             'title' => __('Enable', 'woocommerce-braspag'),
             'label' => __('Enable', 'woocommerce-braspag'),

@@ -110,133 +110,34 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
     }
 
     /**
+     * Campos hidden consumidos pelo fluxo v3 (assets/js/braspag-auth3ds-v3.js
+     * + WC_Braspag_Mpi_V3_Ajax): o JS preenche `.bpmpi_v3_*` com o resultado
+     * de `validate()` (ou da decisão de "autorizar mesmo assim", conforme
+     * `auth3ds20_mpi_authorize_on_*`) antes de liberar o submit do form.
+     * Os builders de crédito/débito (`braspag_pagador_*_payment_request_auth3ds20_builder`)
+     * leem esses campos via `$checkout->get_value()`.
+     *
      * @param $fields
      */
     public function get_braspag_auth3ds20_elements($fields)
     {
-        // O token precisa vir pronto AQUI, embutido no HTML de forma síncrona.
-        // O campo era renderizado sempre vazio, contando com braspag-auth3ds20.js
-        // para preenchê-lo via jQuery — mas esse driver é enfileirado como
-        // dependente da própria lib vendor (carrega DEPOIS dela), então a lib
-        // sempre lia o campo antes de ele ser populado, mandando
-        // "Authorization: Bearer " (vazio) para /v2/3ds/init, independente de
-        // head/footer. Gerar o valor aqui, na renderização PHP, elimina essa
-        // corrida de vez (mesmo padrão usado em payment_scripts_auth3ds20()).
         $auth3ds_params = apply_filters(
             'wc_gateway_braspag_pagador_auth3ds20_params',
             array('isTestEnvironment' => $this->test_mode)
         );
 
-        $bpmpi_token = (empty($auth3ds_params['isBpmpiEnabledCC']) === FALSE || empty($auth3ds_params['isBpmpiEnabledDC']) === FALSE)
-            ? $this->get_mpi_auth_token()
-            : '';
-
-        $cart = WC()->cart;
-
-        $cart_items = "";
-        $key = 0;
-        foreach ($cart->get_cart_contents() as $cart_content) {
-
-            $cart_items .= '
-                    <input type="hidden" name="bpmpi_cart_' . $key . '_description" class="bpmpi_cart_' . $key . '_description" value="' . $cart_content['data']->get_name() . '"/>
-                    <input type="hidden" name="bpmpi_cart_' . $key . '_name" class="bpmpi_cart_' . $key . '_name" value="' . $cart_content['data']->get_name() . '"/>
-                    <input type="hidden" name="bpmpi_cart_' . $key . '_sku" class="bpmpi_cart_' . $key . '_sku" value="' . (!empty($cart_content['data']->get_sku()) ? $cart_content['data']->get_sku() : $cart_content['data']->get_slug()) . '"/>
-                    <input type="hidden" name="bpmpi_cart_' . $key . '_quantity" class="bpmpi_cart_' . $key . '_quantity" value="' . $cart_content['quantity'] . '"/>
-                    <input type="hidden" name="bpmpi_cart_' . $key . '_unitprice" class="bpmpi_cart_' . $key . '_unitprice" value="' . ($cart_content['data']->get_price() * 100) . '"/>';
-            $key++;
+        if (empty($auth3ds_params['isBpmpiEnabledCC']) && empty($auth3ds_params['isBpmpiEnabledDC'])) {
+            return;
         }
 
-        echo '<div id="bpmpi_data">
-
-                <div id="bpmpi_data_auth">
-                    <input type="hidden" name="test_environment" class="test_environment" value="1"/>
-                    <input type="hidden" name="bpmpi_accesstoken" class="bpmpi_accesstoken" value="' . esc_attr($bpmpi_token) . '"/>
-                    <input type="hidden" name="bpmpi_auth" class="bpmpi_auth" value="true"/>
-                    <input type="hidden" name="bpmpi_auth_notifyonly" class="bpmpi_auth_notifyonly" value=""/>
-                    <input type="hidden" name="bpmpi_auth_suppresschallenge" class="bpmpi_auth_suppresschallenge" value="false"/>
-                    <input type="hidden" name="bpmpi_auth_failure_type" class="bpmpi_auth_failure_type" value=""/>
-                    <input type="hidden" name="bpmpi_auth_cavv" class="bpmpi_auth_cavv" value=""/>
-                    <input type="hidden" name="bpmpi_auth_xid" class="bpmpi_auth_xid" value=""/>
-                    <input type="hidden" name="bpmpi_auth_eci" class="bpmpi_auth_eci" value=""/>
-                    <input type="hidden" name="bpmpi_auth_version" class="bpmpi_auth_version" value=""/>
-                    <input type="hidden" name="bpmpi_auth_reference_id" class="bpmpi_auth_reference_id" value=""/>
-                </div>
-            
-                <div id="bpmpi_data_recurring">
-                    <input type="hidden" name="bpmpi_recurring_enddate" class="bpmpi_recurring_enddate" value=""/>
-                    <input type="hidden" name="bpmpi_recurring_frequency" class="bpmpi_recurring_frequency" value=""/>
-                    <input type="hidden" name="bpmpi_recurring_originalpurchasedate" class="bpmpi_recurring_originalpurchasedate" value=""/>
-                </div>
-            
-                <div id="bpmpi_data_payment">
-                    <input type="hidden" class="bpmpi_paymentmethod" value=""/>
-                    <input type="hidden" class="bpmpi_cardnumber" value=""/>
-                    <input type="hidden" class="bpmpi_cardexpirationmonth" value=""/>
-                    <input type="hidden" class="bpmpi_cardexpirationyear" value=""/>
-                    <input type="hidden" class="bpmpi_installments" value=""/>
-            
-                    <input type="hidden" class="bpmpi_totalamount" value="' . ($cart->get_cart_contents_total() * 100) . '"/>
-                    <input type="hidden" class="bpmpi_currency" value="BRL"/>
-                    <input type="hidden" class="bpmpi_ordernumber" value="' . (WC()->cart->get_cart_hash()) . '"/>
-                    <input type="hidden" class="bpmpi_transaction_mode" value=""/>
-                    <input type="hidden" class="bpmpi_merchant_url" value="' . wp_parse_url(home_url(), PHP_URL_HOST) . '"/>
-                </div>
-            
-                <div id="bpmpi_data_billto">
-                    <input type="hidden" class="bpmpi_billto_contactname" value=""/>
-                    <input type="hidden" class="bpmpi_billto_phonenumber" value=""/>
-                    <input type="hidden" class="bpmpi_billto_customerid" value="' . $this->get_logged_in_customer_id() . '"/>
-                    <input type="hidden" class="bpmpi_billto_email" value=""/>
-                    <input type="hidden" class="bpmpi_billto_street1" value=""/>
-                    <input type="hidden" class="bpmpi_billto_street2" value=""/>
-                    <input type="hidden" class="bpmpi_billto_city" value=""/>
-                    <input type="hidden" class="bpmpi_billto_state" value=""/>
-                    <input type="hidden" class="bpmpi_billto_zipcode" value=""/>
-                    <input type="hidden" class="bpmpi_billto_country" value=""/>
-                </div>
-            
-                <div id="bpmpi_data_shipto">
-                    <input type="hidden" class="bpmpi_shipto_sameasbillto" value=""/>
-                    <input type="hidden" class="bpmpi_shipto_addressee" value=""/>
-                    <input type="hidden" class="bpmpi_shipto_phonenumber" value=""/>
-                    <input type="hidden" class="bpmpi_shipto_email" value=""/>
-                    <input type="hidden" class="bpmpi_shipto_street1" value=""/>
-                    <input type="hidden" class="bpmpi_shipto_street2" value=""/>
-                    <input type="hidden" class="bpmpi_shipto_city" value=""/>
-                    <input type="hidden" class="bpmpi_shipto_state" value=""/>
-                    <input type="hidden" class="bpmpi_shipto_zipcode" value=""/>
-                    <input type="hidden" class="bpmpi_shipto_country" value=""/>
-                </div>
-            
-                <div id="bpmpi_data_cart">
-                    ' . $cart_items . '
-                </div>
-            
-                <div id="bpmpi_data_useraccount">
-                    <input type="hidden" class="bpmpi_useraccount_guest" value="' . (empty($this->get_logged_in_customer_id()) ? 'true' : 'false') . '"/>
-                    <input type="hidden" class="bpmpi_useraccount_createddate" value=""/>
-                    <input type="hidden" class="bpmpi_useraccount_changeddate" value=""/>
-                    <input type="hidden" class="bpmpi_useraccount_authenticationmethod" value=""/>
-                    <input type="hidden" class="bpmpi_useraccount_authenticationprotocol" value=""/>
-                </div>
-            
-                <div id="bpmpi_data_device">
-                    <input type="hidden" name="bpmpi_device_ipaddress" class="bpmpi_device_ipaddress" value="' . WC_Geolocation::get_ip_address() . '"/>
-                    <input type="hidden" class="bpmpi_device_0_fingerprint" value=""/>
-                    <input type="hidden" class="bpmpi_device_0_provider" value=""/>
-                </div>
-            
-                <div id="bpmpi_data_mdd">
-                    <input type="hidden" class="bpmpi_mdd1" value=""/>
-                    <input type="hidden" class="bpmpi_mdd2" value=""/>
-                    <input type="hidden" class="bpmpi_mdd3" value=""/>
-                    <input type="hidden" class="bpmpi_mdd4" value=""/>
-                    <input type="hidden" class="bpmpi_mdd5" value=""/>
-                </div>
-                
-                <div id="bpmpi_data_mdd">
-                    <input type="hidden" class="bpmpi_order_productcode" value="PHY"/>
-                </div>
+        echo '<div id="bpmpi_v3_data">
+                <input type="hidden" name="bpmpi_v3_failure_type" class="bpmpi_v3_failure_type" value=""/>
+                <input type="hidden" name="bpmpi_v3_cavv" class="bpmpi_v3_cavv" value=""/>
+                <input type="hidden" name="bpmpi_v3_xid" class="bpmpi_v3_xid" value=""/>
+                <input type="hidden" name="bpmpi_v3_eci" class="bpmpi_v3_eci" value=""/>
+                <input type="hidden" name="bpmpi_v3_version" class="bpmpi_v3_version" value=""/>
+                <input type="hidden" name="bpmpi_v3_reference_id" class="bpmpi_v3_reference_id" value=""/>
+                <input type="hidden" name="bpmpi_v3_data_only" class="bpmpi_v3_data_only" value=""/>
             </div>
             ';
     }
@@ -463,11 +364,19 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
     }
 
     /**
+     * Registra e enfileira os scripts do MPI v3 (Cardinal Commerce), em
+     * substituição ao driver client-side v2 (`BP.Mpi.3ds20.min.js` +
+     * `braspag-auth3ds20*.js`). O fluxo agora é: init/enroll/validate são
+     * chamados via AJAX (server-to-server, ver WC_Braspag_Mpi_V3_Ajax); o
+     * JS só carrega `mpi.js`/`mpiHelpers.js`, sincroniza o cartão
+     * (`MPI.updateCard()`) e exibe o challenge (`MPI.challenge()`) quando
+     * necessário — nunca envia o número do cartão para o backend do
+     * merchant nessa etapa.
+     *
      * @throws WC_Braspag_Exception
      */
     public function payment_scripts_auth3ds20()
     {
-
         $auth3ds_params = apply_filters(
             'wc_gateway_braspag_pagador_auth3ds20_params',
             array(
@@ -475,59 +384,51 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
             )
         );
 
-        if ($auth3ds_params['isBpmpiEnabledCC'] || $auth3ds_params['isBpmpiEnabledDC']) {
-
-            wp_register_script('wc-braspag-auth3ds20-conf', plugins_url('assets/js/vendor/auth3ds20/BP.Mpi.3ds20.conf.js', WC_BRASPAG_MAIN_FILE), array(), WC_BRASPAG_VERSION, false);
-            wp_enqueue_script('wc-braspag-auth3ds20-conf');
-
-            wp_localize_script(
-                'wc-braspag-auth3ds20-conf',
-                'braspag_auth3ds20_params',
-                $auth3ds_params
-            );
-
-            // Carrega a biblioteca MPI diretamente do CDN da Cielo (não de um arquivo
-            // vendorizado local) e no footer, conforme a documentação oficial
-            // (docs.cielo.com.br/gateway/docs/3-implementando-o-script): scripts
-            // baixados/hospedados localmente pararam de funcionar em 31/07/2026,
-            // pois as URLs de autenticação antigas foram descontinuadas. Carregar
-            // no footer garante que o campo de token (.bpmpi_accesstoken) já
-            // exista no DOM quando a lib se auto-inicializa (renderizado por
-            // get_braspag_auth3ds20_elements()).
-            $auth3ds20_lib_url = $this->test_mode === TRUE
-                ? 'https://mpisandbox.braspag.com.br/Scripts/BP.Mpi.3ds20.min.js'
-                : 'https://mpi.braspag.com.br/Scripts/BP.Mpi.3ds20.min.js';
-
-            wp_register_script('wc-braspag-auth3ds20-lib', $auth3ds20_lib_url, array('wc-braspag-auth3ds20-conf'), '', true);
-            wp_enqueue_script('wc-braspag-auth3ds20-lib');
-
-            wp_register_script('wc-braspag-auth3ds20-renderer', plugins_url('assets/js/braspag-auth3ds20-renderer.js', WC_BRASPAG_MAIN_FILE), array(), WC_BRASPAG_VERSION, true);
-            wp_enqueue_script('wc-braspag-auth3ds20-renderer');
-
-            wp_register_script('wc-braspag-auth3ds20', plugins_url('assets/js/braspag-auth3ds20.js', WC_BRASPAG_MAIN_FILE), array('wc-braspag-auth3ds20-conf', 'wc-braspag-auth3ds20-lib', 'wc-braspag-auth3ds20-renderer', 'wc-braspag'), WC_BRASPAG_VERSION, true);
-            wp_enqueue_script('wc-braspag-auth3ds20');
-
-            // Otimizadores como o Cloudflare Rocket Loader convertem scripts para
-            // execução assíncrona própria (type="text/rocketscript"), o que não
-            // preserva a ordem de dependências declarada acima nem garante que o
-            // DOM (campo .bpmpi_accesstoken) já esteja pronto quando a lib MPI se
-            // auto-inicializa — causando "Bearer null" / 401 mesmo com o script no
-            // rodapé. `data-cfasync="false"` (convenção do próprio Rocket Loader)
-            // faz esses handles serem ignorados por ele e carregados normalmente.
-            add_filter('script_loader_tag', array($this, 'disable_cfasync_for_auth3ds20_scripts'), 10, 2);
-
-            wp_localize_script(
-                'wc-braspag-auth3ds20',
-                'braspag_auth3ds20_params',
-                apply_filters(
-                    'wc_gateway_braspag_pagador_auth3ds20_params',
-                    array(
-                        'bpmpiToken' => $this->get_mpi_auth_token(),
-                        'isTestEnvironment' => $this->test_mode,
-                    )
-                )
-            );
+        if (empty($auth3ds_params['isBpmpiEnabledCC']) && empty($auth3ds_params['isBpmpiEnabledDC'])) {
+            return;
         }
+
+        // mpi.js/mpiHelpers.js (Cardinal Commerce) — documentação oficial:
+        // docs.cielo.com.br/gateway/docs, Scripts/V3.
+        $mpi_v3_base_url = $this->test_mode === TRUE
+            ? 'https://mpisandbox.braspag.com.br/Scripts/V3/'
+            : 'https://mpi.braspag.com.br/Scripts/V3/';
+
+        wp_register_script('wc-braspag-mpi-v3-helpers', $mpi_v3_base_url . 'mpiHelpers.js', array(), '', true);
+        wp_enqueue_script('wc-braspag-mpi-v3-helpers');
+
+        wp_register_script('wc-braspag-mpi-v3', $mpi_v3_base_url . 'mpi.js', array('wc-braspag-mpi-v3-helpers'), '', true);
+        wp_enqueue_script('wc-braspag-mpi-v3');
+
+        wp_register_script(
+            'wc-braspag-auth3ds-v3',
+            plugins_url('assets/js/braspag-auth3ds-v3.js', WC_BRASPAG_MAIN_FILE),
+            array('wc-braspag-mpi-v3', 'wc-braspag-mpi-v3-helpers', 'wc-braspag', 'jquery'),
+            WC_BRASPAG_VERSION,
+            true
+        );
+        wp_enqueue_script('wc-braspag-auth3ds-v3');
+
+        // Otimizadores como o Cloudflare Rocket Loader convertem scripts para
+        // execução assíncrona própria, o que não preserva a ordem de
+        // dependências declarada acima. `data-cfasync="false"` faz esses
+        // handles serem ignorados por ele e carregados normalmente.
+        add_filter('script_loader_tag', array($this, 'disable_cfasync_for_auth3ds20_scripts'), 10, 2);
+
+        wp_localize_script(
+            'wc-braspag-auth3ds-v3',
+            'braspag_auth3ds_v3_params',
+            apply_filters(
+                'wc_gateway_braspag_pagador_auth3ds20_params',
+                array(
+                    'ajaxUrl' => admin_url('admin-ajax.php'),
+                    'initNonce' => wp_create_nonce(WC_Braspag_Mpi_V3_Ajax::NONCE_ACTION),
+                    'enrollNonce' => wp_create_nonce(WC_Braspag_Mpi_V3_Ajax::NONCE_ACTION),
+                    'validateNonce' => wp_create_nonce(WC_Braspag_Mpi_V3_Ajax::NONCE_ACTION),
+                    'isTestEnvironment' => $this->test_mode,
+                )
+            )
+        );
     }
 
     /**
@@ -538,10 +439,9 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
     public function disable_cfasync_for_auth3ds20_scripts($tag, $handle)
     {
         $handles = array(
-            'wc-braspag-auth3ds20-conf',
-            'wc-braspag-auth3ds20-lib',
-            'wc-braspag-auth3ds20-renderer',
-            'wc-braspag-auth3ds20',
+            'wc-braspag-mpi-v3-helpers',
+            'wc-braspag-mpi-v3',
+            'wc-braspag-auth3ds-v3',
         );
 
         if (in_array($handle, $handles, TRUE) === FALSE) {
@@ -603,6 +503,150 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
         ) {
             update_option('wc_braspag_show_changed_keys_notice', 'yes');
         }
+
+        // 3DS e SilentOrderPost (SOP) são mutuamente exclusivos: o MPI v3 não
+        // funciona em conjunto com o SOP. Este método é compartilhado pelas
+        // três telas de settings (geral, cartão de crédito e cartão de
+        // débito), então a regra correta depende de qual delas está sendo
+        // salva no momento ($this->id).
+        $this->enforce_sop_3ds_mutual_exclusivity();
+
+        // Roda DEPOIS da regra SOP×3DS: se aquela desligou o 3DS do débito
+        // (porque o SOP está ativo), esta desliga o próprio débito, já que
+        // débito sem 3DS não é uma configuração válida.
+        $this->enforce_3ds_required_on_debit();
+    }
+
+    /**
+     * Débito exige autenticação: "Todas as transações de débito devem ser
+     * autenticadas por exigência dos bancos emissores e bandeiras"
+     * (docs.cielo.com.br/ecommerce-cielo/docs/cartão-de-debito).
+     *
+     * Sem esta regra era possível manter o gateway de débito habilitado com
+     * o 3DS desligado, e as transações seguiam sem autenticação — com
+     * `Authenticate = false` e sem `ExternalAuthentication`, exatamente o
+     * que o log de 26/09 mostrou no pedido 240. Como a configuração é
+     * inválida na origem, o save é recusado: o débito volta para
+     * desabilitado e o admin recebe o motivo.
+     *
+     * @return void
+     */
+    protected function enforce_3ds_required_on_debit()
+    {
+        if ('braspag_debitcard' !== $this->id) {
+            return;
+        }
+
+        if ('yes' !== $this->get_option('enabled')) {
+            return;
+        }
+
+        if ('yes' === $this->get_option('auth3ds20_mpi_is_active')) {
+            return;
+        }
+
+        $this->update_option('enabled', 'no');
+
+        if (class_exists('WC_Admin_Settings')) {
+            WC_Admin_Settings::add_error(
+                __('O Cartão de Débito não pôde ser habilitado porque a autenticação 3DS está desativada. Todas as transações de débito devem ser autenticadas, por exigência dos bancos emissores e das bandeiras — habilite o 3DS nesta mesma tela antes de habilitar o Cartão de Débito.', 'woocommerce-braspag')
+            );
+        }
+    }
+
+    /**
+     * Garante, no momento do save (independente de UI/JS), que SOP e 3DS
+     * nunca fiquem ambos habilitados ao mesmo tempo. Esta é a garantia real
+     * (server-side) do bloqueio; o JS de admin é apenas UX.
+     *
+     * @return void
+     */
+    protected function enforce_sop_3ds_mutual_exclusivity()
+    {
+        if ('braspag' === $this->id) {
+            $this->prevent_sop_enabled_with_active_3ds();
+            return;
+        }
+
+        if (in_array($this->id, array('braspag_creditcard', 'braspag_debitcard'), true)) {
+            $this->prevent_3ds_enabled_with_active_sop();
+        }
+    }
+
+    /**
+     * Chamado ao salvar a tela geral (braspag_settings). Se o usuário tentou
+     * habilitar o SOP enquanto o 3DS (crédito ou débito) já está ativo,
+     * força o SOP de volta para 'no' e registra um erro no admin.
+     *
+     * @return void
+     */
+    protected function prevent_sop_enabled_with_active_3ds()
+    {
+        if ('yes' !== $this->get_option('silentpost_enabled')) {
+            return;
+        }
+
+        if (!$this->is_any_auth3ds20_active()) {
+            return;
+        }
+
+        $this->update_option('silentpost_enabled', 'no');
+
+        if (class_exists('WC_Admin_Settings')) {
+            WC_Admin_Settings::add_error(
+                __('O SilentOrderPost não pôde ser habilitado porque o 3DS está ativo (Cartão de Crédito ou Débito). O 3DS não funciona em conjunto com o SilentOrderPost — desative o 3DS antes de habilitar o SilentOrderPost, ou desative o SilentOrderPost antes de habilitar o 3DS.', 'woocommerce-braspag')
+            );
+        }
+    }
+
+    /**
+     * Chamado ao salvar a tela de Cartão de Crédito ou Cartão de Débito. Se
+     * o usuário tentou habilitar o 3DS enquanto o SOP já está ativo, força o
+     * 3DS de volta para 'no' e registra um erro no admin.
+     *
+     * @return void
+     */
+    protected function prevent_3ds_enabled_with_active_sop()
+    {
+        if ('yes' !== $this->get_option('auth3ds20_mpi_is_active')) {
+            return;
+        }
+
+        if ('yes' !== $this->get_silentpost_enabled_option()) {
+            return;
+        }
+
+        $this->update_option('auth3ds20_mpi_is_active', 'no');
+
+        if (class_exists('WC_Admin_Settings')) {
+            WC_Admin_Settings::add_error(
+                __('O 3DS não pôde ser habilitado porque o SilentOrderPost está ativo. O 3DS não funciona em conjunto com o SilentOrderPost — desative o SilentOrderPost antes de habilitar o 3DS, ou desative o 3DS antes de habilitar o SilentOrderPost.', 'woocommerce-braspag')
+            );
+        }
+    }
+
+    /**
+     * @return bool True se o 3DS está ativo no cartão de crédito ou no cartão de débito.
+     */
+    protected function is_any_auth3ds20_active()
+    {
+        $credit_settings = get_option('woocommerce_braspag_creditcard_settings', array());
+        $debit_settings = get_option('woocommerce_braspag_debitcard_settings', array());
+
+        $credit_active = isset($credit_settings['auth3ds20_mpi_is_active']) && 'yes' === $credit_settings['auth3ds20_mpi_is_active'];
+        $debit_active = isset($debit_settings['auth3ds20_mpi_is_active']) && 'yes' === $debit_settings['auth3ds20_mpi_is_active'];
+
+        return $credit_active || $debit_active;
+    }
+
+    /**
+     * @return string O valor salvo de silentpost_enabled na tela geral (braspag).
+     */
+    protected function get_silentpost_enabled_option()
+    {
+        $general_settings = get_option('woocommerce_braspag_settings', array());
+
+        return isset($general_settings['silentpost_enabled']) ? $general_settings['silentpost_enabled'] : 'no';
     }
 
     /**
@@ -920,13 +964,35 @@ class WC_Gateway_Braspag extends WC_Braspag_Payment_Gateway
     {
         $localized_messages = WC_Braspag_Helper::get_localized_messages();
 
-        if ('card_error' === $response->error->type) {
-            $localized_message = isset($localized_messages[$response->error->code]) ? $localized_messages[$response->error->code] : $response->error->message;
-        } else {
-            $localized_message = isset($localized_messages[$response->error->type]) ? $localized_messages[$response->error->type] : $response->error->message;
+        // Forma legada: objeto `error` com type/code/message. O Pagador nunca
+        // devolveu isso — só chega aqui via filtro de terceiros —, mas era a
+        // ÚNICA forma que este método lia. Com o formato real, `$response->error`
+        // é inexistente e o PHP 8 emitia warnings ("Undefined property
+        // stdClass::$error", "Attempt to read property on null") que vazavam
+        // como HTML na resposta JSON do checkout, com a mensagem saindo vazia
+        // (`{"result":"failure","messages":""}`).
+        if (is_object($response) && isset($response->error) && is_object($response->error)) {
+            $type = isset($response->error->type) ? $response->error->type : '';
+            $code = isset($response->error->code) ? $response->error->code : '';
+            $message = isset($response->error->message) ? $response->error->message : '';
+
+            if ('card_error' === $type) {
+                return isset($localized_messages[$code]) ? $localized_messages[$code] : $message;
+            }
+
+            return isset($localized_messages[$type]) ? $localized_messages[$type] : $message;
         }
 
-        return $localized_message;
+        // Forma real do Pagador: em resposta não-2xx, prepare_response() move
+        // o corpo decodificado para `errors` — uma lista de {Code, Message}.
+        $errors = is_object($response) && isset($response->errors) ? $response->errors : null;
+        $messages = WC_Braspag_Pagador_API::extract_error_messages($errors);
+
+        if (!empty($messages)) {
+            return implode(' ', $messages);
+        }
+
+        return $localized_messages['invalid_request_error'];
     }
 
     /**
